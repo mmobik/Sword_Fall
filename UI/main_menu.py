@@ -1,8 +1,8 @@
 import pygame
-from Game.ui.menu import Menu
-from Game.ui.button import Button
-from Game.utils import load_image
-from Game.config import WIDTH, HEIGHT, BUTTON_SPACING, MENU_BUTTON_X
+from UI.menu import Menu
+from button import Button
+from utils import load_image
+from config import HEIGHT, BUTTON_SPACING, MENU_BUTTON_X
 
 
 class MainMenu(Menu):

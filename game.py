@@ -1,9 +1,9 @@
 import pygame
-from Game.sound_manager import SoundManager
-from Game.ui.main_menu import MainMenu
-from Game.ui.settings_menu import SettingsMenu
-from Game.config import WIDTH, HEIGHT, TARGET_FPS
-from Game.game_state_manager import GameStateManager
+from sound_manager import SoundManager
+from UI.main_menu import MainMenu
+from UI.settings_menu import SettingsMenu
+from config import WIDTH, HEIGHT, TARGET_FPS
+from game_state_manager import GameStateManager
 
 
 class Game:
@@ -17,7 +17,7 @@ class Game:
         self.main_menu = MainMenu(self.sound_manager, self.toggle_settings,
                                   self.change_game_state)
         self.settings_menu = SettingsMenu(self.sound_manager, self.toggle_settings)
-        pygame.mixer.music.load("Sounds/Soundracks/Dark_fantasm.mp3")
+        pygame.mixer.music.load("Sounds/Soundtracks/Dark_fantasm.mp3")
         pygame.mixer.music.play(-1)
 
     def toggle_settings(self):
@@ -29,7 +29,7 @@ class Game:
     def change_game_state(self, new_state):
         self.game_state_manager.change_state(new_state)
         if new_state == "new_game":
-            self.sound_manager.play_music("Sounds/Soundracks/Room.mp3")
+            self.sound_manager.play_music("House.mp3")
         elif new_state == "main_menu":
             if not pygame.mixer.music.get_busy():
                 pygame.mixer.music.load("Sounds/Soundracks/Dark_fantasm.mp3")

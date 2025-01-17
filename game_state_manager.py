@@ -1,7 +1,7 @@
 import pygame
 import time
-from Game.utils import load_image
-from Game.config import WIDTH, HEIGHT, FADE_DURATION, TARGET_FPS
+from utils import load_image
+from config import WIDTH, HEIGHT, FADE_DURATION, TARGET_FPS
 
 
 class GameStateManager:
@@ -38,11 +38,11 @@ class GameStateManager:
             self.fade_surface.fill((0, 0, 0, alpha))
             # Рисуем текущее меню
             if self.game_state == "settings_menu":
-                from Game.ui.settings_menu import SettingsMenu
+                from UI.settings_menu import SettingsMenu
                 settings_menu = SettingsMenu(self.sound_manager, lambda: None)
                 settings_menu.draw(pygame.display.get_surface(), pygame.mouse.get_pos())
             elif self.game_state == "main_menu":
-                from Game.ui.main_menu import MainMenu
+                from UI.main_menu import MainMenu
                 main_menu = MainMenu(self.sound_manager, lambda: None, lambda x: None)
                 main_menu.draw(pygame.display.get_surface(), pygame.mouse.get_pos())
 
