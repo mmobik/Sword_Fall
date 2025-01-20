@@ -1,4 +1,5 @@
 import pygame
+import sys
 from UI.menu import Menu
 from button import Button
 from utils import load_image
@@ -29,10 +30,8 @@ class MainMenu(Menu):
     def open_settings_menu(self):
         self.settings_menu_callback()
 
-    @staticmethod
-    def exit_game():
+    def exit_game(self):
         pygame.quit()
-        import sys
         sys.exit()
 
     def draw(self, surface, mouse_pos):

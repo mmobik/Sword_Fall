@@ -10,6 +10,6 @@ class Menu:
         for button in self.buttons:
             button.draw(surface, mouse_pos)
 
-    def handle_event(self, event, mouse_pos):
+    def handle_event(self, event, mouse_pos, sound_manager):
         for button in self.buttons:
-            button.handle_event(event, mouse_pos, self.sound_manager)
+            button.handle_event(event, mouse_pos, sound_manager)

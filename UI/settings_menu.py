@@ -26,21 +26,18 @@ class SettingsMenu(Menu):
                                (BACK_BUTTON_X, BACK_BUTTON_Y),
                                self.open_main_menu))
 
-    @staticmethod
-    def settings_game_menu():
+    def settings_game_menu(self):
         print("Game settings menu")
 
-    @staticmethod
-    def settings_graphics_menu():
+    def settings_graphics_menu(self):
         print("Graphics settings menu")
 
-    @staticmethod
-    def settings_language_menu():
+    def settings_language_menu(self):
         print("Language settings menu")
 
     def open_main_menu(self):
         self.main_menu_callback()
 
     def draw(self, surface, mouse_pos):
-        surface.blit(load_image("main_menu\Backgrounds\Settings_Background.jpg"), (0, 0))
+        surface.blit(load_image("main_menu/Backgrounds/Settings_Background.jpg"), (0, 0))
         super().draw(surface, mouse_pos)

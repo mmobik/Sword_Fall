@@ -22,12 +22,12 @@ class Game:
 
     def toggle_settings(self):
         if self.game_state_manager.get_state() == "main_menu":
-            self.game_state_manager.change_state("settings_menu")
+            self.game_state_manager.change_state("settings_menu", self.settings_menu)
         else:
-            self.game_state_manager.change_state("main_menu")
+            self.game_state_manager.change_state("main_menu", self.main_menu)
 
-    def change_game_state(self, new_state):
-        self.game_state_manager.change_state(new_state)
+    def change_game_state(self, new_state, menu=None):
+        self.game_state_manager.change_state(new_state, menu)
         if new_state == "new_game":
             self.sound_manager.play_music("House.mp3")
         elif new_state == "main_menu":
@@ -43,9 +43,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
                 if self.game_state_manager.get_state() == "settings_menu":
-                    self.settings_menu.handle_event(event, mouse_pos)
+                    self.settings_menu.handle_event(event, mouse_pos, self.sound_manager)
                 elif self.game_state_manager.get_state() == "main_menu":
-                    self.main_menu.handle_event(event, mouse_pos)
+                    self.main_menu.handle_event(event, mouse_pos, self.sound_manager)
 
             if self.game_state_manager.get_state() == "settings_menu":
                 self.settings_menu.draw(self.screen, mouse_pos)
