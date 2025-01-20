@@ -98,4 +98,4 @@
 
 **VK Автора:** [Сергей Ощепков](https://vk.com/sergeyoshepkov).
 
-**Почта Автора:** [Почта](Oshchepkov.Sergey@urfu.me).
+**Почта Автора:** Oshchepkov.Sergey@urfu.me
