@@ -96,4 +96,4 @@
 
 ## Контакты
 
-**VK Автора:** [Сергей Ошепков](https://vk.com/sergeyoshepkov)
+**VK Автора:** [Сергей Ощепков](https://vk.com/sergeyoshepkov)
