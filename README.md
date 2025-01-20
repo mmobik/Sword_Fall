@@ -96,5 +96,6 @@
 
 ## Контакты
 
-**VK Автора:** [Сергей Ощепков](https://vk.com/sergeyoshepkov)
-**Почта Автора:** [Почта](Oshchepkov.Sergey@urfu.me)
+**VK Автора:** [Сергей Ощепков](https://vk.com/sergeyoshepkov).
+
+**Почта Автора:** [Почта](Oshchepkov.Sergey@urfu.me).
