@@ -2,7 +2,7 @@ import pygame
 from sound_manager import SoundManager
 from UI.main_menu import MainMenu
 from UI.settings_menu import SettingsMenu
-from config import WIDTH, HEIGHT, TARGET_FPS
+from config import WIDTH, HEIGHT, TARGET_FPS, ASSETS
 from game_state_manager import GameStateManager
 
 
@@ -10,13 +10,14 @@ class Game:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("Main_menu")
+        pygame.display.set_caption("SwordFall")
+        icon = pygame.image.load(ASSETS["ICON"])
+        pygame.display.set_icon(icon)
         self.clock = pygame.time.Clock()
         self.sound_manager = SoundManager()
         self.game_state_manager = GameStateManager(self.sound_manager)
-        self.main_menu = MainMenu(self.sound_manager, self.toggle_settings,
-                                  self.change_game_state)
-        self.settings_menu = SettingsMenu(self.sound_manager, self.toggle_settings)
+        self.main_menu = MainMenu(self.sound_manager, lambda: self.toggle_settings(), self.change_game_state)
+        self.settings_menu = SettingsMenu(self.sound_manager, lambda: self.toggle_settings())
         pygame.mixer.music.load("Sounds/Soundtracks/Dark_fantasm.mp3")
         pygame.mixer.music.play(-1)
 
