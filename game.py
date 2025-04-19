@@ -2,15 +2,19 @@ import pygame
 from sound_manager import SoundManager
 from UI.main_menu import MainMenu
 from UI.settings_menu import SettingsMenu
-from config import WIDTH, HEIGHT, TARGET_FPS, ASSETS
+from config import WIDTH, HEIGHT, TARGET_FPS, ASSETS, FPS
 from game_state_manager import GameStateManager
+from player import Player
+from camera import Camera
+from level_manager import create_level
 
 
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()  # Инициализация mixer
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("SwordFall")
+        pygame.display.set_caption("GAME_NAME")
         icon = pygame.image.load(ASSETS["ICON"])
         pygame.display.set_icon(icon)
         self.clock = pygame.time.Clock()
@@ -37,28 +41,57 @@ class Game:
                 pygame.mixer.music.play(-1)
 
     def run(self):
+        clock = pygame.time.Clock()  # Используем clock из self
         running = True
+        level_width, level_height, background = create_level()
+        camera = Camera(level_width, level_height)
+        player = Player(WIDTH // 2, HEIGHT // 2)  # Передаем размеры экрана из конфига
+        all_sprites = pygame.sprite.Group(player)
+
         while running:
-            mouse_pos = pygame.mouse.get_pos()
+            dt = clock.tick(FPS) / 1000
+            mouse_pos = pygame.mouse.get_pos() # Получаем позицию мыши
+
+            # Обработка событий
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                if self.game_state_manager.get_state() == "settings_menu":
-                    self.settings_menu.handle_event(event, mouse_pos, self.sound_manager)
-                elif self.game_state_manager.get_state() == "main_menu":
-                    self.main_menu.handle_event(event, mouse_pos, self.sound_manager)
 
-            if self.game_state_manager.get_state() == "settings_menu":
-                self.settings_menu.draw(self.screen, mouse_pos)
-            elif self.game_state_manager.get_state() == "main_menu":
-                self.main_menu.draw(self.screen, mouse_pos)
-            elif self.game_state_manager.get_state() == "new_game":
-                self.screen.blit(self.game_state_manager.new_game_background, (0, 0))
+                # === ВАЖНО! Проверь этот блок ===
+                current_state = self.game_state_manager.get_state()
+                print(f"Current game state: {current_state}")  # Добавили отладочное сообщение
+
+                if current_state == "settings_menu":
+                    print("Calling settings_menu.handle_event")  # Добавили отладочное сообщение
+                    self.settings_menu.handle_event(event, mouse_pos, self.sound_manager)
+                elif current_state == "main_menu":
+                    print("Calling main_menu.handle_event")  # Добавили отладочное сообщение
+                    self.main_menu.handle_event(event, mouse_pos, self.sound_manager)
+                # === Конец важного блока ===
+
+            # Обновление
+            all_sprites.update(dt, level_width, level_height)
+            camera.update(player)
+
+            # Отрисовка
+            if self.game_state_manager.get_state() == "new_game":
+                self.screen.blit(background, (0, 0), (camera.offset.x, camera.offset.y, WIDTH, HEIGHT))
+                for sprite in all_sprites:
+                    self.screen.blit(sprite.image, camera.apply(sprite.rect))
+            else:
+                # Отрисовка меню и настроек (из SwordFall)
+                mouse_pos = pygame.mouse.get_pos() # Получаем позицию мыши
+                if self.game_state_manager.get_state() == "settings_menu":
+                    self.settings_menu.draw(self.screen, mouse_pos)
+                elif self.game_state_manager.get_state() == "main_menu":
+                    self.main_menu.draw(self.screen, mouse_pos)
+                elif self.game_state_manager.get_state() == "new_game":
+                    self.screen.blit(self.game_state_manager.new_game_background, (0, 0))
 
             pygame.display.flip()
-            self.clock.tick(TARGET_FPS)
+            self.clock.tick(TARGET_FPS)  # Используем clock из self
         self.sound_manager.stop_music()
-        pygame.quit()
+        # pygame.quit() #Не нужно вызывать, т.к. вызывается в game_state_manager
 
 
 if __name__ == "__main__":
