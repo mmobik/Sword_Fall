@@ -4,12 +4,12 @@ import os
 
 class SoundManager:
     def __init__(self):
-        self.button_click_sound = self.load_sound("Game_sounds/Button.mp3")
+        self.button_click_sound = self.load_sound("Sounds/Game_sounds/Button.mp3")
         self.current_music = None
 
     @staticmethod
     def load_sound(path):
-        full_path = os.path.join("Sounds", path)
+        full_path = os.path.join("assets", path)
         try:
             return pygame.mixer.Sound(full_path)
         except pygame.error as e:
@@ -21,7 +21,7 @@ class SoundManager:
             self.button_click_sound.play()
 
     def play_music(self, music_path):
-        full_path = os.path.join("Sounds", "Soundtracks", music_path)
+        full_path = os.path.join("assets", "Sounds", music_path)
         if self.current_music != full_path:
             if pygame.mixer.music.get_busy():
                 pygame.mixer.music.stop()

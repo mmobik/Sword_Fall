@@ -25,10 +25,10 @@ FADE_DURATION = 0.5
 
 # Пути к игровым ресурсам
 ASSETS = {
-    "ICON": "icon/game_icon_1.jpg",  # Путь к иконке игры
-    "BACKGROUND": "background/1.png",  # Путь к фоновому изображению
-    "IDLE_SHEET": "sprites/Idle.png",  # Путь к спрайт-листу для анимации покоя
-    "RUN_SHEET": "sprites/Run.png"  # Путь к спрайт-листу для анимации бега
+    "ICON": "assets/Images/Icons/Game_icon_1.jpg",  # Путь к иконке игры
+    "BACKGROUND": "assets/Images/Game/Backgrounds/Levels/first_level.png",  # Путь к фоновому изображению уровня
+    "IDLE_SHEET": "assets/Sprites/Idle.png",  # Путь к спрайт-листу для анимации покоя
+    "RUN_SHEET": "assets/Sprites/Run.png"  # Путь к спрайт-листу для анимации бега
 }
 
 # Цвета, используемые в игре

@@ -1,8 +1,8 @@
-import pygame
-import time
 import sys
-from utils import load_image
-from config import WIDTH, HEIGHT, FADE_DURATION, TARGET_FPS
+import time
+
+import pygame
+from .config import WIDTH, HEIGHT, FADE_DURATION, TARGET_FPS
 
 
 class GameStateManager:
@@ -10,12 +10,10 @@ class GameStateManager:
         self.game_state = "main_menu"
         self.sound_manager = sound_manager
         self.fade_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        self.new_game_background = None
+        self.new_game_background = None  # Инициализируем фон как None
 
     def change_state(self, new_state, menu=None):
         if new_state == "new_game":
-            if not self.new_game_background:
-                self.new_game_background = load_image("Game/Bedroom.jpeg")
             self.animate_transition(new_state, menu)
             self.game_state = new_state
         elif new_state == "settings_menu" or new_state == "main_menu":
@@ -47,13 +45,6 @@ class GameStateManager:
             pygame.display.flip()
             pygame.time.Clock().tick(TARGET_FPS)
 
-        if isinstance(new_state_or_image, str):
-            if new_state_or_image == "new_game":
-                pygame.display.get_surface().blit(self.new_game_background, (0, 0))
-
-        else:
-            pygame.display.get_surface().blit(new_state_or_image, (0, 0))
-
         pygame.display.flip()
 
         alpha = 255
@@ -69,11 +60,6 @@ class GameStateManager:
             alpha = max(0, 255 - int(255 * time_elapsed / duration))
 
             self.fade_surface.fill((0, 0, 0, alpha))
-            if isinstance(new_state_or_image, str):
-                if new_state_or_image == "new_game":
-                    pygame.display.get_surface().blit(self.new_game_background, (0, 0))
-            else:
-                pygame.display.get_surface().blit(new_state_or_image, (0, 0))
 
             pygame.display.get_surface().blit(self.fade_surface, (0, 0))
 

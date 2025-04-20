@@ -1,5 +1,5 @@
 import pygame
-import config
+from Game.core import config
 
 
 # Инициализация уровня

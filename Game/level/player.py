@@ -1,7 +1,7 @@
 import pygame
-from spritesheet import SpriteSheet
-from player_movement import PlayerMovementHandler
-import config
+from .spritesheet import SpriteSheet
+from .player_movement import PlayerMovementHandler
+from Game.core import config
 
 
 class Player(pygame.sprite.Sprite):
