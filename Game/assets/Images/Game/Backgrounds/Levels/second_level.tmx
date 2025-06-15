@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="157" height="157" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="62">
+ <tileset firstgid="1" source="underworld_load-lomem-32x32.tsx"/>
+ <layer id="1" name="Слой тайлов 1" width="157" height="157" offsetx="-30" offsety="-16">
+  <data encoding="base64" compression="zstd">
+   KLUv/aAkgQEADRkAwsYOEcAlHb/7ev2qX/WrhqFN/18ZV2PYVh9qdpjVYxhHOYZp9aFmh1k9hnGUY5hWH2p2mNVjuPBQ6JoASYKBvKghvxrBBU5ApCJJ7RK4QqAhiCCCKIsQJATPEEQEyGJOBUQzPW2UddpmeDVO1RxtnLU52ziqOdpxVnPoDKGXaGXoTrQlLuy/cT8z4s3OnZXpAsqVPu5yt6PzvNa3xf3AEwJzR7fie4DgBfzuvrAuK+hTis3OHeyyC1Afui/ZnfTeoLoOpydHR7Zs5Z4C2bmDtuwC7gaMgPdPytJdjeNP+3PbC7DzK5Z9x7j2BUfIjpB6xScJdpxigDn54HbtuD3I45P3gik/2bDKMtRcX5hoaZX6V3bu+Ne64LD2CGmv+KThrvcLexfhNJGdO7nJBZyvWs71jvmjEvSXrEe1f2DnjmndS7gABQEj4P0fatj06QvTLfv5vcd53yku6Dk7kgRN5+aS8Vdbs3sQaNd5AbplRxi94on4l9oWXsy6qLkhO3e4Ll4gOL3UHvUrX2bpCu9NX9jXwuuUMmbnDr7cBdCLXJdwJ7s3qF/D3/PR0Vs2uKeM7NzBLXcBZwJGwPsnZemuxvGn/bntBdj5Fcu+Y1z7giNkR0i94pMEO04xwJx8cLt23B7k8cl7wZSfbFhlGWquL0y0tEr9Kzt3/GtdcFh7hLRXfNJw1/uFvYtwmsjOndzkAs5XLed6x/xRCfpL1qPaP7Bzx7TuJVyAgoAR8P4PNWz69IXplv383uO87xQX9JwdSYKmc3PJ+Kut2T0ItOu8AN2yI4xe8UT8S20LL2Zd1NyQnTtcFy8QnF5qj/qVL7N0hfemL+xr4XVKGbNzB1/uAuhFrku4k90b1K/h7/no6C0b3FNGdu7glruAMwEj4P2TsnRX4/jT/tz2Auz8imXfMa59wRGyI6Re8UmCHacYYE4+uF07bg/y+OS9YMpPNqyyDDXXFyZaWqX+lZ07/rUuOKw9QtorPmm46/3C3kU4TWTnTm5yAeerlnO9Y/6oBP0l61HtH2LnjpXDBTIEjHz7YnfjkYi/fv5Y4KkEv4pz5asC
+  </data>
+ </layer>
+ <group id="9" name="Группа 1">
+  <objectgroup id="8" name="Слой объектов 1" offsetx="-1" offsety="97.6667"/>
+ </group>
+</map>
