@@ -1,9 +1,6 @@
-import pygame
 from .menu import Menu
 from .button import Button
-from Game.core import load_image
-from Game.core import WIDTH, HEIGHT
-from Game.core import BACK_BUTTON_X, BACK_BUTTON_Y
+from Game.core import config, load_image
 
 
 class LanguageMenu(Menu):
@@ -12,39 +9,41 @@ class LanguageMenu(Menu):
         self.back_callback = back_callback
         self.language_callback = language_callback
 
-        # Позиции кнопок (центрируем по горизонтали)
+        # Центрирование кнопок по горизонтали
         button_width = 586
-        button_height = 86
-        button_x = (WIDTH - button_width) // 2
+        button_x = (config.WIDTH - button_width) // 2
 
         # Кнопка английского языка
         self.add_button(Button(
-            load_image("Images/Settings_menu/eng_language_before.jpg"),
-            load_image("Images/Settings_menu/eng_language_after.jpg"),
-            (button_x, HEIGHT // 2 - 100),
+            load_image(config.get_image_path("ENGLISH_BTN", "before")),
+            load_image(config.get_image_path("ENGLISH_BTN", "after")),
+            (button_x, config.HEIGHT // 2 - 100),
             lambda: self.select_language("english")
         ))
 
         # Кнопка русского языка
         self.add_button(Button(
-            load_image("Images/Settings_menu/rus_language_before.jpg"),
-            load_image("Images/Settings_menu/rus_language_after.jpg"),
-            (button_x, HEIGHT // 2 + 50),
+            load_image(config.get_image_path("RUSSIAN_BTN", "before")),
+            load_image(config.get_image_path("RUSSIAN_BTN", "after")),
+            (button_x, config.HEIGHT // 2 + 50),
             lambda: self.select_language("russian")
         ))
 
-        # Кнопка назад
+        # Кнопка "Назад"
         self.add_button(Button(
-            load_image("Images/Settings_menu/Settings_back_before.jpg"),
-            load_image("Images/Settings_menu/Settings_back_after.jpg"),
-            (BACK_BUTTON_X, BACK_BUTTON_Y),
+            load_image(config.get_image_path("LANG_BACK_BTN", "before")),
+            load_image(config.get_image_path("LANG_BACK_BTN", "after")),
+            (config.BACK_BUTTON_X, config.BACK_BUTTON_Y),
             self.back_callback
         ))
 
     def select_language(self, lang):
-        self.language_callback(lang)
-        self.back_callback()
+        """Выбор языка и возврат в меню настроек"""
+        print(f"Selected language: {lang}")
+        self.language_callback(lang)  # Сохраняем выбор языка
+        self.back_callback()  # Возвращаемся в меню настроек
 
     def draw(self, surface, mouse_pos):
-        surface.blit(load_image("Images/Main_menu/Backgrounds/Settings_Background.jpg"), (0, 0))
+        """Отрисовка меню языка"""
+        surface.blit(load_image(config.MENU_IMAGES["LANGUAGE_BG"]), (0, 0))
         super().draw(surface, mouse_pos)

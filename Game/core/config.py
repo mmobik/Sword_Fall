@@ -67,3 +67,33 @@ DEFAULT_ANIMATION_SPEED = 0.15  # Скорость смены кадров ан�
 NO_ANIMATION = float('inf')  # Значение для отключения анимации
 PLAYER_START_X = DEFAULT_LEVEL_WIDTH // 2  # Стартовая позиция игрока по X
 PLAYER_START_Y = DEFAULT_LEVEL_HEIGHT // 2  # Стартовая позиция игрока по Y
+
+# Пути к изображениям меню
+MENU_IMAGES = {
+    # Главное меню
+    "MAIN_BG": "Images/Main_menu/Backgrounds/Background.jpg",
+    "START_BTN": "Images/Main_menu/Buttons/Start/Start_{state}.jpg",  # {state} заменится на before/after
+    "SETTINGS_BTN": "Images/Main_menu/Buttons/Settings/Settings_{state}.jpg",
+    "EXIT_BTN": "Images/Main_menu/Buttons/Exit/Exit_{state}.jpg",
+
+    # Меню настроек
+    "SETTINGS_BG": "Images/Main_menu/Backgrounds/Settings_Background.jpg",
+    "GAME_SETTINGS_BTN": "Images/Settings_menu/Settings_game_{state}.jpg",
+    "GRAPHICS_SETTINGS_BTN": "Images/Settings_menu/Settings_graphics_{state}.jpg",
+    "LANGUAGE_SETTINGS_BTN": "Images/Settings_menu/Settings_language_{state}.jpg",
+    "BACK_BTN": "Images/Settings_menu/Settings_back_{state}.jpg",
+
+    # Меню языка
+    "LANGUAGE_BG": "Images/Main_menu/Backgrounds/Settings_Background.jpg",
+    "ENGLISH_BTN": "Images/Settings_menu/eng_language_{state}.jpg",
+    "RUSSIAN_BTN": "Images/Settings_menu/rus_language_{state}.jpg",
+    "LANG_BACK_BTN": "Images/Settings_menu/Settings_back_{state}.jpg"
+}
+
+
+def get_image_path(key, state=None):
+    """Возвращает путь к изображению с подстановкой состояния (before/after)"""
+    path = MENU_IMAGES[key]
+    if state and "{state}" in path:
+        return path.format(state=state)
+    return path

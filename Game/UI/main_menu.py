@@ -3,37 +3,47 @@ import sys
 from .menu import Menu
 from .button import Button
 from Game.core import load_image
-from Game.core import HEIGHT, BUTTON_SPACING, MENU_BUTTON_X
+from Game.core import config
 
 
 class MainMenu(Menu):
     def __init__(self, sound_manager, settings_callback, game_callback):
         super().__init__(sound_manager)
-        self.settings_callback = settings_callback  # Изменил имя атрибута
+        self.settings_callback = settings_callback
         self.game_callback = game_callback
-        self.add_button(Button(load_image("Images/Main_menu/Buttons/Start/Start_before.jpg"),
-                         load_image("Images/Main_menu/Buttons/Start/Start_after.jpg"),
-                         (MENU_BUTTON_X, HEIGHT // 2 - BUTTON_SPACING),
-                         self.start_new_game))
-        self.add_button(Button(load_image("Images/Main_menu/Buttons/Settings/Settings_before.jpg"),
-                         load_image("Images/Main_menu/Buttons/Settings/Settings_after.jpg"),
-                         (MENU_BUTTON_X, HEIGHT // 2),
-                         self.open_settings_menu))
-        self.add_button(Button(load_image("Images/Main_menu/Buttons/Exit/Exit_before.jpg"),
-                         load_image("Images/Main_menu/Buttons/Exit/Exit_after.jpg"),
-                         (MENU_BUTTON_X, HEIGHT // 2 + BUTTON_SPACING),
-                         self.exit_game))
+
+        # Используем config для получения путей
+        self.add_button(Button(
+            load_image(config.get_image_path("START_BTN", "before")),
+            load_image(config.get_image_path("START_BTN", "after")),
+            (config.MENU_BUTTON_X, config.HEIGHT // 2 - config.BUTTON_SPACING),
+            self.start_new_game
+        ))
+
+        self.add_button(Button(
+            load_image(config.get_image_path("SETTINGS_BTN", "before")),
+            load_image(config.get_image_path("SETTINGS_BTN", "after")),
+            (config.MENU_BUTTON_X, config.HEIGHT // 2),
+            self.open_settings_menu
+        ))
+
+        self.add_button(Button(
+            load_image(config.get_image_path("EXIT_BTN", "before")),
+            load_image(config.get_image_path("EXIT_BTN", "after")),
+            (config.MENU_BUTTON_X, config.HEIGHT // 2 + config.BUTTON_SPACING),
+            self.exit_game
+        ))
+
+    def draw(self, surface, mouse_pos):
+        surface.blit(load_image(config.MENU_IMAGES["MAIN_BG"]), (0, 0))
+        super().draw(surface, mouse_pos)
 
     def start_new_game(self):
         self.game_callback("new_game")
 
     def open_settings_menu(self):
-        self.settings_callback()  # Используем исправленное имя
+        self.settings_callback()
 
     def exit_game(self):
         pygame.quit()
         sys.exit()
-
-    def draw(self, surface, mouse_pos):
-        surface.blit(load_image("Images/Main_menu/Backgrounds/Background.jpg"), (0, 0))
-        super().draw(surface, mouse_pos)

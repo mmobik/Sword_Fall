@@ -1,7 +1,6 @@
 from .menu import Menu
 from .button import Button
-from Game.core import load_image
-from Game.core import BUTTON_SPACING, SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y_START, BACK_BUTTON_X, BACK_BUTTON_Y
+from Game.core import config, load_image
 
 
 class SettingsMenu(Menu):
@@ -10,43 +9,51 @@ class SettingsMenu(Menu):
         self.back_callback = back_callback
         self.language_callback = language_callback
 
+        # Создаем кнопки с использованием путей из config
         self.add_button(Button(
-            load_image("Images/Settings_menu/Settings_game_before.jpg"),
-            load_image("Images/Settings_menu/Settings_game_after.jpg"),
-            (SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y_START),
+            load_image(config.get_image_path("GAME_SETTINGS_BTN", "before")),
+            load_image(config.get_image_path("GAME_SETTINGS_BTN", "after")),
+            (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START),
             self.settings_game_menu
         ))
 
         self.add_button(Button(
-            load_image("Images/Settings_menu/Settings_graphics_before.jpg"),
-            load_image("Images/Settings_menu/Settings_graphics_after.jpg"),
-            (SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y_START + BUTTON_SPACING),
+            load_image(config.get_image_path("GRAPHICS_SETTINGS_BTN", "before")),
+            load_image(config.get_image_path("GRAPHICS_SETTINGS_BTN", "after")),
+            (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START + config.BUTTON_SPACING),
             self.settings_graphics_menu
         ))
 
         self.add_button(Button(
-            load_image("Images/Settings_menu/Settings_language_before.jpg"),
-            load_image("Images/Settings_menu/Settings_language_after.jpg"),
-            (SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y_START + 2 * BUTTON_SPACING),
+            load_image(config.get_image_path("LANGUAGE_SETTINGS_BTN", "before")),
+            load_image(config.get_image_path("LANGUAGE_SETTINGS_BTN", "after")),
+            (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START + 2 * config.BUTTON_SPACING),
             self.open_language_menu
         ))
 
         self.add_button(Button(
-            load_image("Images/Settings_menu/Settings_back_before.jpg"),
-            load_image("Images/Settings_menu/Settings_back_after.jpg"),
-            (BACK_BUTTON_X, BACK_BUTTON_Y),
+            load_image(config.get_image_path("BACK_BTN", "before")),
+            load_image(config.get_image_path("BACK_BTN", "after")),
+            (config.BACK_BUTTON_X, config.BACK_BUTTON_Y),
             self.back_callback
         ))
 
     def settings_game_menu(self):
-        print("Game settings menu")
+        """Обработчик кнопки настроек игры"""
+        print("Game settings menu opened")
+        # Здесь будет логика открытия меню настроек игры
 
     def settings_graphics_menu(self):
-        print("Graphics settings menu")
+        """Обработчик кнопки графических настроек"""
+        print("Graphics settings menu opened")
+        # Здесь будет логика открытия графических настроек
 
     def open_language_menu(self):
-        self.language_callback()
+        """Обработчик кнопки языковых настроек"""
+        print("Opening language menu")
+        self.language_callback()  # Переходим в меню языка
 
     def draw(self, surface, mouse_pos):
-        surface.blit(load_image("Images/Main_menu/Backgrounds/Settings_Background.jpg"), (0, 0))
+        """Отрисовка меню настроек"""
+        surface.blit(load_image(config.MENU_IMAGES["SETTINGS_BG"]), (0, 0))
         super().draw(surface, mouse_pos)
