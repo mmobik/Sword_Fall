@@ -13,29 +13,28 @@ class MainMenu(Menu):
         self.game_callback = game_callback
 
         self.add_button(Button(
-            load_image(config.get_image("START_BTN", "before")),
-            load_image(config.get_image("START_BTN", "after")),
+            load_image(config.get_image_path("START_BTN", "before")),
+            load_image(config.get_image_path("START_BTN", "after")),
             (config.MENU_BUTTON_X, config.HEIGHT // 2 - config.BUTTON_SPACING),
             self.start_new_game
         ))
 
         self.add_button(Button(
-            load_image(config.get_image("SETTINGS_BTN", "before")),
-            load_image(config.get_image("SETTINGS_BTN", "after")),
+            load_image(config.get_image_path("SETTINGS_BTN", "before")),
+            load_image(config.get_image_path("SETTINGS_BTN", "after")),
             (config.MENU_BUTTON_X, config.HEIGHT // 2),
             self.open_settings_menu
         ))
 
         self.add_button(Button(
-            load_image(config.get_image("EXIT_BTN", "before")),
-            load_image(config.get_image("EXIT_BTN", "after")),
+            load_image(config.get_image_path("EXIT_BTN", "before")),
+            load_image(config.get_image_path("EXIT_BTN", "after")),
             (config.MENU_BUTTON_X, config.HEIGHT // 2 + config.BUTTON_SPACING),
             self.exit_game
         ))
 
     def draw(self, surface, mouse_pos):
-        bg_key = "MAIN_BG_RUS" if config.current_language == "russian" else "MAIN_BG"
-        surface.blit(load_image(config.MENU_IMAGES[bg_key]), (0, 0))
+        surface.blit(load_image(config.MENU_IMAGES["MAIN_BG"]), (0, 0))
         super().draw(surface, mouse_pos)
 
     def start_new_game(self):

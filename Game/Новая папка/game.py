@@ -56,29 +56,7 @@ class Game:
         self.game_state_manager.change_state("language_menu", self.language_menu)
 
     def change_language(self, lang):
-        config.set_language(lang)
         print(f"Язык изменен на: {lang}")
-
-        # Пересоздаем меню с новым языком
-        self.main_menu = MainMenu(
-            self.sound_manager,
-            self.show_settings,
-            self.start_game
-        )
-
-        self.settings_menu = SettingsMenu(
-            self.sound_manager,
-            self.show_main_menu,
-            self.show_language
-        )
-
-        self.language_menu = LanguageMenu(
-            self.sound_manager,
-            self.show_settings,
-            self.change_language
-        )
-
-        # Возвращаемся в меню настроек
         self.show_settings()
 
     def start_game(self, state):

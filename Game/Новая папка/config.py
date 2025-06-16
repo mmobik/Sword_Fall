@@ -172,8 +172,8 @@ class GameConfig:
 
             # Меню языка (RU)
             "ENGLISH_BTN_RUS": {
-                "before": "assets/images/menu/settings/eng/eng/before.jpg",
-                "after": "assets/images/menu/settings/eng/eng/after.jpg"
+                "before": "assets/images/menu/settings/rus/eng/before.jpg",
+                "after": "assets/images/menu/settings/rus/eng/after.jpg"
             },
             "RUSSIAN_BTN_RUS": {
                 "before": "assets/images/menu/settings/rus/rus/before.jpg",
@@ -233,11 +233,8 @@ class GameConfig:
         :param state: Состояние ('before', 'after' для кнопок)
         :return: Путь к изображению или None если не найдено
         """
-        # Пробуем получить русскую версию, если язык русский
         if self.current_language == "russian":
-            rus_key = f"{key}_RUS"
-            if rus_key in self.MENU_IMAGES:
-                key = rus_key
+            key += "_RUS"
 
         path = self.MENU_IMAGES.get(key)
         if not path:
