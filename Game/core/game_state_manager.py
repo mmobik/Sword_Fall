@@ -1,7 +1,7 @@
 import sys
 import time
 import pygame
-from .config import WIDTH, HEIGHT, FADE_DURATION, TARGET_FPS
+from Game.core.config import config
 
 
 class GameStateManager:
@@ -9,18 +9,18 @@ class GameStateManager:
         self.game_state = "main_menu"
         self.current_menu = None
         self.sound_manager = sound_manager
-        self.fade_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        self.fade_surface = pygame.Surface(config.SCREEN_SIZE, pygame.SRCALPHA)
 
     def change_state(self, new_state, menu=None):
         if new_state == "new_game":
-            self.animate_transition(menu)
+            self.animate_transition(menu, config.FADE_DURATION)
         self.game_state = new_state
         self.current_menu = menu
 
     def get_state(self):
         return self.game_state
 
-    def animate_transition(self, menu, duration=FADE_DURATION):
+    def animate_transition(self, menu, duration=config.FADE_DURATION):
         # Фаза затемнения
         alpha = 0
         start_time = time.time()
@@ -40,7 +40,7 @@ class GameStateManager:
 
             pygame.display.get_surface().blit(self.fade_surface, (0, 0))
             pygame.display.flip()
-            pygame.time.Clock().tick(TARGET_FPS)
+            pygame.time.Clock().tick(config.TARGET_FPS)
 
         # Фаза осветления
         alpha = 255
@@ -57,4 +57,4 @@ class GameStateManager:
             self.fade_surface.fill((0, 0, 0, alpha))
             pygame.display.get_surface().blit(self.fade_surface, (0, 0))
             pygame.display.flip()
-            pygame.time.Clock().tick(TARGET_FPS)
+            pygame.time.Clock().tick(config.TARGET_FPS)

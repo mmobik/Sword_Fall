@@ -1,5 +1,6 @@
 import pygame
-from Game.core import config
+from Game.core.config import config
+
 
 
 class SpriteSheet:
@@ -18,13 +19,12 @@ class SpriteSheet:
         self.width = width
         self.height = height
         try:
-            self.sheet = pygame.image.load(filename).convert_alpha()  # Загрузка спрайт-листа
-
-        # Заглушка если спрайт не загрузилс
+            self.sheet = pygame.image.load(filename).convert_alpha()
         except FileNotFoundError:
             self.download = 0
-            self.sheet = pygame.Surface((self.width, self.height),  pygame.SRCALPHA)
-            pygame.draw.rect(self.sheet, config.GAME_COLORS["WHITE"], (0, 0, self.width, self.height), 1)
+            self.sheet = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            pygame.draw.rect(self.sheet, config.COLORS["WHITE"],
+                             (0, 0, self.width, self.height), 1)
 
     def get_image(self, x, y, width, height):
         """

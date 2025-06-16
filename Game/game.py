@@ -1,30 +1,27 @@
-import pygame
-import sys
-from core import SoundManager
+from Game.core.config import config
+from Game.core.sound_manager import SoundManager
+from Game.core.game_state_manager import GameStateManager
 from UI.main_menu import MainMenu
 from UI.settings_menu import SettingsMenu
 from UI.language_menu import LanguageMenu
-from core import WIDTH, HEIGHT, TARGET_FPS, ASSETS, FPS
-from core import GameStateManager
-from level import Player
-from level import Camera
-from level import create_level
-from core import GAME_NAME
+from level import Player, Camera, create_level
+import pygame
+import sys
 
 
 class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption(GAME_NAME)
-        icon = pygame.image.load(ASSETS["ICON"])
+        self.screen = pygame.display.set_mode(config.SCREEN_SIZE)
+        pygame.display.set_caption(config.GAME_NAME)
+        icon = pygame.image.load(config.ASSETS["ICON"])
         pygame.display.set_icon(icon)
+
         self.clock = pygame.time.Clock()
         self.sound_manager = SoundManager()
         self.game_state_manager = GameStateManager(self.sound_manager)
 
-        # Создаем все меню
         self.main_menu = MainMenu(
             self.sound_manager,
             self.show_settings,
@@ -47,8 +44,7 @@ class Game:
         self.show_main_menu()
 
         # Загрузка музыки
-        pygame.mixer.music.load("assets/Sounds/Soundtracks/Dark_fantasm.mp3")
-        pygame.mixer.music.play(-1)
+        self.sound_manager.play_music("Dark_fantasm.mp3")
 
     def show_main_menu(self):
         self.game_state_manager.change_state("main_menu", self.main_menu)
@@ -65,8 +61,8 @@ class Game:
 
     def start_game(self, state):
         if state == "new_game":
-            self.game_state_manager.change_state(state, self.main_menu)  # Передаем текущее меню для анимации
-            self.sound_manager.play_music("Soundtracks/House.mp3")
+            self.game_state_manager.change_state(state, self.main_menu)
+            self.sound_manager.play_music("house.mp3")
         else:
             self.game_state_manager.change_state(state)
 
@@ -79,7 +75,7 @@ class Game:
         all_sprites = pygame.sprite.Group(player)
 
         while running:
-            dt = clock.tick(FPS) / 1000
+            dt = clock.tick(config.FPS) / 1000
             mouse_pos = pygame.mouse.get_pos()
 
             # Обработка событий
@@ -99,14 +95,14 @@ class Game:
             self.screen.fill((0, 0, 0))
 
             if self.game_state_manager.game_state == "new_game":
-                self.screen.blit(background, (0, 0), (camera.offset.x, camera.offset.y, WIDTH, HEIGHT))
+                self.screen.blit(background, (0, 0), (camera.offset.x, camera.offset.y, config.WIDTH, config.HEIGHT))
                 for sprite in all_sprites:
                     self.screen.blit(sprite.image, camera.apply(sprite.rect))
             elif self.game_state_manager.current_menu:
                 self.game_state_manager.current_menu.draw(self.screen, mouse_pos)
 
             pygame.display.flip()
-            self.clock.tick(TARGET_FPS)
+            self.clock.tick(config.TARGET_FPS)
 
         self.sound_manager.stop_music()
         pygame.quit()

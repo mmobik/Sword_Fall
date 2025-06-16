@@ -1,5 +1,5 @@
 import pygame
-from Game.core import config
+from Game.core.config import config
 
 
 class Camera:
@@ -15,8 +15,8 @@ class Camera:
             level_width (int): Ширина уровня.
             level_height (int): Высота уровня.
         """
-        self.offset = pygame.math.Vector2()  # Смещение камеры
-        self.level_rect = pygame.Rect(0, 0, level_width, level_height)  # Границы уровня
+        self.offset = pygame.math.Vector2()
+        self.level_rect = pygame.Rect(0, 0, level_width, level_height)
 
     def apply(self, rect):
         """

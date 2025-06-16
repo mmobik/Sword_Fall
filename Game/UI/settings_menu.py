@@ -1,6 +1,7 @@
+from Game.core.config import config
+from Game.core.utils import load_image
 from .menu import Menu
 from .button import Button
-from Game.core import config, load_image
 
 
 class SettingsMenu(Menu):
@@ -9,7 +10,6 @@ class SettingsMenu(Menu):
         self.back_callback = back_callback
         self.language_callback = language_callback
 
-        # Создаем кнопки с использованием путей из config
         self.add_button(Button(
             load_image(config.get_image_path("GAME_SETTINGS_BTN", "before")),
             load_image(config.get_image_path("GAME_SETTINGS_BTN", "after")),

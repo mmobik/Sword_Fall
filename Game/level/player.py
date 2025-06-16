@@ -1,7 +1,7 @@
 import pygame
+from Game.core.config import config
 from .spritesheet import SpriteSheet
 from .player_movement import PlayerMovementHandler
-from Game.core import config
 
 
 class Player(pygame.sprite.Sprite):
@@ -18,19 +18,14 @@ class Player(pygame.sprite.Sprite):
             y (int): Начальная координата Y.
         """
         super().__init__()
-        # Загрузка спрайтов
-        self.idle_sheet = SpriteSheet(config.ASSETS["IDLE_SHEET"], *config.FRAME_SIZE)  # Спрайт-лист для бездействия
-        self.run_sheet = SpriteSheet(config.ASSETS["RUN_SHEET"], *config.FRAME_SIZE)  # Спрайт-лист для бега
+        self.idle_sheet = SpriteSheet(config.ASSETS["IDLE_SHEET"], *config.FRAME_SIZE)
+        self.run_sheet = SpriteSheet(config.ASSETS["RUN_SHEET"], *config.FRAME_SIZE)
 
-        # Параметры анимации
-        self.frame_size = config.FRAME_SIZE  # Размер кадра
-
+        self.frame_size = config.FRAME_SIZE
         self.idle_frames = config.ANIMATION_FRAMES["IDLE"]
-
         self.run_frames = config.ANIMATION_FRAMES["RUN"]
 
-        # Настройки персонажа
-        self.speed = config.SPEED  # Скорость передвижения
+        self.speed = config.PLAYER_SPEED
         self.direction = 1  # Направление
         self.current_frame = 0
         self.DEFAULT_ANIMATION_SPEED = config.DEFAULT_ANIMATION_SPEED

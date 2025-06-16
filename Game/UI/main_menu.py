@@ -1,9 +1,9 @@
 import pygame
+from Game.core.config import config
+from Game.core.utils import load_image
 import sys
 from .menu import Menu
 from .button import Button
-from Game.core import load_image
-from Game.core import config
 
 
 class MainMenu(Menu):
@@ -12,7 +12,6 @@ class MainMenu(Menu):
         self.settings_callback = settings_callback
         self.game_callback = game_callback
 
-        # Используем config для получения путей
         self.add_button(Button(
             load_image(config.get_image_path("START_BTN", "before")),
             load_image(config.get_image_path("START_BTN", "after")),
@@ -39,6 +38,7 @@ class MainMenu(Menu):
         super().draw(surface, mouse_pos)
 
     def start_new_game(self):
+        self.sound_manager.play_music("house.mp3")  # Используем существующий трек
         self.game_callback("new_game")
 
     def open_settings_menu(self):
