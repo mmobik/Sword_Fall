@@ -22,6 +22,10 @@ class Game:
         self.sound_manager = SoundManager()
         self.game_state_manager = GameStateManager(self.sound_manager)
 
+        self.fps_counter = 0
+        self.last_fps_time = pygame.time.get_ticks()
+        self.fps_history = []
+
         self.main_menu = MainMenu(
             self.sound_manager,
             self.show_settings,
@@ -88,6 +92,7 @@ class Game:
         else:
             self.game_state_manager.change_state(state)
 
+        # В файле game.py
     def run(self):
         clock = pygame.time.Clock()
         running = True
@@ -98,14 +103,28 @@ class Game:
 
         while running:
             dt = clock.tick(config.FPS) / 1000
+            current_time = pygame.time.get_ticks()
             mouse_pos = pygame.mouse.get_pos()
+
+            # Счетчик FPS
+            self.fps_counter += 1
+            if current_time - self.last_fps_time >= 5000:  # 5 секунд
+                current_fps = self.fps_counter / 5  # Средний FPS за 5 секунд
+                self.fps_history.append(current_fps)
+                print(f"Current FPS: {current_fps:.1f} | State: {self.game_state_manager.game_state}")
+                if len(self.fps_history) > 1:
+                    improvement = ((current_fps - self.fps_history[-2]) / self.fps_history[-2]) * 100
+                    print(f"Performance change: {improvement:+.1f}%")
+                self.fps_counter = 0
+                self.last_fps_time = current_time
 
             # Обработка событий
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-                if self.game_state_manager.current_menu:
+                if (self.game_state_manager.current_menu and
+                        self.game_state_manager.should_process_menu):
                     self.game_state_manager.current_menu.handle_event(event, mouse_pos, self.sound_manager)
 
             # Обновление игры
@@ -117,7 +136,8 @@ class Game:
             self.screen.fill((0, 0, 0))
 
             if self.game_state_manager.game_state == "new_game":
-                self.screen.blit(background, (0, 0), (camera.offset.x, camera.offset.y, config.WIDTH, config.HEIGHT))
+                self.screen.blit(background, (0, 0),
+                                 (camera.offset.x, camera.offset.y, config.WIDTH, config.HEIGHT))
                 for sprite in all_sprites:
                     self.screen.blit(sprite.image, camera.apply(sprite.rect))
             elif self.game_state_manager.current_menu:

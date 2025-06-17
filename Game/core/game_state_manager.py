@@ -4,16 +4,21 @@ import pygame
 from Game.core.config import config
 
 
+# В файле game_state_manager.py
 class GameStateManager:
     def __init__(self, sound_manager):
         self.game_state = "main_menu"
         self.current_menu = None
         self.sound_manager = sound_manager
         self.fade_surface = pygame.Surface(config.SCREEN_SIZE, pygame.SRCALPHA)
+        self.should_process_menu = True  # Новый флаг
 
     def change_state(self, new_state, menu=None):
         if new_state == "new_game":
             self.animate_transition(menu, config.FADE_DURATION)
+            self.should_process_menu = False  # Отключаем обработку меню
+        else:
+            self.should_process_menu = True  # Включаем обработку меню
         self.game_state = new_state
         self.current_menu = menu
 

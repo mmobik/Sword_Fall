@@ -11,32 +11,36 @@ class SettingsMenu(Menu):
         self.language_callback = language_callback
 
         self.add_button(Button(
-            load_image(config.get_image_path("GAME_SETTINGS_BTN", "before")),
-            load_image(config.get_image_path("GAME_SETTINGS_BTN", "after")),
+            load_image(config.get_image("GAME_SETTINGS_BTN", "before")),
+            load_image(config.get_image("GAME_SETTINGS_BTN", "after")),
             (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START),
             self.settings_game_menu
         ))
 
         self.add_button(Button(
-            load_image(config.get_image_path("GRAPHICS_SETTINGS_BTN", "before")),
-            load_image(config.get_image_path("GRAPHICS_SETTINGS_BTN", "after")),
+            load_image(config.get_image("GRAPHICS_SETTINGS_BTN", "before")),
+            load_image(config.get_image("GRAPHICS_SETTINGS_BTN", "after")),
             (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START + config.BUTTON_SPACING),
             self.settings_graphics_menu
         ))
 
         self.add_button(Button(
-            load_image(config.get_image_path("LANGUAGE_SETTINGS_BTN", "before")),
-            load_image(config.get_image_path("LANGUAGE_SETTINGS_BTN", "after")),
+            load_image(config.get_image("LANGUAGE_SETTINGS_BTN", "before")),
+            load_image(config.get_image("LANGUAGE_SETTINGS_BTN", "after")),
             (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START + 2 * config.BUTTON_SPACING),
             self.open_language_menu
         ))
 
         self.add_button(Button(
-            load_image(config.get_image_path("BACK_BTN", "before")),
-            load_image(config.get_image_path("BACK_BTN", "after")),
+            load_image(config.get_image("BACK_BTN", "before")),
+            load_image(config.get_image("BACK_BTN", "after")),
             (config.BACK_BUTTON_X, config.BACK_BUTTON_Y),
             self.back_callback
         ))
+
+    def draw(self, surface, mouse_pos):
+        surface.blit(load_image(config.MENU_IMAGES["SETTINGS_BG"]), (0, 0))
+        super().draw(surface, mouse_pos)
 
     def settings_game_menu(self):
         """Обработчик кнопки настроек игры"""
@@ -52,8 +56,3 @@ class SettingsMenu(Menu):
         """Обработчик кнопки языковых настроек"""
         print("Opening language menu")
         self.language_callback()  # Переходим в меню языка
-
-    def draw(self, surface, mouse_pos):
-        """Отрисовка меню настроек"""
-        surface.blit(load_image(config.MENU_IMAGES["SETTINGS_BG"]), (0, 0))
-        super().draw(surface, mouse_pos)
