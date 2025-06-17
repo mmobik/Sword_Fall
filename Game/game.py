@@ -131,19 +131,26 @@ class Game:
             self.collision_objects = self.collision_handler.load_collision_objects(self.level)
             print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
 
-            spawn_layer = self.level.get_layer_by_name("PlayerSpawn")
-            player_spawn = None
-            if spawn_layer and hasattr(spawn_layer, '__iter__'):
-                for obj in spawn_layer:
-                    if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
-                        player_spawn = obj
-                        break
-
             print("Создание игрока...")
-            self.player = Player(
-                player_spawn.x if player_spawn else config.PLAYER_START_X,
-                player_spawn.y if player_spawn else config.PLAYER_START_Y
-            )
+            # Поиск спавна игрока в карте
+            spawn_x = 200  # Fallback позиция по X
+            spawn_y = 200  # Fallback позиция по Y
+            
+            # Ищем слой PlayerSpawn
+            for layer in self.level.layers:
+                if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
+                    # Ищем объект спавна в слое
+                    for obj in layer:
+                        if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
+                            spawn_x = int(obj.x)
+                            spawn_y = int(obj.y)
+                            print(f"Найден спавн игрока: ({spawn_x}, {spawn_y})")
+                            break
+                    break
+            else:
+                print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
+            
+            self.player = Player(spawn_x, spawn_y)
             print(f"Игрок создан. Позиция: {self.player.hitbox.topleft}")
             print(f"Размер спрайта: {self.player.image.get_size()}")
             print(f"Размер хитбокса: {self.player.hitbox.size}")

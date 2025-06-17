@@ -36,26 +36,28 @@ class CollisionHandler:
         return None
 
     def handle_movement_collisions(self, player, new_x, new_y, collision_objects):
-        # Создаем временный rect для проверки коллизий
-        temp_rect = pygame.Rect(new_x, new_y, player.hitbox.width, player.hitbox.height)
+        # Сохраняем оригинальные координаты
         original_x = player.hitbox.x
         original_y = player.hitbox.y
+        width = player.hitbox.width
+        height = player.hitbox.height
 
-        # Движение по X
-        collision_x = self.check_collision(temp_rect, collision_objects)
+        # Сначала пробуем двигаться по X
+        temp_rect_x = pygame.Rect(new_x, original_y, width, height)
+        collision_x = self.check_collision(temp_rect_x, collision_objects)
         if collision_x:
             if new_x > original_x:
-                new_x = collision_x['rect'].left - temp_rect.width
-            else:
+                new_x = collision_x['rect'].left - width
+            elif new_x < original_x:
                 new_x = collision_x['rect'].right
 
-        # Движение по Y
-        temp_rect.x = new_x
-        collision_y = self.check_collision(temp_rect, collision_objects)
+        # Затем пробуем двигаться по Y
+        temp_rect_y = pygame.Rect(new_x, new_y, width, height)
+        collision_y = self.check_collision(temp_rect_y, collision_objects)
         if collision_y:
             if new_y > original_y:
-                new_y = collision_y['rect'].top - temp_rect.height
-            else:
+                new_y = collision_y['rect'].top - height
+            elif new_y < original_y:
                 new_y = collision_y['rect'].bottom
 
         return new_x, new_y

@@ -9,8 +9,8 @@ class Player(pygame.sprite.Sprite):
     Класс, представляющий игрока.
     """
 
-    def __init__(self, x: int, y: int) -> None:
-        super().__init__()
+    def __init__(self, x: int, y: int, *groups) -> None:
+        super().__init__(*groups)
         self.state_name = "idle_front"
         self.state = config.PLAYER_STATES[self.state_name]
         self.sprite_sheet = SpriteSheet(self.state["sprite_sheet"], *config.FRAME_SIZE)
@@ -23,13 +23,13 @@ class Player(pygame.sprite.Sprite):
         # Создаем rect на основе изображения
         self.rect = self.image.get_rect()
         
-        # Создаем hitbox с правильным смещением
-        self.hitbox = pygame.Rect(
-            x + config.PLAYER_HITBOX["X_OFFSET"],
-            y + config.PLAYER_HITBOX["Y_OFFSET"],
-            self.rect.width + config.PLAYER_HITBOX["WIDTH_OFFSET"],
-            self.rect.height + config.PLAYER_HITBOX["HEIGHT_OFFSET"]
-        )
+        # Создаем хитбокс с фиксированными размерами из конфига
+        hitbox_width = config.PLAYER_HITBOX["WIDTH"]
+        hitbox_height = config.PLAYER_HITBOX["HEIGHT"]
+        hitbox_x = x + config.PLAYER_HITBOX["X_OFFSET"] - hitbox_width // 2
+        hitbox_y = y + config.PLAYER_HITBOX["Y_OFFSET"] - hitbox_height // 2
+        
+        self.hitbox = pygame.Rect(hitbox_x, hitbox_y, hitbox_width, hitbox_height)
         
         # Устанавливаем позицию rect относительно hitbox
         self.rect.center = self.hitbox.center

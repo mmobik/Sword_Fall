@@ -74,23 +74,18 @@ class GameConfig:
         }
 
         # === Параметры игрового уровня ===
-        self.DEFAULT_LEVEL_WIDTH = self.WIDTH * 4  # Ширина уровня по умолчанию
-        self.DEFAULT_LEVEL_HEIGHT = self.HEIGHT * 4  # Высота уровня по умолчанию
         self.TILE_SIZE = 100  # Размер клетки уровня
         self.LEVEL_MAP_PATH = "assets/Tiles/Royal_one.tmx"
 
         # === Параметры игрока ===
         self.PLAYER_SPEED = 180  # Базовая скорость перемещения игрока
-        self.PLAYER_START_X = self.DEFAULT_LEVEL_WIDTH // 2  # Стартовая позиция игрока по X
-        self.PLAYER_START_Y = self.DEFAULT_LEVEL_HEIGHT // 2  # Стартовая позиция игрока по Y
-        self.PLAYER_HITBOX_OFFSET = (-16, -16)  # Смещение хитбокса
-
+        
         # === Параметры хитбокса игрока ===
         self.PLAYER_HITBOX = {
-            "X_OFFSET": 0,
-            "Y_OFFSET": 16,
-            "WIDTH_OFFSET": -16,
-            "HEIGHT_OFFSET": -16
+            "WIDTH": 32,      # Фиксированная ширина хитбокса
+            "HEIGHT": 48,     # Фиксированная высота хитбокса
+            "X_OFFSET": 0,    # Смещение по X относительно центра спрайта
+            "Y_OFFSET": 0     # Смещение по Y относительно центра спрайта
         }
 
         # === Состояния игрока ===
