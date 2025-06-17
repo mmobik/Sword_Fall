@@ -50,7 +50,8 @@ class Game:
         # Статистика
         self.fps_history = []
         self.last_log_time = time.time()
-        self.debug_mode = False
+        self.debug_mode = True  # Включаем дебаг по умолчанию
+        self.debug_font = pygame.font.SysFont('Arial', 16)
 
     def _init_menus(self):
         self.main_menu = MainMenu(
@@ -90,8 +91,6 @@ class Game:
             running = self._handle_events()
             self._update_game_state()
             self._render_frame()
-            if self.debug_mode:
-                self._draw_debug_info()
 
     def _handle_events(self) -> bool:
         for event in pygame.event.get():
@@ -121,33 +120,47 @@ class Game:
                 self.camera.update(self.player)
 
     def _load_game_resources(self):
-        self.level = pytmx.TiledMap(config.LEVEL_MAP_PATH)
-        map_width = self.level.width * self.level.tilewidth
-        map_height = self.level.height * self.level.tileheight
-        self.collision_handler = CollisionHandler()
-        self.collision_objects = self.collision_handler.load_collision_objects(self.level)
-        spawn_layer = self.level.get_layer_by_name("PlayerSpawn")
-        player_spawn = next(
-            (obj for obj in spawn_layer if obj.properties.get("object_type") == "player_spawn"),
-            None
-        )
-        self.player = Player(
-            player_spawn.x if player_spawn else config.PLAYER_START_X,
-            player_spawn.y if player_spawn else config.PLAYER_START_Y
-        )
-        self.all_sprites = pygame.sprite.GroupSingle(self.player)
-        self.camera = Camera(map_width, map_height)
-        self.level_renderer = LevelRenderer(self.level, self.camera)
+        try:
+            print("Загрузка карты...")
+            self.level = pytmx.TiledMap(config.LEVEL_MAP_PATH)
+            map_width = self.level.width * self.level.tilewidth
+            map_height = self.level.height * self.level.tileheight
+            print(f"Карта загружена. Размер: {map_width}x{map_height}")
+
+            self.collision_handler = CollisionHandler()
+            self.collision_objects = self.collision_handler.load_collision_objects(self.level)
+            print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
+
+            spawn_layer = self.level.get_layer_by_name("PlayerSpawn")
+            player_spawn = next(
+                (obj for obj in spawn_layer if obj.properties.get("object_type") == "player_spawn"),
+                None
+            )
+
+            print("Создание игрока...")
+            self.player = Player(
+                player_spawn.x if player_spawn else config.PLAYER_START_X,
+                player_spawn.y if player_spawn else config.PLAYER_START_Y
+            )
+            print(f"Игрок создан. Позиция: {self.player.hitbox.topleft}")
+            print(f"Размер спрайта: {self.player.image.get_size()}")
+            print(f"Размер хитбокса: {self.player.hitbox.size}")
+
+            self.all_sprites = pygame.sprite.GroupSingle(self.player)
+            self.camera = Camera(map_width, map_height)
+            self.level_renderer = LevelRenderer(self.level, self.camera)
+
+        except Exception as e:
+            print(f"Ошибка загрузки ресурсов: {e}")
+            raise
 
     def _render_frame(self):
         if self.game_state_manager.current_menu:
-            # Меню — рисуем напрямую на экран
             self.screen.fill((0, 0, 0))
             mouse_pos = pygame.mouse.get_pos()
             self.game_state_manager.current_menu.draw(self.screen, mouse_pos)
             pygame.display.flip()
         elif self.game_state_manager.game_state == "new_game":
-            # Игра — рендерим на виртуальный экран, потом масштабируем
             self.virtual_screen.fill((0, 0, 0))
             self._render_game()
             scaled_screen = pygame.transform.scale(self.virtual_screen, (config.WIDTH, config.HEIGHT))
@@ -157,20 +170,33 @@ class Game:
     def _render_game(self):
         if not self.player or not self.camera or not self.level:
             return
+
         # Рендер уровня
         self.level_renderer.render(self.virtual_screen)
-        # Дебаг-отрисовка
-        if config.DEBUG_MODE:
-            pygame.draw.rect(self.virtual_screen, config.DEBUG_COLORS["HITBOX"], self.camera.apply(self.player.hitbox), 1)
-            for obj in self.collision_objects:
-                pygame.draw.rect(self.virtual_screen, config.DEBUG_COLORS["COLLISION"], self.camera.apply(obj['rect']), 1)
+
         # Рендер игрока
         for sprite in self.all_sprites:
             self.virtual_screen.blit(sprite.image, self.camera.apply(sprite.rect))
+
+        # Дебаг-отрисовка
+        if self.debug_mode:
+            # Хитбокс игрока
+            pygame.draw.rect(self.virtual_screen, (0, 255, 0), self.camera.apply(self.player.hitbox), 1)
+            # Центр хитбокса
+            pygame.draw.circle(self.virtual_screen, (255, 0, 255), self.camera.apply(self.player.hitbox).center, 3)
+            # Коллизии
+            for obj in self.collision_objects:
+                pygame.draw.rect(self.virtual_screen, (255, 0, 0), self.camera.apply(obj['rect']), 1)
+
+        # Оверлап-тайлы
         self.level_renderer.render_overlap_tiles(
             self.virtual_screen,
             (self.player.hitbox.centerx, self.player.hitbox.centery)
         )
+
+        # Теперь debug-информация будет поверх всего
+        if self.debug_mode:
+            self._draw_debug_info()
 
     def _log_performance(self):
         current_fps = self.clock.get_fps()
@@ -178,16 +204,19 @@ class Game:
         print(f"[PERF] FPS: {current_fps:.1f} | State: {self.game_state_manager.game_state}")
 
     def _draw_debug_info(self):
-        font = pygame.font.SysFont('Arial', 20)
         debug_text = [
             f"FPS: {self.clock.get_fps():.1f}",
             f"State: {self.game_state_manager.game_state}",
+            f"Player Pos: {self.player.rect.topleft if self.player else 'N/A'}",
+            f"Player Hitbox: {self.player.hitbox.topleft if self.player else 'N/A'}",
+            f"Camera Offset: {self.camera.offset if self.camera else 'N/A'}",
+            f"Frame: {self.player.current_frame if self.player else 'N/A'}",
+            f"Anim State: {self.player.state_name if self.player else 'N/A'}"
         ]
-        if self.player:
-            debug_text.append(f"Player: ({self.player.rect.x:.0f}, {self.player.rect.y:.0f})")
+
         for i, text in enumerate(debug_text):
-            surface = font.render(text, True, (255, 255, 255))
-            self.screen.blit(surface, (10, 10 + i * 25))
+            surface = self.debug_font.render(text, True, (255, 255, 255))
+            self.virtual_screen.blit(surface, (10, 10 + i * 20))
 
     # Методы управления состоянием ------------------------------------------------
     def show_main_menu(self):

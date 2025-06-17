@@ -11,7 +11,6 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, x: int, y: int) -> None:
         super().__init__()
-
         self.state_name = "idle_front"
         self.state = config.PLAYER_STATES[self.state_name]
         self.sprite_sheet = SpriteSheet(self.state["sprite_sheet"], *config.FRAME_SIZE)
@@ -19,28 +18,34 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = self.state["animation_speed"]
         self.animation_time = 0
         self.current_frame = 0
-
         self.image = self._get_frame()
         self.rect = self.image.get_rect(center=(x, y))
-
-        # Создаем хитбокс с учетом смещений из конфига
         self.hitbox = self.rect.inflate(
             config.PLAYER_HITBOX["WIDTH_OFFSET"],
             config.PLAYER_HITBOX["HEIGHT_OFFSET"]
         )
-        # Применяем смещение центра
         self.hitbox.center = (
             x + config.PLAYER_HITBOX["X_OFFSET"],
             y + config.PLAYER_HITBOX["Y_OFFSET"]
         )
-
         self.speed = config.PLAYER_SPEED
         self.movement_handler = PlayerMovementHandler(self)
+        print(f"Rect: {self.rect}, Hitbox: {self.hitbox}")
 
     def _get_frame(self):
+        if not hasattr(self, 'sprite_sheet') or not self.sprite_sheet:
+            print(f"Ошибка: спрайт-лист не загружен для состояния {self.state_name}")
+            return pygame.Surface(config.FRAME_SIZE, pygame.SRCALPHA)
+
         x, y = self.frames[self.current_frame]
         frame = self.sprite_sheet.get_image(x, y, *config.FRAME_SIZE)
-        return pygame.transform.flip(frame, self.state.get("flip", False), False)
+        if not frame:
+            frame = pygame.Surface((64, 64), pygame.SRCALPHA)
+            frame.fill((255, 0, 0))  # Красный квадрат\
+
+        if frame:
+            return pygame.transform.flip(frame, self.state.get("flip", False), False)
+        return pygame.Surface(config.FRAME_SIZE, pygame.SRCALPHA)
 
     def set_state(self, state_name):
         if state_name == self.state_name:
@@ -51,6 +56,7 @@ class Player(pygame.sprite.Sprite):
             self.sprite_sheet = SpriteSheet(self.state["sprite_sheet"], *config.FRAME_SIZE)
             self.frames = self.state["frames"]
             self.animation_speed = self.state["animation_speed"]
+            self.animation_time = 0
             self.current_frame = 0
             self.image = self._get_frame()
 
@@ -58,10 +64,8 @@ class Player(pygame.sprite.Sprite):
         self.movement_handler.handle_movement(dt, level_width, level_height, collision_objects)
         self._animate(dt)
         # Обновляем позицию rect в соответствии с hitbox
-        self.rect.center = (
-            self.hitbox.centerx - config.PLAYER_HITBOX["X_OFFSET"],
-            self.hitbox.centery - config.PLAYER_HITBOX["Y_OFFSET"]
-        )
+        self.rect.center = self.hitbox.center  # Центрируем rect по hitbox
+        print(f"Состояние: {self.state_name}, кадр: {self.current_frame}, время анимации: {self.animation_time}")
 
     def _animate(self, dt):
         self.animation_time += dt
