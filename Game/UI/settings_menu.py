@@ -1,3 +1,4 @@
+import pygame
 from Game.core.config import config
 from Game.core.utils import load_image
 from .menu import Menu
@@ -9,50 +10,105 @@ class SettingsMenu(Menu):
         super().__init__(sound_manager)
         self.back_callback = back_callback
         self.language_callback = language_callback
+        self._bg_key = "SETTINGS_BG"
+        self._static_surface = None  # Кэш статичной части
+        self._last_mouse_pos = None
+        self._create_buttons()
+        self._pre_render_static()  # Предварительный рендеринг
 
-        self.add_button(Button(
-            load_image(config.get_image("GAME_SETTINGS_BTN", "before")),
-            load_image(config.get_image("GAME_SETTINGS_BTN", "after")),
-            (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START),
-            self.settings_game_menu
-        ))
+    def _ensure_background(self):
+        """Гарантирует, что фон будет загружен или создан"""
+        if self._cached_bg is None:
+            try:
+                self._cached_bg = load_image(config.MENU_IMAGES[self._bg_key])
+            except (KeyError, pygame.error, TypeError) as e:
+                print(f"Ошибка загрузки фона настроек: {e}")
+                # Создаём простой фон если загрузка не удалась
+                self._cached_bg = pygame.Surface(config.SCREEN_SIZE)
+                self._cached_bg.fill((40, 40, 60))  # Тёмно-синий фон
 
-        self.add_button(Button(
-            load_image(config.get_image("GRAPHICS_SETTINGS_BTN", "before")),
-            load_image(config.get_image("GRAPHICS_SETTINGS_BTN", "after")),
-            (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START + config.BUTTON_SPACING),
-            self.settings_graphics_menu
-        ))
+    def _create_buttons(self):
+        """Создаем кнопки с обработчиками"""
+        self.buttons = []
 
-        self.add_button(Button(
-            load_image(config.get_image("LANGUAGE_SETTINGS_BTN", "before")),
-            load_image(config.get_image("LANGUAGE_SETTINGS_BTN", "after")),
-            (config.SETTINGS_BUTTON_X, config.SETTINGS_BUTTON_Y_START + 2 * config.BUTTON_SPACING),
-            self.open_language_menu
-        ))
+        buttons_data = [
+            ("GAME_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START, self.settings_game_menu),
+            ("GRAPHICS_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START + config.BUTTON_SPACING,
+             self.settings_graphics_menu),
+            ("LANGUAGE_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START + 2 * config.BUTTON_SPACING,
+             self.open_language_menu),
+            ("BACK_BTN", config.BACK_BUTTON_Y, self.back_callback)
+        ]
 
-        self.add_button(Button(
-            load_image(config.get_image("BACK_BTN", "before")),
-            load_image(config.get_image("BACK_BTN", "after")),
-            (config.BACK_BUTTON_X, config.BACK_BUTTON_Y),
-            self.back_callback
-        ))
+        for btn_key, y_pos, action in buttons_data:
+            try:
+                btn = Button(
+                    load_image(config.get_image(btn_key, "before")),
+                    load_image(config.get_image(btn_key, "after")),
+                    (config.SETTINGS_BUTTON_X, y_pos),
+                    action,
+                    self.sound_manager
+                )
+                self.add_button(btn)
+            except Exception as e:
+                print(f"Ошибка создания кнопки {btn_key}: {e}")
 
-    def draw(self, surface, mouse_pos):
-        surface.blit(load_image(config.MENU_IMAGES["SETTINGS_BG"]), (0, 0))
-        super().draw(surface, mouse_pos)
+    def update_textures(self):
+        """Обновление текстур при смене языка"""
+        self._static_surface = None
+        self._pre_render_static()
+        self._create_buttons()
+
+    def draw(self, surface, mouse_pos=None):
+        """Оптимизированная отрисовка без мерцания"""
+        # Если мышь не двигалась - рисуем кэшированную статичную версию
+        if mouse_pos == self._last_mouse_pos:
+            surface.blit(self._static_surface, (0, 0))
+            return
+
+        self._last_mouse_pos = mouse_pos
+
+        # Рисуем статичную часть
+        surface.blit(self._static_surface, (0, 0))
+
+        # Поверх рисуем только hover-кнопки (если есть)
+        if mouse_pos:
+            for button in self.buttons:
+                if button.rect.collidepoint(mouse_pos):
+                    button.draw(surface, mouse_pos)
 
     def settings_game_menu(self):
         """Обработчик кнопки настроек игры"""
-        print("Game settings menu opened")
-        # Здесь будет логика открытия меню настроек игры
+        print("Открыты настройки игры")
+        # Здесь будет логика меню настроек игры
+        # Например: self.game_state_manager.change_state("game_settings")
 
     def settings_graphics_menu(self):
-        """Обработчик кнопки графических настроек"""
-        print("Graphics settings menu opened")
-        # Здесь будет логика открытия графических настроек
+        """Обработчик графических настроек"""
+        print("Открыты графические настройки")
+        # Здесь будет логика графических настроек
+        # Например: self.game_state_manager.change_state("graphics_settings")
 
     def open_language_menu(self):
         """Обработчик кнопки языковых настроек"""
-        print("Opening language menu")
-        self.language_callback()  # Переходим в меню языка
+        print("Открытие меню языка")
+        self.language_callback()  # Переходим в языковое меню
+
+    def update(self):
+        """Обновление состояния меню (если нужно)"""
+        pass
+
+    def _pre_render_static(self):
+        """Создаем кэш статичной части меню"""
+        self._static_surface = pygame.Surface(config.SCREEN_SIZE)
+
+        # Загружаем и рисуем фон
+        try:
+            bg = load_image(config.MENU_IMAGES[self._bg_key])
+            self._static_surface.blit(bg, (0, 0))
+        except:
+            self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
+
+        # Рисуем все кнопки в их обычном состоянии
+        for button in self.buttons:
+            button.draw(self._static_surface, None)  # None - без hover-эффекта

@@ -2,7 +2,7 @@ import pygame
 
 
 class Button:
-    def __init__(self, normal_image, hover_image, position, action=None):
+    def __init__(self, normal_image, hover_image, position, action=None, sound_manager=None):
         self.normal_image = normal_image
         self.hover_image = hover_image
         self.position = position
@@ -10,29 +10,30 @@ class Button:
                                 normal_image.get_width(),
                                 normal_image.get_height())
         self.action = action
+        self.sound_manager = sound_manager
         self.is_hovered = False
         self.is_clicked = False
 
-    def handle_event(self, event, mouse_pos, sound_manager):
-        """Обрабатывает события мыши для кнопки"""
+    def draw(self, surface, mouse_pos=None):
+        """Отрисовка кнопки с оптимизацией"""
+        if mouse_pos and self.rect.collidepoint(mouse_pos):
+            surface.blit(self.hover_image, self.position)
+        else:
+            surface.blit(self.normal_image, self.position)
+
+    def handle_event(self, event, mouse_pos):
+        """Обработка событий кнопки"""
         if event.type == pygame.MOUSEMOTION:
             self.is_hovered = self.rect.collidepoint(mouse_pos)
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1 and self.rect.collidepoint(mouse_pos):
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(mouse_pos):
                 self.is_clicked = True
-                if sound_manager:
-                    sound_manager.play_sound('button_click')
+                if self.sound_manager:
+                    self.sound_manager.play_sound('button_click')
 
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1 and self.is_clicked and self.rect.collidepoint(mouse_pos):
-                self.is_clicked = False
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if self.is_clicked and self.rect.collidepoint(mouse_pos):
                 if self.action:
                     self.action()
-            else:
-                self.is_clicked = False
-
-    def draw(self, surface, mouse_pos):
-        """Отрисовывает кнопку с учетом состояния"""
-        current_image = self.hover_image if self.rect.collidepoint(mouse_pos) else self.normal_image
-        surface.blit(current_image, self.position)
+            self.is_clicked = False

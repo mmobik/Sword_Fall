@@ -33,6 +33,7 @@ class GameConfig:
 
         # === Настройки интерфейса ===
         self.BUTTON_SPACING = 125
+        self._image_cache = {}
         self.MENU_BUTTON_X = self.WIDTH // 3
         self.SETTINGS_BUTTON_X = self.WIDTH // 2 - 200
         self.SETTINGS_BUTTON_Y_START = self.HEIGHT // 2 - 200
@@ -90,7 +91,7 @@ class GameConfig:
         self.MENU_IMAGES = {
             # Главное меню
             "MAIN_BG": "assets/images/menu/main/backgrounds/dark_prince.jpg",
-            "MAIN_BG_RUS": "assets/images/menu/main/backgrounds/dark_prince.jpg",
+            "MAIN_BG_RUS": "assets/images/menu/settings/backgrounds/dark_prince.jpg",
 
             # Кнопки главного меню (EN)
             "START_BTN": {
@@ -250,6 +251,14 @@ class GameConfig:
     def get_image_path(self, key: str, state: str = None) -> Union[str, None]:
         """Алиас для get_image (совместимость)"""
         return self.get_image(key, state)
+
+    def get_image_cached(self, key, state=None):
+        cache_key = f"{key}_{state}"
+        if cache_key not in self._image_cache:
+            img = self.get_image(key, state)
+            if img:  # Конвертируем в оптимальный формат
+                self._image_cache[cache_key] = img.convert_alpha()
+        return self._image_cache.get(cache_key)
 
 
 # Глобальный экземпляр конфигурации
