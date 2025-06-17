@@ -91,7 +91,7 @@ class GameConfig:
         self.MENU_IMAGES = {
             # Главное меню
             "MAIN_BG": "assets/images/menu/main/backgrounds/dark_prince.jpg",
-            "MAIN_BG_RUS": "assets/images/menu/settings/backgrounds/dark_prince.jpg",
+            "MAIN_BG_RUS": "assets/images/menu/main/backgrounds/dark_prince.jpg",
 
             # Кнопки главного меню (EN)
             "START_BTN": {

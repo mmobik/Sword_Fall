@@ -1,6 +1,6 @@
 import pygame
-from Game.core.config import config
-from Game.core.utils import load_image
+from core.config import config
+from core.utils import load_image
 from .menu import Menu
 from .button import Button
 
@@ -13,6 +13,7 @@ class SettingsMenu(Menu):
         self._bg_key = "SETTINGS_BG"
         self._static_surface = None  # Кэш статичной части
         self._last_mouse_pos = None
+        self._last_language = config.current_language  # Отслеживаем смену языка
         self._create_buttons()
         self._pre_render_static()  # Предварительный рендеринг
 
@@ -55,15 +56,27 @@ class SettingsMenu(Menu):
 
     def update_textures(self):
         """Обновление текстур при смене языка"""
-        self._static_surface = None
-        self._pre_render_static()
-        self._create_buttons()
+        # Проверяем, действительно ли изменился язык
+        if self._last_language != config.current_language:
+            self._last_language = config.current_language
+            self._static_surface = None  # Сбрасываем кэш только при реальной смене языка
+            self._create_buttons()  # Пересоздаем кнопки с новыми изображениями
+            self._pre_render_static()
 
     def draw(self, surface, mouse_pos=None):
         """Оптимизированная отрисовка без мерцания"""
-        # Если мышь не двигалась - рисуем кэшированную статичную версию
-        if mouse_pos == self._last_mouse_pos:
+        # Проверяем, нужно ли обновить кэш
+        if self._static_surface is None:
+            self._pre_render_static()
+        
+        # Если мышь не двигалась и язык не менялся - рисуем кэшированную статичную версию
+        if mouse_pos == self._last_mouse_pos and self._last_language == config.current_language:
             surface.blit(self._static_surface, (0, 0))
+            # Но все равно рисуем hover-эффекты если есть
+            if mouse_pos:
+                for button in self.buttons:
+                    if button.rect.collidepoint(mouse_pos):
+                        button.draw(surface, mouse_pos)
             return
 
         self._last_mouse_pos = mouse_pos
@@ -71,11 +84,9 @@ class SettingsMenu(Menu):
         # Рисуем статичную часть
         surface.blit(self._static_surface, (0, 0))
 
-        # Поверх рисуем только hover-кнопки (если есть)
-        if mouse_pos:
-            for button in self.buttons:
-                if button.rect.collidepoint(mouse_pos):
-                    button.draw(surface, mouse_pos)
+        # Поверх рисуем все кнопки с учетом hover-эффектов
+        for button in self.buttons:
+            button.draw(surface, mouse_pos)
 
     def settings_game_menu(self):
         """Обработчик кнопки настроек игры"""
@@ -105,7 +116,10 @@ class SettingsMenu(Menu):
         # Загружаем и рисуем фон
         try:
             bg = load_image(config.MENU_IMAGES[self._bg_key])
-            self._static_surface.blit(bg, (0, 0))
+            if bg is not None:
+                self._static_surface.blit(bg, (0, 0))
+            else:
+                self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
         except:
             self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
 

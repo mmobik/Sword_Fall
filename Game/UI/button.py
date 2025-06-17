@@ -13,10 +13,14 @@ class Button:
         self.sound_manager = sound_manager
         self.is_hovered = False
         self.is_clicked = False
+        self._last_hover_state = False  # Для отслеживания изменений hover-состояния
 
     def draw(self, surface, mouse_pos=None):
         """Отрисовка кнопки с оптимизацией"""
-        if mouse_pos and self.rect.collidepoint(mouse_pos):
+        current_hover = mouse_pos and self.rect.collidepoint(mouse_pos)
+        
+        # Всегда рисуем кнопку, но с правильным состоянием
+        if current_hover:
             surface.blit(self.hover_image, self.position)
         else:
             surface.blit(self.normal_image, self.position)

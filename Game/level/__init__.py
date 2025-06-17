@@ -1,5 +1,5 @@
 # level/__init__.py
-from .player import Player
-from .camera import Camera
-from .level_manager import create_level
-from .spritesheet import SpriteSheet
+from Game.level.player import Player
+from Game.level.camera import Camera
+from Game.level.level_manager import create_level
+from Game.level.spritesheet import SpriteSheet

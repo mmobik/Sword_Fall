@@ -1,16 +1,19 @@
 import pygame
 import sys
+from pathlib import Path
 import time
-from typing import Tuple, Optional
-from Game.core.config import config
-from Game.core.sound_manager import SoundManager
-from Game.core.game_state_manager import GameStateManager
+from core.config import config
+from core.sound_manager import SoundManager
+from core.game_state_manager import GameStateManager
 from UI.main_menu import MainMenu
 from UI.settings_menu import SettingsMenu
 from UI.language_menu import LanguageMenu
 from level.player import Player
 from level.camera import Camera
 from level.level_manager import create_level
+
+sys.path.append(str(Path(__file__).parent.parent))
+
 
 
 class Game:
@@ -158,7 +161,7 @@ class Game:
         """Отрисовка игрового уровня"""
         if not self.player or not self.camera or not self.level_data:
             return
-            
+
         # Фон
         bg_rect = (
             self.camera.offset.x,
@@ -187,7 +190,7 @@ class Game:
             f"FPS: {self.clock.get_fps():.1f}",
             f"State: {self.game_state_manager.game_state}",
         ]
-        
+
         if self.player:
             debug_text.append(f"Player: ({self.player.rect.x:.0f}, {self.player.rect.y:.0f})")
 
@@ -214,10 +217,13 @@ class Game:
         if config.current_language == lang:
             return
 
+        # Сохраняем текущее состояние мыши для плавного перехода
+        current_mouse_pos = pygame.mouse.get_pos()
+
         config.set_language(lang)
         print(f"Язык изменен на: {lang}")
 
-        # Обновляем текстуры во всех меню
+        # Обновляем текстуры во всех меню с проверкой изменений
         if hasattr(self.main_menu, 'update_textures'):
             self.main_menu.update_textures()
         if hasattr(self.settings_menu, 'update_textures'):
@@ -225,8 +231,13 @@ class Game:
         if hasattr(self.language_menu, 'update_textures'):
             self.language_menu.update_textures()
 
-        # Возвращаемся в меню настроек
+        # Возвращаемся в меню настроек с сохранением позиции мыши
         self.show_settings()
+
+        # Принудительно обновляем отрисовку для предотвращения мерцания
+        if self.game_state_manager.current_menu:
+            self.game_state_manager.current_menu.draw(self.screen, current_mouse_pos)
+            pygame.display.flip()
 
     def start_game(self, state: str):
         """Запуск игры"""
