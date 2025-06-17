@@ -149,20 +149,12 @@ class Game:
         """Оптимизированный рендеринг с приоритетами"""
         self.screen.fill((0, 0, 0))  # Всегда очищаем экран
 
-        # Оптимизация для меню
         if self.game_state_manager.current_menu:
             mouse_pos = pygame.mouse.get_pos()
-
-            # Ограничиваем FPS в меню до 60 для экономии ресурсов
-            if self.game_state_manager.game_state != "new_game":
-                self.clock.tick(60)
-
             self.game_state_manager.current_menu.draw(self.screen, mouse_pos)
 
-        # Полный FPS в игре
         elif self.game_state_manager.game_state == "new_game":
             self._render_game()
-            self.clock.tick(self.target_fps)
 
         pygame.display.flip()
 
