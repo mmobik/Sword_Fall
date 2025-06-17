@@ -22,16 +22,6 @@ class LevelRenderer:
         self._create_all_chunks()
 
     def _get_chunk_coords(self, tile_x, tile_y):
-        """
-        Возвращает координаты чанка для данного тайла.
-
-        Args:
-            tile_x (int): X координата тайла.
-            tile_y (int): Y координата тайла.
-
-        Returns:
-            tuple: Координаты чанка (chunk_x, chunk_y).
-        """
         return tile_x // self.chunk_size, tile_y // self.chunk_size
 
     def _create_chunk(self, chunk_x, chunk_y):
@@ -75,9 +65,6 @@ class LevelRenderer:
         self.chunks_info[(chunk_x, chunk_y)] = chunk
 
     def _create_all_chunks(self):
-        """
-        Создает все чанки для карты.
-        """
         for layer in self.tmx_data.layers:
             if isinstance(layer, pytmx.TiledTileLayer):
                 for x, y, image in layer.tiles():
@@ -86,7 +73,6 @@ class LevelRenderer:
                         self._create_chunk(chunk_x, chunk_y)
 
     def render(self, surface, player_pos=None):
-        """Отрисовывает уровень и слои поверх игрока (если нужно)."""
         camera_x = self.camera.offset.x
         camera_y = self.camera.offset.y
 
@@ -114,7 +100,6 @@ class LevelRenderer:
                             surface.blit(tile_surface, (tile_rect.x - camera_x, tile_rect.y - camera_y))
 
     def render_overlap_tiles(self, surface, player_pos):
-        """Отрисовывает только тайлы overlap_player, которые перекрывают игрока."""
         camera_x = self.camera.offset.x
         camera_y = self.camera.offset.y
 
@@ -138,7 +123,6 @@ class LevelRenderer:
                             print(f"Ошибка при отрисовке тайла: {e}")
 
     def _get_tile_surface(self, image):
-        """Создает поверхность для тайла с учетом трансформаций."""
         tileset_path, rect, flags = image
 
         if tileset_path not in self.tileset_images:

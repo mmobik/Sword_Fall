@@ -19,28 +19,21 @@ class Camera:
         self.level_rect = pygame.Rect(0, 0, level_width, level_height)
 
     def apply(self, rect):
-        """
-        Переводит координаты объекта в координаты камеры.
-
-        Args:
-            rect (pygame.Rect): Объект, чьи координаты нужно преобразовать.
-
-        Returns:
-            pygame.Rect: Преобразованный Rect.
-        """
+        """Применяет смещение камеры к объекту"""
         return rect.move(-self.offset.x, -self.offset.y)
 
     def update(self, target):
-        """
-        Центрирует камеру на цели с учетом границ уровня.
+        """Обновляет позицию камеры, следуя за целью"""
+        # Центрируем камеру на хитбоксе игрока
+        target_x = target.hitbox.centerx - config.VIRTUAL_WIDTH // 2
+        target_y = target.hitbox.centery - config.VIRTUAL_HEIGHT // 2
 
-        Args:
-            target (Player): Объект, за которым следует камера.
-        """
-        #  Смещение относительно координат экрана
-        target_x = target.rect.centerx - config.WIDTH // 2
-        target_y = target.rect.centery - config.HEIGHT // 2
+        # Жёсткие границы для камеры
+        self.offset.x = max(0, min(target_x, self.level_rect.width - config.VIRTUAL_WIDTH))
+        self.offset.y = max(0, min(target_y, self.level_rect.height - config.VIRTUAL_HEIGHT))
 
-        # Ограничиваем камеру границами уровня
-        self.offset.x = max(0, min(target_x, self.level_rect.width - config.WIDTH))
-        self.offset.y = max(0, min(target_y, self.level_rect.height - config.HEIGHT))
+        # Фикс для маленьких уровней
+        if self.level_rect.width < config.VIRTUAL_WIDTH:
+            self.offset.x = (self.level_rect.width - config.VIRTUAL_WIDTH) // 2
+        if self.level_rect.height < config.VIRTUAL_HEIGHT:
+            self.offset.y = (self.level_rect.height - config.VIRTUAL_HEIGHT) // 2

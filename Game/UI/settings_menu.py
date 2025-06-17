@@ -61,7 +61,7 @@ class SettingsMenu(Menu):
             self._last_language = config.current_language
             self._static_surface = None  # Сбрасываем кэш только при реальной смене языка
             self._create_buttons()  # Пересоздаем кнопки с новыми изображениями
-            self._pre_render_static()
+        self._pre_render_static()
 
     def draw(self, surface, mouse_pos=None):
         """Оптимизированная отрисовка без мерцания"""
@@ -86,7 +86,7 @@ class SettingsMenu(Menu):
 
         # Поверх рисуем все кнопки с учетом hover-эффектов
         for button in self.buttons:
-            button.draw(surface, mouse_pos)
+                button.draw(surface, mouse_pos)
 
     def settings_game_menu(self):
         """Обработчик кнопки настроек игры"""

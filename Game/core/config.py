@@ -11,18 +11,7 @@ class GameConfig:
     def __init__(self):
         # === Языковые настройки ===
         self.current_language = "english"
-        # === Уровни ===
-        self.LEVELS = {
-            "first": {
-                "background": "assets/images/game/backgrounds/level/first_level.png",
-                "map": "assets/images/game/backgrounds/level/second_level.tmx"
-            },
-            "second": {
-                "background": "assets/images/game/backgrounds/level/second_level.png",
-                "map": "assets/images/game/backgrounds/level/second_level.tmx"
-            }
-        }
-
+        
         # === Настройки экрана ===
         self.WIDTH = 1920
         self.HEIGHT = 1080
@@ -30,6 +19,9 @@ class GameConfig:
         self.FPS = 144
         self.TARGET_FPS = 60
         self.SCREEN_SIZE = (self.WIDTH, self.HEIGHT)
+        self.VIRTUAL_WIDTH = 960  # Логическое разрешение (внутриигровое)
+        self.VIRTUAL_HEIGHT = 540
+        self.SCALE_FACTOR = 2  # Масштаб (2x)
 
         # === Настройки интерфейса ===
         self.BUTTON_SPACING = 125
@@ -43,10 +35,9 @@ class GameConfig:
 
         # === Пути к игровым ресурсам ===
         self.ASSETS = {
-            "ICON": "assets/images/icons/icon_1.jpg",
-            "BACKGROUND": "assets/images/game/backgrounds/locations/bedroom.jpeg",
-            "IDLE_SHEET": "assets/sprites/Idle.png",
-            "RUN_SHEET": "assets/sprites/Run.png",
+            "ICON": "icon/game_icon_1.jpg",  # Путь к иконке игры
+            "IDLE_SHEET": "assets/sprites/idle++++.png",  # Путь к спрайт-листу для анимации покоя
+            "RUN_SHEET": "assets/sprites/Run.png",  # Путь к спрайт-листу для анимации бега
             "SOUNDTRACK": "assets/sounds/soundtracks/Dark_fantasm.mp3"
         }
 
@@ -59,33 +50,117 @@ class GameConfig:
             "RED": (255, 0, 0),
             "GREEN": (0, 255, 0)
         }
+        self.GAME_COLORS = {
+            "DARK_BLUE": (0, 33, 55),  # Темно-синий цвет для фона
+            "BLUE": (46, 68, 116),  # Основной синий цвет
+            "WHITE": (255, 255, 255)  # Белый цвет для интерфейса
+        }
 
         # === Параметры анимации ===
-        self.FRAME_SIZE = (128, 64)  # Ширина, высота кадра
+        self.FRAME_SIZE = (64, 64)  # Размер одного кадра анимации
         self.DEFAULT_ANIMATION_SPEED = 0.15  # Скорость смены кадров
         self.NO_ANIMATION = float('inf')  # Значение для отключения анимации
 
+        # Координаты кадров анимации в спрайт-листах
         self.ANIMATION_FRAMES = {
             "IDLE": [
-                (0, 0), (128, 0), (0, 64), (128, 64),
-                (0, 128), (128, 128), (0, 192), (128, 192)
+                (0, 0), (128, 0),
+                (0, 64), (128, 64),
+                (0, 128), (128, 128),
+                (0, 192), (128, 192)
             ],
             "RUN": [
-                (0, 0), (128, 0), (0, 64), (128, 64),
-                (0, 128), (128, 128), (0, 192), (128, 192)
+                (0, 0), (128, 0),
+                (0, 64), (128, 64),
+                (0, 128), (128, 128),
+                (0, 192), (128, 192)
             ]
         }
 
-        # === Параметры уровня ===
-        self.DEFAULT_LEVEL_WIDTH = self.WIDTH * 4
-        self.DEFAULT_LEVEL_HEIGHT = self.HEIGHT * 4
+        # === Параметры игрового уровня ===
+        self.DEFAULT_LEVEL_WIDTH = self.WIDTH * 4  # Ширина уровня по умолчанию
+        self.DEFAULT_LEVEL_HEIGHT = self.HEIGHT * 4  # Высота уровня по умолчанию
         self.TILE_SIZE = 100  # Размер клетки уровня
+        self.LEVEL_MAP_PATH = "assets/Tiles/Royal_one.tmx"
 
         # === Параметры игрока ===
-        self.PLAYER_SPEED = 300
-        self.PLAYER_START_X = self.DEFAULT_LEVEL_WIDTH // 2
-        self.PLAYER_START_Y = self.DEFAULT_LEVEL_HEIGHT // 2
-        self.PLAYER_HITBOX_OFFSET = (-30, -20)  # Смещение хитбокса
+        self.PLAYER_SPEED = 180  # Базовая скорость перемещения игрока
+        self.PLAYER_START_X = self.DEFAULT_LEVEL_WIDTH // 2  # Стартовая позиция игрока по X
+        self.PLAYER_START_Y = self.DEFAULT_LEVEL_HEIGHT // 2  # Стартовая позиция игрока по Y
+        self.PLAYER_HITBOX_OFFSET = (-16, -16)  # Смещение хитбокса
+
+        # === Параметры хитбокса игрока ===
+        self.PLAYER_HITBOX = {
+            "X_OFFSET": 0,
+            "Y_OFFSET": 16,
+            "WIDTH_OFFSET": -16,
+            "HEIGHT_OFFSET": -16
+        }
+
+        # === Состояния игрока ===
+        self.PLAYER_STATES = {
+            "idle_front": {
+                "sprite_sheet": "assets/sprites/player/unarmed/idle_back.png",
+                "frames": [(0, 0)],
+                "animation_speed": 0.2,
+                "flip": False
+            },
+            "run_right": {
+                "sprite_sheet": "assets/sprites/player/armed/run_right.png",
+                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "animation_speed": 0.1,
+                "flip": False
+            },
+            "run_left": {
+                "sprite_sheet": "assets/sprites/player/armed/run_right.png",
+                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "animation_speed": 0.1,
+                "flip": True
+            },
+            "run_up": {
+                "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",
+                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "animation_speed": 0.1,
+                "flip": False
+            },
+            "run_down": {
+                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "animation_speed": 0.1,
+                "flip": False
+            },
+            "idle_right": {
+                "sprite_sheet": "assets/sprites/player/armed/idle_right.png",
+                "frames": [(0, 0)],
+                "animation_speed": 0.2,
+                "flip": False
+            },
+            "idle_left": {
+                "sprite_sheet": "assets/sprites/player/armed/idle_right.png",
+                "frames": [(0, 0)],
+                "animation_speed": 0.2,
+                "flip": True
+            },
+            "idle_back": {
+                "sprite_sheet": "assets/sprites/player/unarmed/idle_back.png",
+                "frames": [(0, 0)],
+                "animation_speed": 0.2,
+                "flip": False
+            }
+        }
+
+        # === Коллизии ===
+        self.COLLISION_SETTINGS = {
+            "COLLISION_LAYER_NAME": "CollisionLayer",
+            "DEFAULT_COLLISION": True
+        }
+
+        self.DEBUG_MODE = True
+        self.DEBUG_COLORS = {
+            "COLLISION": (255, 0, 0),    # Красный - объекты коллизий
+            "HITBOX": (0, 255, 0),       # Зеленый - хитбокс игрока
+        }
+        self.BG_COLOR = (0, 125, 200)  # Голубой
 
         # === Изображения для меню ===
         self.MENU_IMAGES = {

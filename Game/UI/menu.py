@@ -32,7 +32,7 @@ class Menu:
         if self._last_language != config.current_language:
             self._last_language = config.current_language
             self._cached_bg = None
-            self._ensure_background()
+        self._ensure_background()
 
         if self._cached_bg:
             surface.blit(self._cached_bg, (0, 0))
@@ -42,8 +42,8 @@ class Menu:
         # Оптимизация: рисуем кнопки только если мышь двигалась или изменился язык
         if mouse_pos != self._last_mouse_pos or self._last_language != config.current_language:
             self._last_mouse_pos = mouse_pos
-            for button in self.buttons:
-                button.draw(surface, mouse_pos)
+        for button in self.buttons:
+            button.draw(surface, mouse_pos)
 
     def handle_event(self, event, mouse_pos):
         if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):

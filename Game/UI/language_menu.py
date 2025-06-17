@@ -78,13 +78,13 @@ class LanguageMenu(Menu):
         # Проверяем, действительно ли изменился язык
         if self._last_language != config.current_language:
             self._last_language = config.current_language
-            self._cached_bg = None  # Сбрасываем кэш фона
-            self._static_surface = None  # Сбрасываем кэш статичной части
-            self._bg_key = self._get_background_key()
+        self._cached_bg = None  # Сбрасываем кэш фона
+        self._static_surface = None  # Сбрасываем кэш статичной части
+        self._bg_key = self._get_background_key()
 
-            # Пересоздаем кнопки с новыми текстурами
-            self._create_buttons()
-            self._pre_render_static()
+        # Пересоздаем кнопки с новыми текстурами
+        self._create_buttons()
+        self._pre_render_static()
 
     def draw(self, surface, mouse_pos=None):
         """
@@ -106,7 +106,7 @@ class LanguageMenu(Menu):
                         button.draw(surface, mouse_pos)
             return
 
-        self._last_mouse_pos = mouse_pos
+            self._last_mouse_pos = mouse_pos
 
         # Рисуем статичную часть
         surface.blit(self._static_surface, (0, 0))
@@ -131,5 +131,5 @@ class LanguageMenu(Menu):
             self._static_surface.fill((30, 30, 50))  # Фон по умолчанию
 
         # Рисуем все кнопки в их обычном состоянии
-        for button in self.buttons:
-            button.draw(self._static_surface, None)  # None - без hover-эффекта
+            for button in self.buttons:
+                button.draw(self._static_surface, None)  # None - без hover-эффекта
