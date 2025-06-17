@@ -19,18 +19,24 @@ class Player(pygame.sprite.Sprite):
         self.animation_time = 0
         self.current_frame = 0
         self.image = self._get_frame()
-        self.rect = self.image.get_rect(center=(x, y))
-        self.hitbox = self.rect.inflate(
-            config.PLAYER_HITBOX["WIDTH_OFFSET"],
-            config.PLAYER_HITBOX["HEIGHT_OFFSET"]
-        )
-        self.hitbox.center = (
+        
+        # Создаем rect на основе изображения
+        self.rect = self.image.get_rect()
+        
+        # Создаем hitbox с правильным смещением
+        self.hitbox = pygame.Rect(
             x + config.PLAYER_HITBOX["X_OFFSET"],
-            y + config.PLAYER_HITBOX["Y_OFFSET"]
+            y + config.PLAYER_HITBOX["Y_OFFSET"],
+            self.rect.width + config.PLAYER_HITBOX["WIDTH_OFFSET"],
+            self.rect.height + config.PLAYER_HITBOX["HEIGHT_OFFSET"]
         )
+        
+        # Устанавливаем позицию rect относительно hitbox
+        self.rect.center = self.hitbox.center
+        
         self.speed = config.PLAYER_SPEED
         self.movement_handler = PlayerMovementHandler(self)
-        print(f"Rect: {self.rect}, Hitbox: {self.hitbox}")
+        print(f"Игрок создан: rect={self.rect}, hitbox={self.hitbox}")
 
     def _get_frame(self):
         if not hasattr(self, 'sprite_sheet') or not self.sprite_sheet:
@@ -51,6 +57,7 @@ class Player(pygame.sprite.Sprite):
         if state_name == self.state_name:
             return
         if state_name in config.PLAYER_STATES:
+            print(f"Установка состояния: {state_name}")
             self.state_name = state_name
             self.state = config.PLAYER_STATES[self.state_name]
             self.sprite_sheet = SpriteSheet(self.state["sprite_sheet"], *config.FRAME_SIZE)
@@ -59,13 +66,15 @@ class Player(pygame.sprite.Sprite):
             self.animation_time = 0
             self.current_frame = 0
             self.image = self._get_frame()
+            print(f"Новое состояние установлено: {state_name}, кадров: {len(self.frames)}")
+        else:
+            print(f"Ошибка: состояние {state_name} не найдено в конфигурации")
 
     def update(self, dt, level_width, level_height, collision_objects):
         self.movement_handler.handle_movement(dt, level_width, level_height, collision_objects)
         self._animate(dt)
         # Обновляем позицию rect в соответствии с hitbox
-        self.rect.center = self.hitbox.center  # Центрируем rect по hitbox
-        print(f"Состояние: {self.state_name}, кадр: {self.current_frame}, время анимации: {self.animation_time}")
+        self.rect.center = self.hitbox.center
 
     def _animate(self, dt):
         self.animation_time += dt

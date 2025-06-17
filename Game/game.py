@@ -110,7 +110,7 @@ class Game:
         if self.game_state_manager.game_state == "new_game":
             if not self.player or not self.camera or not self.level:
                 self._load_game_resources()
-            if self.player and self.camera and self.level:
+            if self.player and self.camera and self.level and self.all_sprites:
                 self.all_sprites.update(
                     self.dt,
                     self.level.width * self.level.tilewidth,
@@ -132,10 +132,12 @@ class Game:
             print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
 
             spawn_layer = self.level.get_layer_by_name("PlayerSpawn")
-            player_spawn = next(
-                (obj for obj in spawn_layer if obj.properties.get("object_type") == "player_spawn"),
-                None
-            )
+            player_spawn = None
+            if spawn_layer and hasattr(spawn_layer, '__iter__'):
+                for obj in spawn_layer:
+                    if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
+                        player_spawn = obj
+                        break
 
             print("Создание игрока...")
             self.player = Player(
@@ -168,7 +170,7 @@ class Game:
             pygame.display.flip()
 
     def _render_game(self):
-        if not self.player or not self.camera or not self.level:
+        if not self.player or not self.camera or not self.level or not self.level_renderer or not self.all_sprites:
             return
 
         # Рендер уровня
@@ -185,8 +187,9 @@ class Game:
             # Центр хитбокса
             pygame.draw.circle(self.virtual_screen, (255, 0, 255), self.camera.apply(self.player.hitbox).center, 3)
             # Коллизии
-            for obj in self.collision_objects:
-                pygame.draw.rect(self.virtual_screen, (255, 0, 0), self.camera.apply(obj['rect']), 1)
+            if self.collision_objects:
+                for obj in self.collision_objects:
+                    pygame.draw.rect(self.virtual_screen, (255, 0, 0), self.camera.apply(obj['rect']), 1)
 
         # Оверлап-тайлы
         self.level_renderer.render_overlap_tiles(

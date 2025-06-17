@@ -57,23 +57,19 @@ class GameConfig:
         }
 
         # === Параметры анимации ===
-        self.FRAME_SIZE = (64, 64)  # Размер одного кадра анимации
+        self.FRAME_SIZE = (128, 64)  # Размер одного кадра анимации (128x64)
         self.DEFAULT_ANIMATION_SPEED = 0.15  # Скорость смены кадров
         self.NO_ANIMATION = float('inf')  # Значение для отключения анимации
 
-        # Координаты кадров анимации в спрайт-листах
+        # Координаты кадров анимации в спрайт-листах (сетка 2x2)
         self.ANIMATION_FRAMES = {
             "IDLE": [
                 (0, 0), (128, 0),
-                (0, 64), (128, 64),
-                (0, 128), (128, 128),
-                (0, 192), (128, 192)
+                (0, 64), (128, 64)
             ],
             "RUN": [
                 (0, 0), (128, 0),
-                (0, 64), (128, 64),
-                (0, 128), (128, 128),
-                (0, 192), (128, 192)
+                (0, 64), (128, 64)
             ]
         }
 
@@ -100,51 +96,51 @@ class GameConfig:
         # === Состояния игрока ===
         self.PLAYER_STATES = {
             "idle_front": {
-                "sprite_sheet": "assets/sprites/player/unarmed/idle_back.png",
-                "frames": [(0, 0)],
-                "animation_speed": 0.2,
+                "sprite_sheet": "assets/sprites/player/armed/idle_front.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.3,
                 "flip": False
             },
             "run_right": {
-                "sprite_sheet": "assets/sprites/player/armed/run_right.png",
-                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.1,
                 "flip": False
             },
             "run_left": {
-                "sprite_sheet": "assets/sprites/player/armed/run_right.png",
-                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.1,
                 "flip": True
             },
             "run_up": {
                 "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",
-                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.1,
                 "flip": False
             },
             "run_down": {
                 "sprite_sheet": "assets/sprites/player/armed/run_down.png",
-                "frames": [(0, 0), (64, 0), (128, 0), (192, 0)],
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.1,
                 "flip": False
             },
             "idle_right": {
                 "sprite_sheet": "assets/sprites/player/armed/idle_right.png",
-                "frames": [(0, 0)],
-                "animation_speed": 0.2,
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.3,
                 "flip": False
             },
             "idle_left": {
-                "sprite_sheet": "assets/sprites/player/armed/idle_right.png",
-                "frames": [(0, 0)],
-                "animation_speed": 0.2,
-                "flip": True
+                "sprite_sheet": "assets/sprites/player/armed/idle_left.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.3,
+                "flip": False
             },
             "idle_back": {
                 "sprite_sheet": "assets/sprites/player/unarmed/idle_back.png",
-                "frames": [(0, 0)],
-                "animation_speed": 0.2,
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.3,
                 "flip": False
             }
         }

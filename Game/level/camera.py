@@ -25,14 +25,12 @@ class Camera:
     def update(self, target):
         """Обновляет позицию камеры, следуя за целью"""
         # Центрируем камеру на хитбоксе игрока
-        print(f"До камеры: target={target.hitbox.center}, offset={self.offset}")
         target_x = target.hitbox.centerx - config.VIRTUAL_WIDTH // 2
         target_y = target.hitbox.centery - config.VIRTUAL_HEIGHT // 2
 
         # Жёсткие границы для камеры
         self.offset.x = max(0, min(target_x, self.level_rect.width - config.VIRTUAL_WIDTH))
         self.offset.y = max(0, min(target_y, self.level_rect.height - config.VIRTUAL_HEIGHT))
-        print(f"После камеры: offset={self.offset}")
 
         # Фикс для маленьких уровней
         if self.level_rect.width < config.VIRTUAL_WIDTH:
