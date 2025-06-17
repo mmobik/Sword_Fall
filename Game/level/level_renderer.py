@@ -1,6 +1,6 @@
 import pygame
 import pytmx
-from Game.core.config import config
+from core.config import config
 
 
 class LevelRenderer:

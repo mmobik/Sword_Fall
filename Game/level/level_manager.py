@@ -1,6 +1,6 @@
 import pygame
 import os
-from Game.core import config
+from core import config
 
 
 def create_level():

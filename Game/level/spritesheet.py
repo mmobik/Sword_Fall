@@ -1,5 +1,5 @@
 import pygame
-from Game.core.config import config
+from core.config import config
 
 
 

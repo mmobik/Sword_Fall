@@ -1,7 +1,7 @@
 import sys
 import time
 import pygame
-from Game.core.config import config
+from core.config import config
 
 
 # В файле game_state_manager.py

@@ -1,3 +1,3 @@
 # UI/__init__.py
-from Game.UI.menu import Menu
-from Game.UI.button import Button
+from UI.menu import Menu
+from UI.button import Button
