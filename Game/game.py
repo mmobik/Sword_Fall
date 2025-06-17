@@ -30,6 +30,15 @@ class Game:
         )
         pygame.display.set_caption(config.GAME_NAME)
 
+        # Загрузка иконки
+        try:
+            icon = pygame.image.load(config.ASSETS["ICON"])
+            pygame.display.set_icon(icon)
+        except FileNotFoundError:
+            print("Иконка не загружена")
+        except Exception as e:
+            print(f"Ошибка загрузки иконки: {e}")
+
         # Настройки производительности
         self.target_fps = 144
         self.clock = pygame.time.Clock()
