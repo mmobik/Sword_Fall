@@ -17,7 +17,7 @@ class PlayerMovementHandler:
         keys = pygame.key.get_pressed()
         move_x = keys[pygame.K_d] - keys[pygame.K_a]
         move_y = keys[pygame.K_s] - keys[pygame.K_w]
-        print("move_x:", move_x, "move_y:", move_y)  # Отладка
+        # print("move_x:", move_x, "move_y:", move_y)  # Отладка
 
         # Нормализация вектора только при диагональном движении
         is_diagonal = move_x != 0 and move_y != 0
@@ -101,7 +101,8 @@ class PlayerMovementHandler:
 
         # Переключаем состояние только если оно изменилось и прошло достаточно времени
         if new_state and new_state != self.player.state_name and self.state_change_time > 0.1:
-            print(f"Переключение состояния с {self.player.state_name} на {new_state}")
+            if config.DEBUG_MODE:
+                print(f"Переключение состояния с {self.player.state_name} на {new_state}")
             self.player.set_state(new_state)
             self.last_state = new_state
             self.state_change_time = 0

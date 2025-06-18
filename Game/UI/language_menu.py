@@ -126,8 +126,9 @@ class LanguageMenu(Menu):
                 self._static_surface.blit(bg, (0, 0))
             else:
                 self._static_surface.fill((30, 30, 50))  # Фон по умолчанию
-        except (KeyError, pygame.error) as e:
-            print(f"Ошибка загрузки фона: {e}")
+        except (KeyError, pygame.error, TypeError) as e:
+            if config.DEBUG_MODE:
+                print(f"Ошибка загрузки фона: {e}")
             self._static_surface.fill((30, 30, 50))  # Фон по умолчанию
 
         # Рисуем все кнопки в их обычном состоянии

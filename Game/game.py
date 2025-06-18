@@ -33,7 +33,8 @@ class Game:
             icon = pygame.image.load(config.ASSETS["ICON"])
             pygame.display.set_icon(icon)
         except Exception as e:
-            print(f"Иконка не загружена: {e}")
+            if config.DEBUG_MODE:
+                print(f"Иконка не загружена: {e}")
 
         self.target_fps = config.FPS
         self.clock = pygame.time.Clock()
@@ -50,7 +51,6 @@ class Game:
         # Статистика
         self.fps_history = []
         self.last_log_time = time.time()
-        self.debug_mode = True  # Включаем дебаг по умолчанию
         self.debug_font = pygame.font.SysFont('Arial', 16)
 
     def _init_menus(self):
@@ -98,7 +98,7 @@ class Game:
                 return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F3:
-                    self.debug_mode = not self.debug_mode
+                    config.set_debug_mode(not config.DEBUG_MODE)
                 if event.key == pygame.K_ESCAPE and self.game_state_manager.game_state == "new_game":
                     self.show_main_menu()
             if self.game_state_manager.current_menu:
@@ -121,17 +121,22 @@ class Game:
 
     def _load_game_resources(self):
         try:
-            print("Загрузка карты...")
+            # Лог загрузки карты
+            if config.DEBUG_MODE:
+                print("Загрузка карты...")
             self.level = pytmx.TiledMap(config.LEVEL_MAP_PATH)
             map_width = self.level.width * self.level.tilewidth
             map_height = self.level.height * self.level.tileheight
-            print(f"Карта загружена. Размер: {map_width}x{map_height}")
+            if config.DEBUG_MODE:
+                print(f"Карта загружена. Размер: {map_width}x{map_height}")
 
             self.collision_handler = CollisionHandler()
             self.collision_objects = self.collision_handler.load_collision_objects(self.level)
-            print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
+            if config.DEBUG_MODE:
+                print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
 
-            print("Создание игрока...")
+            if config.DEBUG_MODE:
+                print("Создание игрока...")
             # Поиск спавна игрока в карте
             spawn_x = 200  # Fallback позиция по X
             spawn_y = 200  # Fallback позиция по Y
@@ -144,23 +149,27 @@ class Game:
                         if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
                             spawn_x = int(obj.x)
                             spawn_y = int(obj.y)
-                            print(f"Найден спавн игрока: ({spawn_x}, {spawn_y})")
+                            if config.DEBUG_MODE:
+                                print(f"Найден спавн игрока: ({spawn_x}, {spawn_y})")
                             break
                     break
             else:
-                print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
+                if config.DEBUG_MODE:
+                    print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
             
             self.player = Player(spawn_x, spawn_y)
-            print(f"Игрок создан. Позиция: {self.player.hitbox.topleft}")
-            print(f"Размер спрайта: {self.player.image.get_size()}")
-            print(f"Размер хитбокса: {self.player.hitbox.size}")
+            if config.DEBUG_MODE:
+                print(f"Игрок создан. Позиция: {self.player.hitbox.topleft}")
+                print(f"Размер спрайта: {self.player.image.get_size()}")
+                print(f"Размер хитбокса: {self.player.hitbox.size}")
 
             self.all_sprites = pygame.sprite.GroupSingle(self.player)
             self.camera = Camera(map_width, map_height)
             self.level_renderer = LevelRenderer(self.level, self.camera)
 
         except Exception as e:
-            print(f"Ошибка загрузки ресурсов: {e}")
+            if config.DEBUG_MODE:
+                print(f"Ошибка загрузки ресурсов: {e}")
             raise
 
     def _render_frame(self):
@@ -188,11 +197,9 @@ class Game:
             self.virtual_screen.blit(sprite.image, self.camera.apply(sprite.rect))
 
         # Дебаг-отрисовка
-        if self.debug_mode:
+        if config.DEBUG_MODE:
             # Хитбокс игрока
             pygame.draw.rect(self.virtual_screen, (0, 255, 0), self.camera.apply(self.player.hitbox), 1)
-            # Центр хитбокса
-            pygame.draw.circle(self.virtual_screen, (255, 0, 255), self.camera.apply(self.player.hitbox).center, 3)
             # Коллизии
             if self.collision_objects:
                 for obj in self.collision_objects:
@@ -205,25 +212,28 @@ class Game:
         )
 
         # Теперь debug-информация будет поверх всего
-        if self.debug_mode:
+        if config.DEBUG_MODE:
             self._draw_debug_info()
 
     def _log_performance(self):
         current_fps = self.clock.get_fps()
         self.fps_history.append(current_fps)
-        print(f"[PERF] FPS: {current_fps:.1f} | State: {self.game_state_manager.game_state}")
+        if config.DEBUG_MODE:
+            print(f"[PERF] FPS: {current_fps:.1f} | State: {self.game_state_manager.game_state}")
 
     def _draw_debug_info(self):
+        # Базовая информация
         debug_text = [
             f"FPS: {self.clock.get_fps():.1f}",
             f"State: {self.game_state_manager.game_state}",
             f"Player Pos: {self.player.rect.topleft if self.player else 'N/A'}",
             f"Player Hitbox: {self.player.hitbox.topleft if self.player else 'N/A'}",
+            f"Hitbox Size: {self.player.hitbox.size if self.player else 'N/A'}",
             f"Camera Offset: {self.camera.offset if self.camera else 'N/A'}",
             f"Frame: {self.player.current_frame if self.player else 'N/A'}",
-            f"Anim State: {self.player.state_name if self.player else 'N/A'}"
+            f"Anim State: {self.player.state_name if self.player else 'N/A'}",
+            f"Objects: {len(self.collision_objects) if self.collision_objects else 0}",
         ]
-
         for i, text in enumerate(debug_text):
             surface = self.debug_font.render(text, True, (255, 255, 255))
             self.virtual_screen.blit(surface, (10, 10 + i * 20))
@@ -244,7 +254,8 @@ class Game:
             return
         current_mouse_pos = pygame.mouse.get_pos()
         config.set_language(lang)
-        print(f"Язык изменен на: {lang}")
+        if config.DEBUG_MODE:
+            print(f"Язык изменен на: {lang}")
         if hasattr(self.main_menu, 'update_textures'):
             self.main_menu.update_textures()
         if hasattr(self.settings_menu, 'update_textures'):

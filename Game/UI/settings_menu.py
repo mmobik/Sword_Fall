@@ -23,7 +23,8 @@ class SettingsMenu(Menu):
             try:
                 self._cached_bg = load_image(config.MENU_IMAGES[self._bg_key])
             except (KeyError, pygame.error, TypeError) as e:
-                print(f"Ошибка загрузки фона настроек: {e}")
+                if config.DEBUG_MODE:
+                    print(f"Ошибка загрузки фона настроек: {e}")
                 # Создаём простой фон если загрузка не удалась
                 self._cached_bg = pygame.Surface(config.SCREEN_SIZE)
                 self._cached_bg.fill((40, 40, 60))  # Тёмно-синий фон
@@ -52,7 +53,8 @@ class SettingsMenu(Menu):
                 )
                 self.add_button(btn)
             except Exception as e:
-                print(f"Ошибка создания кнопки {btn_key}: {e}")
+                if config.DEBUG_MODE:
+                    print(f"Ошибка создания кнопки {btn_key}: {e}")
 
     def update_textures(self):
         """Обновление текстур при смене языка"""
@@ -90,19 +92,22 @@ class SettingsMenu(Menu):
 
     def settings_game_menu(self):
         """Обработчик кнопки настроек игры"""
-        print("Открыты настройки игры")
+        if config.DEBUG_MODE:
+            print("Открыты настройки игры")
         # Здесь будет логика меню настроек игры
         # Например: self.game_state_manager.change_state("game_settings")
 
     def settings_graphics_menu(self):
         """Обработчик графических настроек"""
-        print("Открыты графические настройки")
+        if config.DEBUG_MODE:
+            print("Открыты графические настройки")
         # Здесь будет логика графических настроек
         # Например: self.game_state_manager.change_state("graphics_settings")
 
     def open_language_menu(self):
         """Обработчик кнопки языковых настроек"""
-        print("Открытие меню языка")
+        if config.DEBUG_MODE:
+            print("Открытие меню языка")
         self.language_callback()  # Переходим в языковое меню
 
     def update(self):

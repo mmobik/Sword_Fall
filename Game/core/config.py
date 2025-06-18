@@ -328,6 +328,9 @@ class GameConfig:
                 self._image_cache[cache_key] = img.convert_alpha()
         return self._image_cache.get(cache_key)
 
+    def set_debug_mode(self, value: bool):
+        self.DEBUG_MODE = value
+
 
 # Глобальный экземпляр конфигурации
 config = GameConfig()

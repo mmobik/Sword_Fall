@@ -80,7 +80,8 @@ class CollisionHandler:
             dx = new_x - original_x
             dy = new_y - original_y
             if abs(dx) > 0.1 or abs(dy) > 0.1:  # Игрок пытается двигаться
-                print(f"Полная блокировка: позиция ({int(final_x)}, {int(final_y)})")
+                if config.DEBUG_MODE:
+                    print(f"Полная блокировка: позиция ({int(final_x)}, {int(final_y)})")
                 # Пробуем оттолкнуть игрока в направлении движения
                 if abs(dx) > abs(dy):
                     # Движение больше по X

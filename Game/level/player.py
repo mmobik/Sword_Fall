@@ -36,11 +36,13 @@ class Player(pygame.sprite.Sprite):
         
         self.speed = config.PLAYER_SPEED
         self.movement_handler = PlayerMovementHandler(self)
-        print(f"Игрок создан: rect={self.rect}, hitbox={self.hitbox}")
+        if config.DEBUG_MODE:
+            print(f"Игрок создан: rect={self.rect}, hitbox={self.hitbox}")
 
     def _get_frame(self):
         if not hasattr(self, 'sprite_sheet') or not self.sprite_sheet:
-            print(f"Ошибка: спрайт-лист не загружен для состояния {self.state_name}")
+            if config.DEBUG_MODE:
+                print(f"Ошибка: спрайт-лист не загружен для состояния {self.state_name}")
             return pygame.Surface(config.FRAME_SIZE, pygame.SRCALPHA)
 
         x, y = self.frames[self.current_frame]
@@ -57,7 +59,8 @@ class Player(pygame.sprite.Sprite):
         if state_name == self.state_name:
             return
         if state_name in config.PLAYER_STATES:
-            print(f"Установка состояния: {state_name}")
+            if config.DEBUG_MODE:
+                print(f"Установка состояния: {state_name}")
             self.state_name = state_name
             self.state = config.PLAYER_STATES[self.state_name]
             self.sprite_sheet = SpriteSheet(self.state["sprite_sheet"], *config.FRAME_SIZE)
@@ -66,9 +69,11 @@ class Player(pygame.sprite.Sprite):
             self.animation_time = 0
             self.current_frame = 0
             self.image = self._get_frame()
-            print(f"Новое состояние установлено: {state_name}, кадров: {len(self.frames)}")
+            if config.DEBUG_MODE:
+                print(f"Новое состояние установлено: {state_name}, кадров: {len(self.frames)}")
         else:
-            print(f"Ошибка: состояние {state_name} не найдено в конфигурации")
+            if config.DEBUG_MODE:
+                print(f"Ошибка: состояние {state_name} не найдено в конфигурации")
 
     def update(self, dt, level_width, level_height, collision_objects):
         self.movement_handler.handle_movement(dt, level_width, level_height, collision_objects)

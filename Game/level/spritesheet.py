@@ -15,10 +15,12 @@ class SpriteSheet:
                 raise FileNotFoundError(f"Файл не найден: {filename}")
 
             self.sheet = pygame.image.load(filename).convert_alpha()
-            print(f"✅ Спрайт загружен: {filename}")
+            if config.DEBUG_MODE:
+                print(f"✅ Спрайт загружен: {filename}")
 
         except Exception as e:
-            print(f"❌ Ошибка загрузки спрайта: {e}")
+            if config.DEBUG_MODE:
+                print(f"❌ Ошибка загрузки спрайта: {e}")
             # Создаём красный квадрат вместо спрайта
             self.sheet = pygame.Surface((width, height), pygame.SRCALPHA)
             pygame.draw.rect(self.sheet, (255, 0, 0), (0, 0, width, height))

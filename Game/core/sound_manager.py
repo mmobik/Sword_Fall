@@ -30,7 +30,8 @@ class SoundManager:
             sound.set_volume(self.sound_volume)
             return sound
         except pygame.error as e:
-            print(f"[SoundManager] Ошибка загрузки звука {full_path}: {e}")
+            if config.DEBUG_MODE:
+                print(f"[SoundManager] Ошибка загрузки звука {full_path}: {e}")
             # Создаем пустой звук, чтобы избежать ошибок
             silent_sound = pygame.mixer.Sound(buffer=bytearray(0))
             silent_sound.set_volume(0)
@@ -49,7 +50,8 @@ class SoundManager:
                 pygame.mixer.music.play(-1 if loop else 0)
                 self.current_music = full_path
         except pygame.error as e:
-            print(f"[SoundManager] Ошибка загрузки музыки {full_path}: {e}")
+            if config.DEBUG_MODE:
+                print(f"[SoundManager] Ошибка загрузки музыки {full_path}: {e}")
             self.current_music = None
 
     def play_sound(self, sound_name: str) -> None:

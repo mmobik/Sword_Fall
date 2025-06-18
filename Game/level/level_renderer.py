@@ -43,7 +43,8 @@ class LevelRenderer:
                             try:
                                 self.tileset_images[tileset_path] = pygame.image.load(tileset_path).convert_alpha()
                             except FileNotFoundError:
-                                print(f"Ошибка: Не удалось найти файл тайлсета '{tileset_path}'")
+                                if config.DEBUG_MODE:
+                                    print(f"Ошибка: Не удалось найти файл тайлсета '{tileset_path}'")
                                 continue
 
                         tileset_image = self.tileset_images[tileset_path]
@@ -120,7 +121,8 @@ class LevelRenderer:
                                 (tile_rect.x - camera_x, tile_rect.y - camera_y)
                             )
                         except Exception as e:
-                            print(f"Ошибка при отрисовке тайла: {e}")
+                            if config.DEBUG_MODE:
+                                print(f"Ошибка при отрисовке тайла: {e}")
 
     def _get_tile_surface(self, image):
         tileset_path, rect, flags = image
@@ -129,7 +131,8 @@ class LevelRenderer:
             try:
                 self.tileset_images[tileset_path] = pygame.image.load(tileset_path).convert_alpha()
             except FileNotFoundError:
-                print(f"Ошибка: Не удалось найти файл тайлсета '{tileset_path}'")
+                if config.DEBUG_MODE:
+                    print(f"Ошибка: Не удалось найти файл тайлсета '{tileset_path}'")
                 return pygame.Surface((rect[2], rect[3]), pygame.SRCALPHA)
 
         tileset_image = self.tileset_images[tileset_path]
