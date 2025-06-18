@@ -3,8 +3,7 @@
 Все настройки доступны через глобальный экземпляр config.
 """
 
-import pygame
-from typing import Dict, Tuple, Union, List
+from typing import Dict, Union
 
 
 class GameConfig:
@@ -21,7 +20,6 @@ class GameConfig:
         self.SCREEN_SIZE = (self.WIDTH, self.HEIGHT)
         self.VIRTUAL_WIDTH = 960
         self.VIRTUAL_HEIGHT = 540
-        self.SCALE_FACTOR = 2
 
         # Настройки интерфейса
         self.BUTTON_SPACING = 125
@@ -56,20 +54,7 @@ class GameConfig:
 
         # Параметры анимации
         self.FRAME_SIZE = (128, 64)
-        self.DEFAULT_ANIMATION_SPEED = 0.15
         self.NO_ANIMATION = float('inf')
-
-        # Координаты кадров анимации
-        self.ANIMATION_FRAMES = {
-            "IDLE": [
-                (0, 0), (128, 0),
-                (0, 64), (128, 64)
-            ],
-            "RUN": [
-                (0, 0), (128, 0),
-                (0, 64), (128, 64)
-            ]
-        }
 
         # Параметры игрового уровня
         self.TILE_SIZE = 100
@@ -77,8 +62,6 @@ class GameConfig:
 
         # Параметры игрока
         self.PLAYER_SPEED = 180
-        self.DIAGONAL_SPEED_MULTIPLIER = 1.0
-        self.WALL_SLIDE_SPEED_MULTIPLIER = 0.7
         
         # Параметры хитбокса игрока
         self.PLAYER_HITBOX = {
@@ -94,25 +77,25 @@ class GameConfig:
             "idle_front": {
                 "sprite_sheet": "assets/sprites/player/armed/idle_front.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.3,
+                "animation_speed": 0.17,
                 "flip": False
             },
             "idle_right": {
                 "sprite_sheet": "assets/sprites/player/armed/idle_right.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.3,
+                "animation_speed": 0.17,
                 "flip": False
             },
             "idle_left": {
                 "sprite_sheet": "assets/sprites/player/armed/idle_left.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.3,
+                "animation_speed": 0.17,
                 "flip": False
             },
             "idle_back": {
                 "sprite_sheet": "assets/sprites/player/unarmed/idle_back.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.3,
+                "animation_speed": 0.17,
                 "flip": False
             },
 
@@ -120,25 +103,25 @@ class GameConfig:
             "run_right": {
                 "sprite_sheet": "assets/sprites/player/armed/run_down.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
+                "animation_speed": 0.13,
                 "flip": False
             },
             "run_left": {
                 "sprite_sheet": "assets/sprites/player/armed/run_down.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
+                "animation_speed": 0.13,
                 "flip": True
             },
             "run_up": {
                 "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
+                "animation_speed": 0.13,
                 "flip": False
             },
             "run_down": {
                 "sprite_sheet": "assets/sprites/player/unarmed/run_down.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
+                "animation_speed": 0.13,
                 "flip": False
             }
         }

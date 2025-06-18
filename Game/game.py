@@ -1,5 +1,4 @@
 import pygame
-import sys
 import time
 from core.config import config
 from core.sound_manager import SoundManager
@@ -137,14 +136,12 @@ class Game:
 
             if config.DEBUG_MODE:
                 print("Создание игрока...")
-            # Поиск спавна игрока в карте
-            spawn_x = 200  # Fallback позиция по X
-            spawn_y = 200  # Fallback позиция по Y
-            
-            # Ищем слой PlayerSpawn
+
+            spawn_x = 200
+            spawn_y = 200
+
             for layer in self.level.layers:
                 if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
-                    # Ищем объект спавна в слое
                     for obj in layer:
                         if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
                             spawn_x = int(obj.x)
@@ -196,10 +193,11 @@ class Game:
         for sprite in self.all_sprites:
             self.virtual_screen.blit(sprite.image, self.camera.apply(sprite.rect))
 
-        # Дебаг-отрисовка
         if config.DEBUG_MODE:
+
             # Хитбокс игрока
             pygame.draw.rect(self.virtual_screen, (0, 255, 0), self.camera.apply(self.player.hitbox), 1)
+
             # Коллизии
             if self.collision_objects:
                 for obj in self.collision_objects:
@@ -211,7 +209,6 @@ class Game:
             (self.player.hitbox.centerx, self.player.hitbox.centery)
         )
 
-        # Теперь debug-информация будет поверх всего
         if config.DEBUG_MODE:
             self._draw_debug_info()
 
@@ -222,7 +219,7 @@ class Game:
             print(f"[PERF] FPS: {current_fps:.1f} | State: {self.game_state_manager.game_state}")
 
     def _draw_debug_info(self):
-        # Базовая информация
+        # Базовая информация для дебага
         debug_text = [
             f"FPS: {self.clock.get_fps():.1f}",
             f"State: {self.game_state_manager.game_state}",
@@ -238,7 +235,7 @@ class Game:
             surface = self.debug_font.render(text, True, (255, 255, 255))
             self.virtual_screen.blit(surface, (10, 10 + i * 20))
 
-    # Методы управления состоянием ------------------------------------------------
+    # Методы управления состоянием
     def show_main_menu(self):
         self.game_state_manager.change_state("main_menu", self.main_menu)
         self.sound_manager.play_music("Dark_fantasm.mp3")
