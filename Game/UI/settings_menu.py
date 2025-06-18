@@ -10,12 +10,20 @@ class SettingsMenu(Menu):
         super().__init__(sound_manager)
         self.back_callback = back_callback
         self.language_callback = language_callback
+        self.music_callback = None  # Будет установлен извне
         self._bg_key = "SETTINGS_BG"
         self._static_surface = None  # Кэш статичной части
         self._last_mouse_pos = None
         self._last_language = config.current_language  # Отслеживаем смену языка
+        
         self._create_buttons()
         self._pre_render_static()  # Предварительный рендеринг
+
+    def set_music_callback(self, callback):
+        """Устанавливает callback для кнопки музыки"""
+        self.music_callback = callback
+        self._create_buttons()  # Пересоздаем кнопки с новым callback
+        self._static_surface = None  # Сбрасываем кэш
 
     def _ensure_background(self):
         """Гарантирует, что фон будет загружен или создан"""
@@ -34,7 +42,7 @@ class SettingsMenu(Menu):
         self.buttons = []
 
         buttons_data = [
-            ("GAME_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START, self.settings_game_menu),
+            ("GAME_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START, self.open_music_menu),
             ("GRAPHICS_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START + config.BUTTON_SPACING,
              self.settings_graphics_menu),
             ("LANGUAGE_SETTINGS_BTN", config.SETTINGS_BUTTON_Y_START + 2 * config.BUTTON_SPACING,
@@ -110,7 +118,11 @@ class SettingsMenu(Menu):
             print("Открытие меню языка")
         self.language_callback()  # Переходим в языковое меню
 
-    def update(self):
+    def open_music_menu(self):
+        if self.music_callback:
+            self.music_callback()
+
+    def update(self, dt=1/60):
         """Обновление состояния меню (если нужно)"""
         pass
 

@@ -108,3 +108,6 @@ class MainMenu(Menu):
         """Обработчик выхода из игры"""
         pygame.quit()
         sys.exit()
+
+    def update(self, dt=1/60):
+        pass

@@ -6,6 +6,7 @@ from core.game_state_manager import GameStateManager
 from UI.main_menu import MainMenu
 from UI.settings_menu import SettingsMenu
 from UI.language_menu import LanguageMenu
+from UI.music_settings_menu import MusicSettingsMenu
 from level.player import Player
 from level.camera import Camera
 from level.level_renderer import LevelRenderer
@@ -59,7 +60,7 @@ class Game:
         self.talk_button_alpha = 0  # Текущий альфа-канал кнопки (0-255)
         self.talk_button_target_alpha = 0  # Целевой альфа-канал (0 или 255)
         self.talk_button_fade_speed = 800  # скорость изменения альфы (значение в секундах, пикс/сек)
-        self.talk_button_show_delay = 1  # Задержка перед появлением кнопки (сек)
+        self.talk_button_show_delay = 0.25  # Задержка перед появлением кнопки (сек)
         self.talk_button_enter_time = None  # Время входа в зону взаимодействия
 
         # Диалоговое окно
@@ -92,6 +93,14 @@ class Game:
             self.show_settings,
             self.change_language
         )
+        self.music_settings_menu = MusicSettingsMenu(
+            self.sound_manager,
+            self.show_settings
+        )
+        
+        # Устанавливаем callback для кнопки музыки
+        self.settings_menu.set_music_callback(self.show_music_settings)
+        
         self.show_main_menu()
 
     def _init_game_objects(self):
@@ -141,6 +150,10 @@ class Game:
         return True
 
     def _update_game_state(self):
+        # Обновляем текущее меню если оно есть
+        if self.game_state_manager.current_menu:
+            self.game_state_manager.current_menu.update(self.dt)
+            
         if self.game_state_manager.game_state == "new_game":
             if not self.player or not self.camera or not self.level:
                 self._load_game_resources()
@@ -332,6 +345,9 @@ class Game:
     def show_language(self):
         self.game_state_manager.change_state("language_menu", self.language_menu)
 
+    def show_music_settings(self):
+        self.game_state_manager.change_state("music_settings_menu", self.music_settings_menu)
+
     def change_language(self, lang: str):
         if config.current_language == lang:
             return
@@ -345,6 +361,8 @@ class Game:
             self.settings_menu.update_textures()
         if hasattr(self.language_menu, 'update_textures'):
             self.language_menu.update_textures()
+        if hasattr(self.music_settings_menu, 'update_textures'):
+            self.music_settings_menu.update_textures()
         self.show_settings()
         if self.game_state_manager.current_menu:
             self.game_state_manager.current_menu.draw(self.screen, current_mouse_pos)

@@ -17,11 +17,15 @@ class MusicSlider:
         
         # Параметры ползунка
         self.value = self.sound_manager.music_volume
+        self.target_value = self.value  # Для плавной анимации
         self.is_dragging = False
         self.rect = pygame.Rect(x, y, width, self.height)
         
         # Вычисляем позицию ползунка
         self.slider_pos = x + int(self.value * width)
+        
+        # Анимация
+        self.animation_speed = 5.0  # Скорость анимации
         
     def _load_slider_images(self):
         """Загружает изображения ползунка для разных уровней громкости"""
@@ -71,18 +75,40 @@ class MusicSlider:
         x = max(self.x, min(self.x + self.width, x))
         
         # Вычисляем новое значение (0.0-1.0)
-        self.value = (x - self.x) / self.width
+        new_value = (x - self.x) / self.width
+        self.target_value = new_value
         
         # Обновляем позицию ползунка
         self.slider_pos = x
         
         # Применяем новую громкость
-        self.sound_manager.set_music_volume(self.value)
+        self.sound_manager.set_music_volume(new_value)
+    
+    def update(self, dt=1/60):
+        """Обновляет состояние ползунка с плавной анимацией"""
+        # Плавная анимация к целевому значению
+        if abs(self.value - self.target_value) > 0.01:
+            diff = self.target_value - self.value
+            self.value += diff * self.animation_speed * dt
+            self.slider_pos = self.x + int(self.value * self.width)
+        
+        # Синхронизируем значение с sound_manager
+        if abs(self.value - self.sound_manager.music_volume) > 0.01:
+            self.value = self.sound_manager.music_volume
+            self.target_value = self.value
+            self.slider_pos = self.x + int(self.value * self.width)
     
     def draw(self, surface):
         """Отрисовывает ползунок"""
-        # Рисуем фон ползунка (простая линия)
-        pygame.draw.rect(surface, (100, 100, 100), self.rect, 2)
+        # Рисуем фон ползунка (дорожка)
+        track_rect = pygame.Rect(self.x, self.y + self.height // 2 - 2, self.width, 4)
+        pygame.draw.rect(surface, (80, 80, 80), track_rect)
+        
+        # Рисуем заполненную часть дорожки
+        filled_width = int(self.value * self.width)
+        if filled_width > 0:
+            filled_rect = pygame.Rect(self.x, self.y + self.height // 2 - 2, filled_width, 4)
+            pygame.draw.rect(surface, (150, 150, 255), filled_rect)
         
         # Получаем изображение для текущего уровня громкости
         slider_image = self.get_current_slider_image()
@@ -96,12 +122,9 @@ class MusicSlider:
             # Отрисовываем изображение
             surface.blit(slider_image, image_rect)
         
-        # Рисуем индикатор текущей позиции
-        pygame.draw.circle(surface, (255, 255, 255), (self.slider_pos, self.y + self.height // 2), 5)
-    
-    def update(self):
-        """Обновляет состояние ползунка"""
-        # Синхронизируем значение с sound_manager
-        if abs(self.value - self.sound_manager.music_volume) > 0.01:
-            self.value = self.sound_manager.music_volume
-            self.slider_pos = self.x + int(self.value * self.width) 
+        # Рисуем индикатор текущей позиции (белый круг)
+        pygame.draw.circle(surface, (255, 255, 255), (self.slider_pos, self.y + self.height // 2), 6)
+        pygame.draw.circle(surface, (100, 100, 100), (self.slider_pos, self.y + self.height // 2), 4)
+        
+        # Рисуем границы ползунка для лучшей видимости
+        pygame.draw.rect(surface, (120, 120, 120), self.rect, 1) 

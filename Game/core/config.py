@@ -205,6 +205,10 @@ class GameConfig:
                 "before": "assets/images/menu/settings/eng/language/before.jpg",
                 "after": "assets/images/menu/settings/eng/language/after.jpg"
             },
+            "MUSIC_SETTINGS_BTN": {
+                "before": "assets/images/menu/settings/eng/music/before.jpg",
+                "after": "assets/images/menu/settings/eng/music/after.jpg"
+            },
             "BACK_BTN": {
                 "before": "assets/images/menu/settings/eng/back/before.jpg",
                 "after": "assets/images/menu/settings/eng/back/after.jpg"
@@ -222,6 +226,10 @@ class GameConfig:
             "LANGUAGE_SETTINGS_BTN_RUS": {
                 "before": "assets/images/menu/settings/rus/language/before.jpg",
                 "after": "assets/images/menu/settings/rus/language/after.jpg"
+            },
+            "MUSIC_SETTINGS_BTN_RUS": {
+                "before": "assets/images/menu/settings/rus/music/before.jpg",
+                "after": "assets/images/menu/settings/rus/music/after.jpg"
             },
             "BACK_BTN_RUS": {
                 "before": "assets/images/menu/settings/rus/back/before.jpg",
@@ -270,6 +278,7 @@ class GameConfig:
                 "game_settings": "Game Settings",
                 "graphics_settings": "Graphics",
                 "language_settings": "Language",
+                "music_settings": "Music",
                 "back": "Back",
                 "english": "English",
                 "russian": "Russian",
@@ -281,6 +290,7 @@ class GameConfig:
                 "game_settings": "Настройки игры",
                 "graphics_settings": "Графика",
                 "language_settings": "Язык",
+                "music_settings": "Музыка",
                 "back": "Назад",
                 "english": "Английский",
                 "russian": "Русский",

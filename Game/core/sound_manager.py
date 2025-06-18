@@ -1,5 +1,6 @@
 import pygame
 import os
+import json
 from core.config import config
 
 
@@ -8,6 +9,9 @@ class SoundManager:
         # Инициализация громкости
         self.music_volume = 0.5
         self.sound_volume = 0.7
+        
+        # Загружаем сохраненные настройки
+        self.load_settings()
 
         # Проверяем инициализацию микшера
         if not pygame.mixer.get_init():
@@ -19,6 +23,31 @@ class SoundManager:
             # Убираем StartGame.mp3, так как его нет в ваших файлах
         }
         self.current_music = None
+
+    def load_settings(self):
+        """Загружает настройки звука из файла"""
+        try:
+            if os.path.exists("sound_settings.json"):
+                with open("sound_settings.json", "r") as f:
+                    settings = json.load(f)
+                    self.music_volume = settings.get("music_volume", 0.5)
+                    self.sound_volume = settings.get("sound_volume", 0.7)
+        except Exception as e:
+            if config.DEBUG_MODE:
+                print(f"Ошибка загрузки настроек звука: {e}")
+
+    def save_settings(self):
+        """Сохраняет настройки звука в файл"""
+        try:
+            settings = {
+                "music_volume": self.music_volume,
+                "sound_volume": self.sound_volume
+            }
+            with open("sound_settings.json", "w") as f:
+                json.dump(settings, f)
+        except Exception as e:
+            if config.DEBUG_MODE:
+                print(f"Ошибка сохранения настроек звука: {e}")
 
     def _load_sound(self, filename: str) -> pygame.mixer.Sound:
         """Загружает звуковой файл из папки assets/sounds/game_sounds/"""
@@ -68,9 +97,13 @@ class SoundManager:
         """Устанавливает громкость музыки (0.0-1.0)"""
         self.music_volume = max(0.0, min(1.0, volume))
         pygame.mixer.music.set_volume(self.music_volume)
+        # Сохраняем настройки при изменении
+        self.save_settings()
 
     def set_sound_volume(self, volume: float) -> None:
         """Устанавливает громкость звуков (0.0-1.0)"""
         self.sound_volume = max(0.0, min(1.0, volume))
         for sound in self.sounds.values():
             sound.set_volume(self.sound_volume)
+        # Сохраняем настройки при изменении
+        self.save_settings()

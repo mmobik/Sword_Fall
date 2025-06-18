@@ -55,3 +55,7 @@ class Menu:
         self._cached_bg = None
         self._last_language = config.current_language
         self._ensure_background()
+
+    def update(self, dt=1/60):
+        """Обновление состояния меню (может переопределяться в дочерних классах)"""
+        pass

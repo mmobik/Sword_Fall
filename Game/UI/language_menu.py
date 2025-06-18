@@ -134,3 +134,6 @@ class LanguageMenu(Menu):
         # Рисуем все кнопки в их обычном состоянии
             for button in self.buttons:
                 button.draw(self._static_surface, None)  # None - без hover-эффекта
+
+    def update(self, dt=1/60):
+        pass
