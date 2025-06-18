@@ -40,7 +40,7 @@ class GameConfig:
         # Настройки кнопки диалога
         self.DIALOGUE_BUTTON = {
             "IMAGE_PATH": "assets/images/game/dialogue/talk_v3.png",
-            "OFFSET_Y": 120,  # Отступ от игрока по Y
+            "OFFSET_Y": 50,  # Отступ от игрока по Y
             "FALLBACK_Y": 120  # Отступ снизу экрана для fallback
         }
 

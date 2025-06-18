@@ -60,9 +60,12 @@ class Game:
         # Диалоговое окно
         self.dialogue_panel_img = pygame.image.load(config.DIALOGUE_PANEL["IMAGE_PATH"]).convert_alpha()
         self.show_dialogue = False
-        self.dialogue_text = ""
+        self.dialogue_text = ""  # Полный текст
         self.dialogue_start_time = 0
         self.dialogue_font = pygame.font.SysFont('Arial', config.DIALOGUE_PANEL["FONT_SIZE"])
+        self.dialogue_text_shown = ""  # Текст, который уже показан
+        self.dialogue_type_time = 0  # Время последнего появления символа
+        self.dialogue_type_speed = 0.025  # Задержка между символами (сек)
 
     def _init_menus(self):
         self.main_menu = MainMenu(
@@ -220,11 +223,13 @@ class Game:
             
             # Отрисовка диалогового окна
             if self.show_dialogue and self.dialogue_panel_img:
+                self._update_typewriter_text()
                 self._render_dialogue_panel()
                 # Автоматическое скрытие диалога через заданное время
                 if time.time() - self.dialogue_start_time > config.DIALOGUE_PANEL["SHOW_DURATION"]:
                     self.show_dialogue = False
                     self.dialogue_text = ""
+                    self.dialogue_text_shown = ""
             scaled_screen = pygame.transform.scale(self.virtual_screen, (config.WIDTH, config.HEIGHT))
             self.screen.blit(scaled_screen, (0, 0))
             pygame.display.flip()
@@ -333,6 +338,9 @@ class Game:
                 break
 
     def _try_interact_with_npc(self):
+        if self.show_dialogue:
+            # Пока окно открыто, не даем открыть новую реплику
+            return
         obj = self.active_npc_obj
         if obj is None:
             return
@@ -345,6 +353,8 @@ class Game:
             dialogue = self.npc_dialogues[npc_id]
             # Показываем диалог на экране вместо вывода в терминал
             self.dialogue_text = dialogue.get_current_dialogue()
+            self.dialogue_text_shown = ""
+            self.dialogue_type_time = time.time()
             self.show_dialogue = True
             self.dialogue_start_time = time.time()
             dialogue.next_dialogue()
@@ -369,6 +379,16 @@ class Game:
         
         return False
 
+    def _update_typewriter_text(self):
+        # Постепенно увеличиваем количество отображаемых символов
+        if self.dialogue_text_shown == self.dialogue_text:
+            return
+        now = time.time()
+        if now - self.dialogue_type_time >= self.dialogue_type_speed:
+            next_len = len(self.dialogue_text_shown) + 1
+            self.dialogue_text_shown = self.dialogue_text[:next_len]
+            self.dialogue_type_time = now
+
     def _render_dialogue_panel(self):
         """Отрисовка панели диалога с текстом и именем NPC"""
         panel_w, panel_h = self.dialogue_panel_img.get_size()
@@ -389,9 +409,9 @@ class Game:
         self.virtual_screen.blit(name_surface, (name_x, name_y))
         
         # Отрисовка текста
-        if self.dialogue_text:
+        if self.dialogue_text_shown:
             text_surface = self.dialogue_font.render(
-                self.dialogue_text, 
+                self.dialogue_text_shown, 
                 True, 
                 config.DIALOGUE_PANEL["FONT_COLOR"]
             )

@@ -110,7 +110,7 @@
     <property name="interactive_type" value="royal_guard"/>
    </properties>
   </object>
-  <object id="363" x="8.66667" y="-14.3333" width="1218" height="129"/>
+  <object id="363" x="0.00296261" y="-0.408278" width="1216" height="128.826"/>
   <object id="365" x="512" y="223.636" width="32" height="32.3636">
    <properties>
     <property name="interactive" type="bool" value="true"/>
