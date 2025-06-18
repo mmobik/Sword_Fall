@@ -67,6 +67,10 @@ class Game:
         self.dialogue_type_time = 0  # Время последнего появления символа
         self.dialogue_type_speed = 0.025  # Задержка между символами (сек)
 
+        self.waiting_for_first_update = False  # Блокировка управления до первой отрисовки после fade
+        self.unlock_control_time = 0  # (больше не используется)
+        self.wait_for_key_release = False  # Ждать отпускания всех клавиш после fade
+
     def _init_menus(self):
         self.main_menu = MainMenu(
             self.sound_manager,
@@ -110,6 +114,12 @@ class Game:
 
     def _handle_events(self) -> bool:
         self._update_talk_button_state()
+        if self.waiting_for_first_update:
+            # Блокируем все действия игрока до первой отрисовки уровня
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+            return True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -129,14 +139,28 @@ class Game:
         if self.game_state_manager.game_state == "new_game":
             if not self.player or not self.camera or not self.level:
                 self._load_game_resources()
-            if self.player and self.camera and self.level and self.all_sprites:
-                self.all_sprites.update(
-                    self.dt,
-                    self.level.width * self.level.tilewidth,
-                    self.level.height * self.level.tileheight,
-                    self.collision_objects
-                )
-                self.camera.update(self.player)
+                self.waiting_for_first_update = True
+            if self.player and self.camera and self.level and self.all_sprites and not self.waiting_for_first_update:
+                # Если нужно ждать отпускания клавиш — не двигаем игрока
+                if not self.wait_for_key_release:
+                    self.all_sprites.update(
+                        self.dt,
+                        self.level.width * self.level.tilewidth,
+                        self.level.height * self.level.tileheight,
+                        self.collision_objects
+                    )
+                    self.camera.update(self.player)
+                else:
+                    keys = pygame.key.get_pressed()
+                    # Клавиши движения: W, A, S, D, стрелки
+                    move_keys = [pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d,
+                                 pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
+                    if not any(keys[k] for k in move_keys):
+                        self.wait_for_key_release = False
+            # Снимаем блокировку только после первой успешной загрузки и отрисовки
+            if self.waiting_for_first_update and self.player and self.camera and self.level and self.all_sprites:
+                self.waiting_for_first_update = False
+                self.wait_for_key_release = True
 
     def _load_game_resources(self):
         try:
@@ -190,6 +214,10 @@ class Game:
             self.all_sprites.add(self.player)
             self.camera = Camera(map_width, map_height)
             self.level_renderer = LevelRenderer(self.level, self.camera)
+            # Синхронизируем rect и hitbox игрока сразу после создания
+            self.player.update(0, map_width, map_height, self.collision_objects)
+            # Центрируем камеру на игроке сразу после загрузки
+            self.camera.update(self.player)
 
         except Exception as e:
             if config.DEBUG_MODE:
@@ -318,6 +346,8 @@ class Game:
 
     def start_game(self, state: str):
         if state == "new_game":
+            self.waiting_for_first_update = True
+            self.wait_for_key_release = False
             self.game_state_manager.change_state(state, None)
             self.sound_manager.play_music("house.mp3")
         else:

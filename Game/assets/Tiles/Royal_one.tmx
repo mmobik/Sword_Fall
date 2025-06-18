@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="396">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="397">
  <tileset firstgid="1" source="room1.tsx"/>
  <tileset firstgid="129" source="room_2.tsx"/>
  <tileset firstgid="321" source="room_5.tsx"/>
@@ -223,6 +223,7 @@
     <property name="interactive_type" value="royal_guard"/>
    </properties>
   </object>
+  <object id="396" x="1199.82" y="128.364" width="15.8182" height="831.455"/>
  </objectgroup>
  <objectgroup id="6" name="Triggers"/>
  <objectgroup id="7" name="SpawnPoints"/>
