@@ -52,6 +52,18 @@ class Game:
         self.last_log_time = time.time()
         self.debug_font = pygame.font.SysFont('Arial', 16)
 
+        self.talk_button_img = pygame.image.load(config.DIALOGUE_BUTTON["IMAGE_PATH"]).convert_alpha()
+        self.show_talk_button = False
+        self.talk_button_rect = None
+        self.active_npc_obj = None
+
+        # Диалоговое окно
+        self.dialogue_panel_img = pygame.image.load(config.DIALOGUE_PANEL["IMAGE_PATH"]).convert_alpha()
+        self.show_dialogue = False
+        self.dialogue_text = ""
+        self.dialogue_start_time = 0
+        self.dialogue_font = pygame.font.SysFont('Arial', config.DIALOGUE_PANEL["FONT_SIZE"])
+
     def _init_menus(self):
         self.main_menu = MainMenu(
             self.sound_manager,
@@ -94,6 +106,7 @@ class Game:
             self._render_frame()
 
     def _handle_events(self) -> bool:
+        self._update_talk_button_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -189,6 +202,29 @@ class Game:
         elif self.game_state_manager.game_state == "new_game":
             self.virtual_screen.fill((0, 0, 0))
             self._render_game()
+            # Показываем кнопку только если не показывается диалог
+            if self.show_talk_button and self.talk_button_img and not self.show_dialogue:
+                btn_w, btn_h = self.talk_button_img.get_size()
+                # Позиция кнопки относительно игрока на экране
+                if self.player and self.camera:
+                    player_screen_x = self.player.hitbox.centerx - self.camera.offset.x
+                    player_screen_y = self.player.hitbox.centery - self.camera.offset.y
+                    x = player_screen_x - btn_w // 2
+                    y = player_screen_y - btn_h + config.DIALOGUE_BUTTON["OFFSET_Y"]  # Кнопка над игроком
+                else:
+                    # Fallback если объекты еще не созданы
+                    x = (config.VIRTUAL_WIDTH - btn_w) // 2
+                    y = config.VIRTUAL_HEIGHT - btn_h - config.DIALOGUE_BUTTON["FALLBACK_Y"]
+                self.virtual_screen.blit(self.talk_button_img, (x, y))
+                self.talk_button_rect = pygame.Rect(x, y, btn_w, btn_h)
+            
+            # Отрисовка диалогового окна
+            if self.show_dialogue and self.dialogue_panel_img:
+                self._render_dialogue_panel()
+                # Автоматическое скрытие диалога через заданное время
+                if time.time() - self.dialogue_start_time > config.DIALOGUE_PANEL["SHOW_DURATION"]:
+                    self.show_dialogue = False
+                    self.dialogue_text = ""
             scaled_screen = pygame.transform.scale(self.virtual_screen, (config.WIDTH, config.HEIGHT))
             self.screen.blit(scaled_screen, (0, 0))
             pygame.display.flip()
@@ -282,27 +318,86 @@ class Game:
         else:
             self.game_state_manager.change_state(state)
 
-    def _try_interact_with_npc(self):
+    def _update_talk_button_state(self):
+        self.show_talk_button = False
+        self.active_npc_obj = None
         if not self.player or not self.interactive_objects:
             return
         player_rect = self.player.hitbox
         for obj in self.interactive_objects:
             obj_rect = pygame.Rect(int(obj.x), int(obj.y), int(obj.width), int(obj.height))
-            if player_rect.colliderect(obj_rect.inflate(10, 10)):
-                npc_type = obj.properties.get('interactive_type', '').lower()
-                npc_id = getattr(obj, 'id', id(obj))
-                if npc_type == 'the guard' or npc_type == 'royal_guard':
-                    from dialogues.npc_dialogues import RoyalGuardDialogue
-                    if npc_id not in self.npc_dialogues:
-                        self.npc_dialogues[npc_id] = RoyalGuardDialogue(npc_id)
-                    dialogue = self.npc_dialogues[npc_id]
-                    if not dialogue.is_finished():
-                        print(dialogue.get_current_dialogue())  # TODO: заменить на вызов диалогового окна
-                        dialogue.next_dialogue()
-                    else:
-                        print("Стражник больше не говорит.")
-                # Здесь можно добавить обработку других типов NPC
+            npc_type = obj.properties.get('interactive_type', '').lower()
+            if (npc_type == 'the guard' or npc_type == 'royal_guard') and player_rect.colliderect(obj_rect.inflate(10, 10)):
+                self.show_talk_button = True
+                self.active_npc_obj = obj
                 break
+
+    def _try_interact_with_npc(self):
+        obj = self.active_npc_obj
+        if obj is None:
+            return
+        npc_type = obj.properties.get('interactive_type', '').lower()
+        npc_id = getattr(obj, 'id', id(obj))
+        if npc_type == 'the guard' or npc_type == 'royal_guard':
+            from dialogues.npc_dialogues import RoyalGuardDialogue
+            if npc_id not in self.npc_dialogues:
+                self.npc_dialogues[npc_id] = RoyalGuardDialogue(npc_id)
+            dialogue = self.npc_dialogues[npc_id]
+            # Показываем диалог на экране вместо вывода в терминал
+            self.dialogue_text = dialogue.get_current_dialogue()
+            self.show_dialogue = True
+            self.dialogue_start_time = time.time()
+            dialogue.next_dialogue()
+        # Здесь можно добавить обработку других типов NPC
+
+    def _check_talk_button_click(self, mouse_pos):
+        """Проверяет клик по кнопке с учетом прозрачности"""
+        if not self.talk_button_rect or not self.talk_button_rect.collidepoint(mouse_pos):
+            return False
+        
+        # Получаем локальные координаты относительно кнопки
+        local_x = mouse_pos[0] - self.talk_button_rect.x
+        local_y = mouse_pos[1] - self.talk_button_rect.y
+        
+        # Проверяем, что координаты в пределах изображения
+        if (0 <= local_x < self.talk_button_img.get_width() and 
+            0 <= local_y < self.talk_button_img.get_height()):
+            # Получаем цвет пикселя (включая альфа-канал)
+            pixel_color = self.talk_button_img.get_at((local_x, local_y))
+            # Проверяем, что пиксель не полностью прозрачный (альфа > 0)
+            return pixel_color[3] > 0
+        
+        return False
+
+    def _render_dialogue_panel(self):
+        """Отрисовка панели диалога с текстом и именем NPC"""
+        panel_w, panel_h = self.dialogue_panel_img.get_size()
+        
+        # Позиция панели снизу экрана
+        x = (config.VIRTUAL_WIDTH - panel_w) // 2
+        y = config.VIRTUAL_HEIGHT - panel_h - config.DIALOGUE_PANEL["OFFSET_Y"]
+        
+        # Отрисовка панели
+        self.virtual_screen.blit(self.dialogue_panel_img, (x, y))
+        
+        # Имя NPC (пока всегда 'Стражник', можно расширить)
+        npc_name = "Стражник"
+        name_font = pygame.font.SysFont('Arial', config.DIALOGUE_PANEL["FONT_SIZE"] + 8, bold=True)
+        name_surface = name_font.render(npc_name, True, config.DIALOGUE_PANEL["FONT_COLOR"])
+        name_x = x + config.DIALOGUE_PANEL["TEXT_OFFSET_X"]
+        name_y = y  # небольшой отступ сверху панели
+        self.virtual_screen.blit(name_surface, (name_x, name_y))
+        
+        # Отрисовка текста
+        if self.dialogue_text:
+            text_surface = self.dialogue_font.render(
+                self.dialogue_text, 
+                True, 
+                config.DIALOGUE_PANEL["FONT_COLOR"]
+            )
+            text_x = x + config.DIALOGUE_PANEL["TEXT_OFFSET_X"]
+            text_y = name_y + name_surface.get_height() + 8  # текст под именем
+            self.virtual_screen.blit(text_surface, (text_x, text_y))
 
 
 def main():

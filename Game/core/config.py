@@ -37,6 +37,25 @@ class GameConfig:
             "SOUNDTRACK": "assets/sounds/soundtracks/Dark_fantasm.mp3"
         }
 
+        # Настройки кнопки диалога
+        self.DIALOGUE_BUTTON = {
+            "IMAGE_PATH": "assets/images/game/dialogue/talk_v3.png",
+            "OFFSET_Y": 120,  # Отступ от игрока по Y
+            "FALLBACK_Y": 120  # Отступ снизу экрана для fallback
+        }
+
+        # Настройки панели диалога
+        self.DIALOGUE_PANEL = {
+            "IMAGE_PATH": "assets/images/game/dialogue/panel_v3.png",
+            "POSITION": "bottom",  # bottom, center, top
+            "OFFSET_Y": 20,  # Отступ снизу экрана
+            "TEXT_OFFSET_X": 30,  # Отступ текста от края панели по X
+            "TEXT_OFFSET_Y": 50,  # Отступ текста от края панели по Y
+            "FONT_SIZE": 24,
+            "FONT_COLOR": (255, 255, 255),  # Белый цвет текста
+            "SHOW_DURATION": 3.0  # Время показа диалога в секундах
+        }
+
         # Цветовая палитра
         self.COLORS = {
             "DARK_BLUE": (0, 33, 55),
