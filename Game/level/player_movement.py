@@ -73,17 +73,26 @@ class PlayerMovementHandler:
     def _update_animation_state(self, move_x, move_y, dt):
         self.state_change_time += dt
         
-        # Определяем новое состояние только если есть движение
         new_state = None
-        
-        # Приоритет движения: вверх > вниз > влево > вправо
-        if move_y < 0:  # Движение вверх
-            new_state = "run_up"
-        elif move_y > 0:  # Движение вниз
-            new_state = "run_down"
-        elif move_x < 0:  # Движение влево
+
+        # Новая логика:
+        if move_y < 0:
+            if move_x > 0:
+                new_state = "run_right"  # вверх-вправо
+            elif move_x < 0:
+                new_state = "run_left"   # вверх-влево
+            else:
+                new_state = "run_up"     # строго вверх
+        elif move_y > 0:
+            if move_x > 0:
+                new_state = "run_right"  # вниз-вправо
+            elif move_x < 0:
+                new_state = "run_left"   # вниз-влево
+            else:
+                new_state = "run_down"   # строго вниз
+        elif move_x < 0:
             new_state = "run_left"
-        elif move_x > 0:  # Движение вправо
+        elif move_x > 0:
             new_state = "run_right"
         else:
             # Если нет движения, определяем idle состояние на основе последнего движения
@@ -96,10 +105,8 @@ class PlayerMovementHandler:
             elif self.last_state.startswith("run_down"):
                 new_state = "idle_front"
             else:
-                # Если не было движения, оставляем текущее состояние
                 new_state = self.player.state_name
 
-        # Переключаем состояние только если оно изменилось и прошло достаточно времени
         if new_state and new_state != self.player.state_name and self.state_change_time > 0.1:
             if config.DEBUG_MODE:
                 print(f"Переключение состояния с {self.player.state_name} на {new_state}")
@@ -107,5 +114,4 @@ class PlayerMovementHandler:
             self.last_state = new_state
             self.state_change_time = 0
         elif new_state and new_state != self.last_state:
-            # Обновляем last_state даже если не переключаем состояние
             self.last_state = new_state
