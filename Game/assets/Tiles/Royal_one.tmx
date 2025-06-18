@@ -24,7 +24,7 @@
  </tileset>
  <layer id="1" name="Floor" width="38" height="39">
   <data encoding="base64" compression="zlib">
-   eJztzqsRgEAUQ9G8TqgAs/1RJiBRQA2wguWjEAhiYOaKYyIyN0lKAAAAAAAA+I3a1BRLSOslx7m5v12818fxMdy7yla1xu9uMswPXaP5TRdddH2nawMElv44
+   eJztzjESQEAQRNGZmziBZO/nmAg3whkQWOwmqgh0QPCn6iUTdP1gZgEAAAC3yn3dAQAAUNSiJpndbMlWP3/qbufv9X5sxGtX+lWtsLsbBdND1yBu00UXXf/p2gB0OP3S
   </data>
  </layer>
  <layer id="18" name="carpet" width="38" height="39">
@@ -98,31 +98,131 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
   </properties>
-  <object id="361" x="543.727" y="160.364" width="32.2727" height="31.6364"/>
-  <object id="362" x="639.818" y="159.727" width="32.1818" height="32.2727"/>
+  <object id="361" x="543.727" y="160.364" width="32.2727" height="31.6364">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="362" x="639.818" y="159.727" width="32.1818" height="32.2727">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
   <object id="363" x="-2" y="-1" width="1218" height="129"/>
-  <object id="365" x="512" y="223.636" width="32" height="32.3636"/>
-  <object id="367" x="511.636" y="319.727" width="32.3636" height="32.2727"/>
-  <object id="370" x="511.818" y="415.909" width="32.1818" height="32.0909"/>
-  <object id="371" x="671.875" y="415.75" width="32.125" height="32.25"/>
-  <object id="374" x="672" y="320" width="32" height="32"/>
-  <object id="375" x="672.125" y="223.875" width="31.875" height="32.125"/>
-  <object id="376" x="670.667" y="638.333" width="33.3333" height="33.6667"/>
-  <object id="377" x="671" y="735.667" width="33" height="32.3333"/>
-  <object id="378" x="672.364" y="831.636" width="31.6364" height="32.3636"/>
-  <object id="379" x="671.818" y="927.818" width="32.1818" height="32.1818"/>
-  <object id="380" x="512.364" y="927.636" width="31.6364" height="32.3636"/>
-  <object id="381" x="512" y="831.455" width="32" height="32.5455"/>
-  <object id="382" x="512.182" y="736.182" width="31.8182" height="31.8182"/>
-  <object id="383" x="511.636" y="639.273" width="32.3636" height="32.7273"/>
+  <object id="365" x="512" y="223.636" width="32" height="32.3636">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="367" x="511.636" y="319.727" width="32.3636" height="32.2727">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="370" x="511.818" y="415.909" width="32.1818" height="32.0909">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="371" x="671.875" y="415.75" width="32.125" height="32.25">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="374" x="672" y="320" width="32" height="32">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="375" x="672.125" y="223.875" width="31.875" height="32.125">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="376" x="670.667" y="638.333" width="33.3333" height="33.6667">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="377" x="671" y="735.667" width="33" height="32.3333">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="378" x="672.364" y="831.636" width="31.6364" height="32.3636">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="379" x="671.818" y="927.818" width="32.1818" height="32.1818">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="380" x="512.364" y="927.636" width="31.6364" height="32.3636">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="381" x="512" y="831.455" width="32" height="32.5455">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="382" x="512.182" y="736.182" width="31.8182" height="31.8182">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="383" x="511.636" y="639.273" width="32.3636" height="32.7273">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
   <object id="384" x="512.125" y="960.25" width="31.875" height="287.75"/>
   <object id="387" x="0.25" y="960" width="543.75" height="32"/>
   <object id="388" x="671.455" y="991.455" width="32.5455" height="256.545"/>
   <object id="389" x="672.364" y="959.818" width="543.636" height="32.1818"/>
-  <object id="390" x="-0.0909091" y="576" width="32.0909" height="32"/>
-  <object id="391" x="0" y="416.182" width="32" height="31.8182"/>
-  <object id="393" x="1183.73" y="415.545" width="32.2727" height="32.4545"/>
-  <object id="395" x="1183.91" y="575.818" width="32.0909" height="32.1818"/>
+  <object id="390" x="-0.0909091" y="576" width="32.0909" height="32">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="391" x="0" y="416.182" width="32" height="31.8182">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="393" x="1183.73" y="415.545" width="32.2727" height="32.4545">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
+  <object id="395" x="1183.91" y="575.818" width="32.0909" height="32.1818">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="The guard"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="6" name="Triggers"/>
  <objectgroup id="7" name="SpawnPoints"/>

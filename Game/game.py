@@ -78,6 +78,8 @@ class Game:
         self.collision_handler = None
         self.collision_objects = None
         self.all_sprites = None
+        self.npc_dialogues = {}  # npc_id -> dialogue instance
+        self.interactive_objects = []  # Список интерактивных объектов
 
     def run(self):
         running = True
@@ -100,6 +102,8 @@ class Game:
                     config.set_debug_mode(not config.DEBUG_MODE)
                 if event.key == pygame.K_ESCAPE and self.game_state_manager.game_state == "new_game":
                     self.show_main_menu()
+                if event.key == pygame.K_e and self.game_state_manager.game_state == "new_game":
+                    self._try_interact_with_npc()
             if self.game_state_manager.current_menu:
                 mouse_pos = pygame.mouse.get_pos()
                 self.game_state_manager.current_menu.handle_event(event, mouse_pos)
@@ -131,6 +135,12 @@ class Game:
 
             self.collision_handler = CollisionHandler()
             self.collision_objects = self.collision_handler.load_collision_objects(self.level)
+            self.interactive_objects = []
+            for layer in self.level.layers:
+                if hasattr(layer, 'name') and hasattr(layer, '__iter__'):
+                    for obj in layer:
+                        if hasattr(obj, 'properties') and obj.properties.get('interactive', False):
+                            self.interactive_objects.append(obj)
             if config.DEBUG_MODE:
                 print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
 
@@ -160,7 +170,8 @@ class Game:
                 print(f"Размер спрайта: {self.player.image.get_size()}")
                 print(f"Размер хитбокса: {self.player.hitbox.size}")
 
-            self.all_sprites = pygame.sprite.GroupSingle(self.player)
+            self.all_sprites = pygame.sprite.Group()
+            self.all_sprites.add(self.player)
             self.camera = Camera(map_width, map_height)
             self.level_renderer = LevelRenderer(self.level, self.camera)
 
@@ -270,6 +281,28 @@ class Game:
             self.sound_manager.play_music("house.mp3")
         else:
             self.game_state_manager.change_state(state)
+
+    def _try_interact_with_npc(self):
+        if not self.player or not self.interactive_objects:
+            return
+        player_rect = self.player.hitbox
+        for obj in self.interactive_objects:
+            obj_rect = pygame.Rect(int(obj.x), int(obj.y), int(obj.width), int(obj.height))
+            if player_rect.colliderect(obj_rect.inflate(10, 10)):
+                npc_type = obj.properties.get('interactive_type', '').lower()
+                npc_id = getattr(obj, 'id', id(obj))
+                if npc_type == 'the guard' or npc_type == 'royal_guard':
+                    from dialogues.npc_dialogues import RoyalGuardDialogue
+                    if npc_id not in self.npc_dialogues:
+                        self.npc_dialogues[npc_id] = RoyalGuardDialogue(npc_id)
+                    dialogue = self.npc_dialogues[npc_id]
+                    if not dialogue.is_finished():
+                        print(dialogue.get_current_dialogue())  # TODO: заменить на вызов диалогового окна
+                        dialogue.next_dialogue()
+                    else:
+                        print("Стражник больше не говорит.")
+                # Здесь можно добавить обработку других типов NPC
+                break
 
 
 def main():
