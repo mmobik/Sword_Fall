@@ -56,6 +56,11 @@ class Game:
         self.show_talk_button = False
         self.talk_button_rect = None
         self.active_npc_obj = None
+        self.talk_button_alpha = 0  # Текущий альфа-канал кнопки (0-255)
+        self.talk_button_target_alpha = 0  # Целевой альфа-канал (0 или 255)
+        self.talk_button_fade_speed = 800  # скорость изменения альфы (значение в секундах, пикс/сек)
+        self.talk_button_show_delay = 1  # Задержка перед появлением кнопки (сек)
+        self.talk_button_enter_time = None  # Время входа в зону взаимодействия
 
         # Диалоговое окно
         self.dialogue_panel_img = pygame.image.load(config.DIALOGUE_PANEL["IMAGE_PATH"]).convert_alpha()
@@ -233,20 +238,21 @@ class Game:
         elif self.game_state_manager.game_state == "new_game":
             self.virtual_screen.fill((0, 0, 0))
             self._render_game()
+            self._update_talk_button_alpha()
             # Показываем кнопку только если не показывается диалог
-            if self.show_talk_button and self.talk_button_img and not self.show_dialogue:
+            if self.talk_button_img and self.talk_button_alpha > 0 and not self.show_dialogue:
                 btn_w, btn_h = self.talk_button_img.get_size()
-                # Позиция кнопки относительно игрока на экране
                 if self.player and self.camera:
                     player_screen_x = self.player.hitbox.centerx - self.camera.offset.x
                     player_screen_y = self.player.hitbox.centery - self.camera.offset.y
                     x = player_screen_x - btn_w // 2
-                    y = player_screen_y - btn_h + config.DIALOGUE_BUTTON["OFFSET_Y"]  # Кнопка над игроком
+                    y = player_screen_y - btn_h + config.DIALOGUE_BUTTON["OFFSET_Y"]
                 else:
-                    # Fallback если объекты еще не созданы
                     x = (config.VIRTUAL_WIDTH - btn_w) // 2
                     y = config.VIRTUAL_HEIGHT - btn_h - config.DIALOGUE_BUTTON["FALLBACK_Y"]
-                self.virtual_screen.blit(self.talk_button_img, (x, y))
+                btn_img = self.talk_button_img.copy()
+                btn_img.set_alpha(int(self.talk_button_alpha))
+                self.virtual_screen.blit(btn_img, (x, y))
                 self.talk_button_rect = pygame.Rect(x, y, btn_w, btn_h)
             
             # Отрисовка диалогового окна
@@ -354,18 +360,44 @@ class Game:
             self.game_state_manager.change_state(state)
 
     def _update_talk_button_state(self):
+        prev = self.show_talk_button
         self.show_talk_button = False
         self.active_npc_obj = None
+        in_zone = False
         if not self.player or not self.interactive_objects:
+            self.talk_button_target_alpha = 0
+            self.talk_button_enter_time = None
             return
         player_rect = self.player.hitbox
         for obj in self.interactive_objects:
             obj_rect = pygame.Rect(int(obj.x), int(obj.y), int(obj.width), int(obj.height))
             npc_type = obj.properties.get('interactive_type', '').lower()
             if (npc_type == 'the guard' or npc_type == 'royal_guard') and player_rect.colliderect(obj_rect.inflate(10, 10)):
-                self.show_talk_button = True
+                in_zone = True
                 self.active_npc_obj = obj
                 break
+        now = time.time()
+        if in_zone:
+            if self.talk_button_enter_time is None:
+                self.talk_button_enter_time = now
+            if (now - self.talk_button_enter_time) >= self.talk_button_show_delay and not self.show_dialogue:
+                self.show_talk_button = True
+        else:
+            self.talk_button_enter_time = None
+        # Меняем целевую альфу в зависимости от состояния
+        if self.show_talk_button and not self.show_dialogue:
+            self.talk_button_target_alpha = 255
+        else:
+            self.talk_button_target_alpha = 0
+
+    def _update_talk_button_alpha(self):
+        # Плавно изменяем альфу к целевому значению
+        dt = self.dt if hasattr(self, 'dt') else 1/144
+        speed = self.talk_button_fade_speed * dt
+        if self.talk_button_alpha < self.talk_button_target_alpha:
+            self.talk_button_alpha = min(self.talk_button_target_alpha, self.talk_button_alpha + speed)
+        elif self.talk_button_alpha > self.talk_button_target_alpha:
+            self.talk_button_alpha = max(self.talk_button_target_alpha, self.talk_button_alpha - speed)
 
     def _try_interact_with_npc(self):
         if self.show_dialogue:
