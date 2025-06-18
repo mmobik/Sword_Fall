@@ -19,25 +19,29 @@ class Player(pygame.sprite.Sprite):
         self.animation_time = 0
         self.current_frame = 0
         self.image = self._get_frame()
-        
-        # Создаем rect на основе изображения
+
+        # Основной rect спрайта (ставим в позицию "ног" персонажа)
         self.rect = self.image.get_rect()
-        
-        # Создаем хитбокс с фиксированными размерами из конфига
+        self.rect.midbottom = (x, y)  # Базовая точка - ноги персонажа
+
+        # Хитбокс рассчитываем относительно rect
         hitbox_width = config.PLAYER_HITBOX["WIDTH"]
         hitbox_height = config.PLAYER_HITBOX["HEIGHT"]
-        hitbox_x = x + config.PLAYER_HITBOX["X_OFFSET"] - hitbox_width // 2
-        hitbox_y = y + config.PLAYER_HITBOX["Y_OFFSET"] - hitbox_height // 2
-        
+
+        # Позиция хитбокса:
+        # X: центр спрайта + смещение
+        # Y: от верха спрайта + смещение
+        hitbox_x = self.rect.centerx - hitbox_width // 2 + config.PLAYER_HITBOX["X_OFFSET"]
+        hitbox_y = self.rect.top + config.PLAYER_HITBOX["Y_OFFSET"]
+
         self.hitbox = pygame.Rect(hitbox_x, hitbox_y, hitbox_width, hitbox_height)
-        
-        # Устанавливаем позицию rect относительно hitbox
-        self.rect.center = self.hitbox.center
-        
+
         self.speed = config.PLAYER_SPEED
         self.movement_handler = PlayerMovementHandler(self)
+
         if config.DEBUG_MODE:
             print(f"Игрок создан: rect={self.rect}, hitbox={self.hitbox}")
+            print(f"Смещение хитбокса: X={config.PLAYER_HITBOX['X_OFFSET']}, Y={config.PLAYER_HITBOX['Y_OFFSET']}")
 
     def _get_frame(self):
         if not hasattr(self, 'sprite_sheet') or not self.sprite_sheet:
@@ -76,10 +80,16 @@ class Player(pygame.sprite.Sprite):
                 print(f"Ошибка: состояние {state_name} не найдено в конфигурации")
 
     def update(self, dt, level_width, level_height, collision_objects):
+        # Сначала двигаем hitbox
         self.movement_handler.handle_movement(dt, level_width, level_height, collision_objects)
+
+        # Затем синхронизируем rect (спрайт) с hitbox
+        self.rect.midbottom = (
+            self.hitbox.centerx - config.PLAYER_HITBOX["X_OFFSET"],
+            self.hitbox.bottom - config.PLAYER_HITBOX["Y_OFFSET"]
+        )
+
         self._animate(dt)
-        # Обновляем позицию rect в соответствии с hitbox
-        self.rect.center = self.hitbox.center
 
     def _animate(self, dt):
         self.animation_time += dt
