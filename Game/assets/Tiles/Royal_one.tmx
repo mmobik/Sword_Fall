@@ -126,5 +126,4 @@
  </objectgroup>
  <objectgroup id="6" name="Triggers"/>
  <objectgroup id="7" name="SpawnPoints"/>
- <objectgroup id="8" name="InteractiveObjects"/>
 </map>
