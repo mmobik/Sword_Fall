@@ -79,6 +79,8 @@ class GameConfig:
 
         # === Параметры игрока ===
         self.PLAYER_SPEED = 180  # Базовая скорость перемещения игрока
+        self.DIAGONAL_SPEED_MULTIPLIER = 1.0  # Множитель скорости для диагонального движения (1.0 = та же скорость)
+        self.WALL_SLIDE_SPEED_MULTIPLIER = 0.7  # Множитель скорости при скольжении вдоль стен (0.7 = 70% от обычной скорости)
         
         # === Параметры хитбокса игрока ===
         self.PLAYER_HITBOX = {
@@ -146,7 +148,7 @@ class GameConfig:
             "DEFAULT_COLLISION": True
         }
 
-        self.DEBUG_MODE = True
+        self.DEBUG_MODE = False
         self.DEBUG_COLORS = {
             "COLLISION": (255, 0, 0),    # Красный - объекты коллизий
             "HITBOX": (0, 255, 0),       # Зеленый - хитбокс игрока
