@@ -35,7 +35,7 @@ class GameConfig:
 
         # === Пути к игровым ресурсам ===
         self.ASSETS = {
-            "ICON": "icon/game_icon_1.jpg",  # Путь к иконке игры
+            "ICON": "assets/images/icons/icon_1.jpg",  # Путь к иконке игры
             "IDLE_SHEET": "assets/sprites/idle++++.png",  # Путь к спрайт-листу для анимации покоя
             "RUN_SHEET": "assets/sprites/Run.png",  # Путь к спрайт-листу для анимации бега
             "SOUNDTRACK": "assets/sounds/soundtracks/Dark_fantasm.mp3"
