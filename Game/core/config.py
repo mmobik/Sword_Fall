@@ -9,21 +9,21 @@ from typing import Dict, Tuple, Union, List
 
 class GameConfig:
     def __init__(self):
-        # === Языковые настройки ===
+        # Языковые настройки
         self.current_language = "english"
         
-        # === Настройки экрана ===
+        # Настройки экрана
         self.WIDTH = 1920
         self.HEIGHT = 1080
         self.GAME_NAME = "SwordFall"
         self.FPS = 144
         self.TARGET_FPS = 60
         self.SCREEN_SIZE = (self.WIDTH, self.HEIGHT)
-        self.VIRTUAL_WIDTH = 960  # Логическое разрешение (внутриигровое)
+        self.VIRTUAL_WIDTH = 960
         self.VIRTUAL_HEIGHT = 540
-        self.SCALE_FACTOR = 2  # Масштаб (2x)
+        self.SCALE_FACTOR = 2
 
-        # === Настройки интерфейса ===
+        # Настройки интерфейса
         self.BUTTON_SPACING = 125
         self._image_cache = {}
         self.MENU_BUTTON_X = self.WIDTH // 3
@@ -31,17 +31,15 @@ class GameConfig:
         self.SETTINGS_BUTTON_Y_START = self.HEIGHT // 2 - 200
         self.BACK_BUTTON_X = self.WIDTH // 2 - 200
         self.BACK_BUTTON_Y = self.HEIGHT - 300
-        self.FADE_DURATION = 0.5  # Длительность перехода между меню
+        self.FADE_DURATION = 0.5
 
-        # === Пути к игровым ресурсам ===
+        # Пути к игровым ресурсам
         self.ASSETS = {
-            "ICON": "assets/images/icons/icon_1.jpg",  # Путь к иконке игры
-            "IDLE_SHEET": "assets/sprites/idle++++.png",  # Путь к спрайт-листу для анимации покоя
-            "RUN_SHEET": "assets/sprites/Run.png",  # Путь к спрайт-листу для анимации бега
+            "ICON": "assets/images/icons/icon_1.jpg",
             "SOUNDTRACK": "assets/sounds/soundtracks/Dark_fantasm.mp3"
         }
 
-        # === Цветовая палитра ===
+        # Цветовая палитра
         self.COLORS = {
             "DARK_BLUE": (0, 33, 55),
             "BLUE": (46, 68, 116),
@@ -51,17 +49,17 @@ class GameConfig:
             "GREEN": (0, 255, 0)
         }
         self.GAME_COLORS = {
-            "DARK_BLUE": (0, 33, 55),  # Темно-синий цвет для фона
-            "BLUE": (46, 68, 116),  # Основной синий цвет
-            "WHITE": (255, 255, 255)  # Белый цвет для интерфейса
+            "DARK_BLUE": (0, 33, 55),
+            "BLUE": (46, 68, 116),
+            "WHITE": (255, 255, 255)
         }
 
-        # === Параметры анимации ===
-        self.FRAME_SIZE = (128, 64)  # Размер одного кадра анимации (128x64)
-        self.DEFAULT_ANIMATION_SPEED = 0.15  # Скорость смены кадров
-        self.NO_ANIMATION = float('inf')  # Значение для отключения анимации
+        # Параметры анимации
+        self.FRAME_SIZE = (128, 64)
+        self.DEFAULT_ANIMATION_SPEED = 0.15
+        self.NO_ANIMATION = float('inf')
 
-        # Координаты кадров анимации в спрайт-листах (сетка 2x2)
+        # Координаты кадров анимации
         self.ANIMATION_FRAMES = {
             "IDLE": [
                 (0, 0), (128, 0),
@@ -73,53 +71,30 @@ class GameConfig:
             ]
         }
 
-        # === Параметры игрового уровня ===
-        self.TILE_SIZE = 100  # Размер клетки уровня
+        # Параметры игрового уровня
+        self.TILE_SIZE = 100
         self.LEVEL_MAP_PATH = "assets/Tiles/Royal_one.tmx"
 
-        # === Параметры игрока ===
-        self.PLAYER_SPEED = 180  # Базовая скорость перемещения игрока
-        self.DIAGONAL_SPEED_MULTIPLIER = 1.0  # Множитель скорости для диагонального движения (1.0 = та же скорость)
-        self.WALL_SLIDE_SPEED_MULTIPLIER = 0.7  # Множитель скорости при скольжении вдоль стен (0.7 = 70% от обычной скорости)
+        # Параметры игрока
+        self.PLAYER_SPEED = 180
+        self.DIAGONAL_SPEED_MULTIPLIER = 1.0
+        self.WALL_SLIDE_SPEED_MULTIPLIER = 0.7
         
-        # === Параметры хитбокса игрока ===
+        # Параметры хитбокса игрока
         self.PLAYER_HITBOX = {
-            "WIDTH": 15,      # Фиксированная ширина хитбокса
-            "HEIGHT": 10,     # Фиксированная высота хитбокса
-            "X_OFFSET": 1,    # Смещение по X относительно центра спрайта
-            "Y_OFFSET": 2     # Смещение по Y относительно центра спрайта
+            "WIDTH": 15,
+            "HEIGHT": 10,
+            "X_OFFSET": 1,
+            "Y_OFFSET": 2
         }
 
-        # === Состояния игрока ===
+        # Состояния игрока
         self.PLAYER_STATES = {
+            # Idle-анимации (стоит на месте)
             "idle_front": {
                 "sprite_sheet": "assets/sprites/player/armed/idle_front.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.3,
-                "flip": False
-            },
-            "run_right": {
-                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
-                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
-                "flip": False
-            },
-            "run_left": {
-                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
-                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
-                "flip": True
-            },
-            "run_up": {
-                "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",
-                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
-                "flip": False
-            },
-            "run_down": {
-                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
-                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
-                "animation_speed": 0.1,
                 "flip": False
             },
             "idle_right": {
@@ -139,10 +114,36 @@ class GameConfig:
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.3,
                 "flip": False
+            },
+
+            # Run-анимации (движение)
+            "run_right": {
+                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.1,
+                "flip": False
+            },
+            "run_left": {
+                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.1,
+                "flip": True
+            },
+            "run_up": {
+                "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.1,
+                "flip": False
+            },
+            "run_down": {
+                "sprite_sheet": "assets/sprites/player/unarmed/run_down.png",
+                "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
+                "animation_speed": 0.1,
+                "flip": False
             }
         }
 
-        # === Коллизии ===
+        # Коллизии и дебаг
         self.COLLISION_SETTINGS = {
             "COLLISION_LAYER_NAME": "CollisionLayer",
             "DEFAULT_COLLISION": True
@@ -155,7 +156,7 @@ class GameConfig:
         }
         self.BG_COLOR = (0, 125, 200)  # Голубой
 
-        # === Изображения для меню ===
+        # Изображения для меню
         self.MENU_IMAGES = {
             # Главное меню
             "MAIN_BG": "assets/images/menu/main/backgrounds/dark_prince.jpg",
@@ -258,7 +259,7 @@ class GameConfig:
             "LANGUAGE_BG": "assets/images/menu/settings/backgrounds/dark_prince.jpg"
         }
 
-        # === Локализация ===
+        # Локализация
         self.LANGUAGE_TEXT = {
             "english": {
                 "start": "Start Game",
@@ -270,7 +271,6 @@ class GameConfig:
                 "back": "Back",
                 "english": "English",
                 "russian": "Russian",
-                # Add more English text keys as needed
             },
             "russian": {
                 "start": "Начать игру",
@@ -282,7 +282,6 @@ class GameConfig:
                 "back": "Назад",
                 "english": "Английский",
                 "russian": "Русский",
-                # Add more Russian text keys as needed
             }
         }
 
