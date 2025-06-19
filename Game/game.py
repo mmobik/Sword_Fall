@@ -22,9 +22,15 @@ class DoorInteractionHandler:
         # Можно добавить дополнительные параметры, например, анимацию двери
 
     def interact(self, obj):
-        # Здесь можно добавить анимацию открытия двери, звук и т.д.
+        # Остановить звук шагов перед переходом
+        player = getattr(self.game, 'player', None)
+        if player:
+            steps_channel = getattr(player, '_steps_channel', None)
+            if steps_channel:
+                steps_channel.stop()
+                setattr(player, '_steps_channel', None)
+            player.is_walking = False
         # Путь к новой карте можно хранить в свойстве объекта или задать явно
-        # Для примера путь захардкожен, но лучше брать из obj.properties
         new_map_path = obj.properties.get('target_map', 'assets/Tiles/Audience Hall .tmx')
         self.game._load_new_map(new_map_path)
 
