@@ -15,15 +15,11 @@ from core.door_handler import DoorInteractionHandler
 from core.sound_manager import SoundManager
 from core.game_state_manager import GameStateManager
 from core.menu_handler import MenuHandler
+from core.game_resources import GameResources
 from UI.main_menu import MainMenu
 from UI.settings_menu import SettingsMenu
 from UI.language_menu import LanguageMenu
 from UI.music_settings_menu import MusicSettingsMenu
-from level.player import Player
-from level.camera import Camera
-from level.level_renderer import LevelRenderer
-from level.collisions import CollisionHandler
-import pytmx
 from UI.talk_button import TalkButton
 
 
@@ -39,7 +35,7 @@ class Game:
         """Инициализация игры."""
         pygame.init()
         pygame.mixer.init()
-        
+
         # Инициализация экрана
         self.virtual_screen = pygame.Surface((config.VIRTUAL_WIDTH, config.VIRTUAL_HEIGHT))
         self.screen = pygame.display.set_mode(
@@ -48,7 +44,7 @@ class Game:
             vsync=1
         )
         pygame.display.set_caption(config.GAME_NAME)
-        
+
         # Загрузка иконки
         try:
             icon = pygame.image.load(config.ASSETS["ICON"])
@@ -56,26 +52,26 @@ class Game:
         except Exception as e:
             if config.DEBUG_MODE:
                 print(f"Иконка не загружена: {e}")
-        
+
         # Основные параметры
         self.target_fps = config.FPS
         self.clock = pygame.time.Clock()
         self.dt = 0.0
-        
+
         # Менеджеры
         self.sound_manager = SoundManager()
         self.game_state_manager = GameStateManager(self.sound_manager)
         self.menu_handler = MenuHandler(self)
-        
+
         # Инициализация компонентов
         self._init_menus()
         self._init_game_objects()
-        
+
         # Отладочная информация
         self.fps_history = []
         self.last_log_time = time.time()
         self.debug_font = pygame.font.SysFont('Arial', 16)
-        
+
         # Кнопка разговора
         self.talk_button_img = pygame.image.load(config.DIALOGUE_BUTTON["IMAGE_PATH"]).convert_alpha()
         self.show_talk_button = False
@@ -86,7 +82,7 @@ class Game:
         self.talk_button_fade_speed = 800
         self.talk_button_show_delay = 0.25
         self.talk_button_enter_time = None
-        
+
         # Панель диалогов
         self.dialogue_panel_img = pygame.image.load(config.DIALOGUE_PANEL["IMAGE_PATH"]).convert_alpha()
         self.show_dialogue = False
@@ -96,41 +92,42 @@ class Game:
         self.dialogue_text_shown = ""
         self.dialogue_type_time = 0
         self.dialogue_type_speed = 0.025
-        
+
         # Состояние управления
         self.waiting_for_first_update = False
         self.unlock_control_time = 0
         self.wait_for_key_release = False
-        
+
         # Изображения NPC
         self.guard_img = config.load_npc_image("GUARD")
         self.king_img = config.load_npc_image("KING")
-        
+
         # Обработчики
         self.door_handler = DoorInteractionHandler(self)
         self.dialogue_panel = DialoguePanel(self)
         self.dialogue_handler = DialogueHandler(self)
         self.talk_button = TalkButton(self)
+        self.game_resources = GameResources(self)
 
     def _init_menus(self):
         """Инициализация всех меню игры."""
         self.main_menu = MainMenu(
-            self.sound_manager, 
-            self.menu_handler.show_settings, 
+            self.sound_manager,
+            self.menu_handler.show_settings,
             self.menu_handler.start_game
         )
         self.settings_menu = SettingsMenu(
-            self.sound_manager, 
-            self.menu_handler.show_main_menu, 
+            self.sound_manager,
+            self.menu_handler.show_main_menu,
             self.menu_handler.show_language
         )
         self.language_menu = LanguageMenu(
-            self.sound_manager, 
-            self.menu_handler.show_settings, 
+            self.sound_manager,
+            self.menu_handler.show_settings,
             self.menu_handler.change_language
         )
         self.music_settings_menu = MusicSettingsMenu(
-            self.sound_manager, 
+            self.sound_manager,
             self.menu_handler.show_settings
         )
         self.settings_menu.set_music_callback(self.menu_handler.show_music_settings)
@@ -188,129 +185,36 @@ class Game:
         """Проверить клик по кнопке разговора."""
         return self.talk_button.check_talk_button_click(mouse_pos)
 
-    def _load_game_resources(self):
-        """Загрузить игровые ресурсы: карту, игрока, камеру и коллизии."""
-        try:
-            if config.DEBUG_MODE:
-                print("Загрузка карты...")
-            
-            self.level = pytmx.TiledMap(config.LEVEL_MAP_PATH)
-            map_width = self.level.width * self.level.tilewidth
-            map_height = self.level.height * self.level.tileheight
-            
-            if config.DEBUG_MODE:
-                print(f"Карта загружена. Размер: {map_width}x{map_height}")
-
-            # Загрузка коллизий
-            self.collision_handler = CollisionHandler()
-            self.collision_objects = self.collision_handler.load_collision_objects(self.level)
-            self.interactive_objects = []
-            
-            # Загрузка интерактивных объектов
-            for layer in self.level.layers:
-                if hasattr(layer, 'name') and hasattr(layer, '__iter__'):
-                    for obj in layer:
-                        if hasattr(obj, 'properties') and obj.properties.get('interactive', False):
-                            self.interactive_objects.append(obj)
-            
-            if config.DEBUG_MODE:
-                print(f"Загружено объектов коллизий: {len(self.collision_objects)}")
-
-            # Создание игрока
-            if config.DEBUG_MODE:
-                print("Создание игрока...")
-
-            spawn_x = 200
-            spawn_y = 200
-
-            # Поиск точки спавна
-            spawn_found = False
-            spawn_point_name = getattr(self, 'next_spawn_point_name', None)
-            
-            if spawn_point_name:
-                for layer in self.level.layers:
-                    if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
-                        for obj in layer:
-                            if (hasattr(obj, 'properties') and 
-                                obj.properties.get("object_type") == spawn_point_name) or \
-                               (hasattr(obj, 'name') and obj.name == spawn_point_name):
-                                spawn_x = int(obj.x)
-                                spawn_y = int(obj.y)
-                                spawn_found = True
-                                break
-                        if spawn_found:
-                            break
-                self.next_spawn_point_name = None
-
-            if not spawn_found:
-                for layer in self.level.layers:
-                    if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
-                        for obj in layer:
-                            if (hasattr(obj, 'properties') and 
-                                obj.properties.get("object_type") == "player_spawn"):
-                                spawn_x = int(obj.x)
-                                spawn_y = int(obj.y)
-                                if config.DEBUG_MODE:
-                                    print(f"Найден спавн игрока: ({spawn_x}, {spawn_y})")
-                                break
-                        break
-                else:
-                    if config.DEBUG_MODE:
-                        print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
-            
-            # Создание игрока и связанных объектов
-            self.player = Player(spawn_x, spawn_y, self.sound_manager)
-            
-            if config.DEBUG_MODE:
-                print(f"Игрок создан. Позиция: {self.player.hitbox.topleft}")
-                print(f"Размер спрайта: {self.player.image.get_size()}")
-                print(f"Размер хитбокса: {self.player.hitbox.size}")
-
-            self.all_sprites = pygame.sprite.Group()
-            self.all_sprites.add(self.player)
-            self.camera = Camera(map_width, map_height)
-            self.level_renderer = LevelRenderer(self.level, self.camera)
-            
-            # Обновление игрока и камеры
-            self.player.update(0, map_width, map_height, self.collision_objects)
-            if self.camera and self.player:
-                self.camera.update(self.player)
-
-        except Exception as e:
-            if config.DEBUG_MODE:
-                print(f"Ошибка загрузки ресурсов: {e}")
-            raise
-
     def _render_game(self):
         """Отрисовка игровой сцены."""
         if not all([self.player, self.camera, self.level, self.level_renderer, self.all_sprites]):
             return
-            
+
         # Отрисовка уровня
         if self.level_renderer:
             self.level_renderer.render(self.virtual_screen)
-        
+
         # Отрисовка спрайтов
         if self.all_sprites and self.camera:
             for sprite in self.all_sprites:
                 self.virtual_screen.blit(sprite.image, self.camera.apply(sprite.rect))
-        
+
         # Отладочная отрисовка
         if config.DEBUG_MODE and self.player and self.camera:
-            pygame.draw.rect(self.virtual_screen, (0, 255, 0), 
-                           self.camera.apply(self.player.hitbox), 1)
+            pygame.draw.rect(self.virtual_screen, (0, 255, 0),
+                             self.camera.apply(self.player.hitbox), 1)
             if self.collision_objects:
                 for obj in self.collision_objects:
-                    pygame.draw.rect(self.virtual_screen, (255, 0, 0), 
-                                   self.camera.apply(obj['rect']), 1)
-        
+                    pygame.draw.rect(self.virtual_screen, (255, 0, 0),
+                                     self.camera.apply(obj['rect']), 1)
+
         # Отрисовка наложенных тайлов
         if self.level_renderer and self.player:
             self.level_renderer.render_overlap_tiles(
                 self.virtual_screen,
                 (self.player.hitbox.centerx, self.player.hitbox.centery)
             )
-        
+
         if config.DEBUG_MODE:
             self._draw_debug_info()
 
@@ -318,7 +222,7 @@ class Game:
         """Обновление текста с эффектом печатной машинки."""
         if self.dialogue_text_shown == self.dialogue_text:
             return
-            
+
         now = time.time()
         if now - self.dialogue_type_time >= self.dialogue_type_speed:
             next_len = len(self.dialogue_text_shown) + 1
@@ -338,17 +242,14 @@ class Game:
             f"Anim State: {self.player.state_name if self.player else 'N/A'}",
             f"Objects: {len(self.collision_objects) if self.collision_objects else 0}",
         ]
-        
+
         for i, text in enumerate(debug_text):
             surface = self.debug_font.render(text, True, (255, 255, 255))
             self.virtual_screen.blit(surface, (10, 10 + i * 20))
 
     def _load_new_map(self, map_path):
         """Загрузить новую карту."""
-        config.LEVEL_MAP_PATH = map_path
-        self._load_game_resources()
-        self.waiting_for_first_update = True
-        self.wait_for_key_release = True
+        self.game_resources.load_new_map(map_path)
 
 
 def main():

@@ -14,7 +14,7 @@ class GameConfig:
         # Языковые настройки
         self.current_language = "english"
         self._load_language_setting()
-        
+
         # Настройки экрана
         self.WIDTH = 1920
         self.HEIGHT = 1080
@@ -91,7 +91,7 @@ class GameConfig:
 
         # Параметры игрока
         self.PLAYER_SPEED = 180
-        
+
         # Параметры хитбокса игрока
         self.PLAYER_HITBOX = {
             "WIDTH": 15,
@@ -163,8 +163,8 @@ class GameConfig:
 
         self.DEBUG_MODE = False
         self.DEBUG_COLORS = {
-            "COLLISION": (255, 0, 0),    # Красный - объекты коллизий
-            "HITBOX": (0, 255, 0),       # Зеленый - хитбокс игрока
+            "COLLISION": (255, 0, 0),  # Красный - объекты коллизий
+            "HITBOX": (0, 255, 0),  # Зеленый - хитбокс игрока
         }
         self.BG_COLOR = (0, 125, 200)  # Голубой
 
@@ -369,7 +369,6 @@ class GameConfig:
             if state is not None:
                 return path.get(state)
             else:
-                # Если state не указан, возвращаем None (или можно вернуть дефолтное значение)
                 return None
         if isinstance(path, str):
             return path
