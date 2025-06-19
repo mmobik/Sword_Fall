@@ -14,6 +14,20 @@ from level.collisions import CollisionHandler
 import pytmx
 
 
+class DoorInteractionHandler:
+    """Класс для обработки интерактивных дверей и перехода между локациями."""
+    def __init__(self, game):
+        self.game = game
+        # Можно добавить дополнительные параметры, например, анимацию двери
+
+    def interact(self, obj):
+        # Здесь можно добавить анимацию открытия двери, звук и т.д.
+        # Путь к новой карте можно хранить в свойстве объекта или задать явно
+        # Для примера путь захардкожен, но лучше брать из obj.properties
+        new_map_path = obj.properties.get('target_map', 'assets/Tiles/Audience Hall .tmx')
+        self.game._load_new_map(new_map_path)
+
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -84,6 +98,8 @@ class Game:
         except Exception as e:
             if config.DEBUG_MODE:
                 print(f"Guard image not loaded: {e}")
+
+        self.door_handler = DoorInteractionHandler(self)
 
     def _init_menus(self):
         self.main_menu = MainMenu(
@@ -407,7 +423,7 @@ class Game:
         for obj in self.interactive_objects:
             obj_rect = pygame.Rect(int(obj.x), int(obj.y), int(obj.width), int(obj.height))
             npc_type = obj.properties.get('interactive_type', '').lower()
-            if (npc_type == 'the guard' or npc_type == 'royal_guard') and player_rect.colliderect(obj_rect.inflate(10, 10)):
+            if ((npc_type == 'the guard' or npc_type == 'royal_guard') or npc_type == 'doors') and player_rect.colliderect(obj_rect.inflate(10, 10)):
                 in_zone = True
                 self.active_npc_obj = obj
                 break
@@ -455,6 +471,8 @@ class Game:
             self.show_dialogue = True
             self.dialogue_start_time = time.time()
             dialogue.next_dialogue()
+        elif npc_type == 'doors':
+            self.door_handler.interact(obj)
         # Здесь можно добавить обработку других типов NPC
 
     def _check_talk_button_click(self, mouse_pos):
@@ -525,6 +543,13 @@ class Game:
             text_x = x + config.DIALOGUE_PANEL["TEXT_OFFSET_X"]
             text_y = name_y + name_surface.get_height() + 8  # текст под именем
             self.virtual_screen.blit(text_surface, (text_x, text_y))
+
+    def _load_new_map(self, map_path):
+        # Сохраняем путь в конфиг, чтобы корректно работала загрузка
+        config.LEVEL_MAP_PATH = map_path
+        self._load_game_resources()
+        self.waiting_for_first_update = True
+        self.wait_for_key_release = True
 
 
 def main():
