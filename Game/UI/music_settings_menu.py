@@ -17,8 +17,6 @@ class MusicSettingsMenu(Menu):
 
         # Анимация музыки
         self.music_animation_images = {}
-        self.music_animation_timer = 0
-        self.music_animation_speed = 0.1  # Секунды между кадрами
         self._load_music_animation()
 
         self._load_images_and_tracks()
@@ -26,9 +24,8 @@ class MusicSettingsMenu(Menu):
         self._pre_render_static()
 
     def _load_music_animation(self):
-        """Загружает изображения для анимации музыки"""
+        """Загружает изображения для анимации музыки (теперь просто для совместимости)"""
         volume_levels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
         for level in volume_levels:
             try:
                 image_path = f"assets/images/menu/settings/music_change/{level}.jpg"
@@ -36,19 +33,14 @@ class MusicSettingsMenu(Menu):
             except:
                 if config.DEBUG_MODE:
                     print(f"Не удалось загрузить изображение анимации музыки для уровня {level}")
-                # Создаем пустое изображение
                 self.music_animation_images[level] = pygame.Surface((200, 100))
                 self.music_animation_images[level].fill((100, 100, 100))
 
     def get_current_music_image(self):
-        """Возвращает текущее изображение анимации музыки на основе громкости"""
-        # Преобразуем значение громкости (0.0-1.0) в процент (0-100)
+        """Возвращает изображение для текущего уровня громкости (без анимации)"""
         volume_percent = int(self.sound_manager.music_volume * 100)
-
-        # Находим ближайший уровень из доступных изображений
         available_levels = sorted(self.music_animation_images.keys())
         closest_level = min(available_levels, key=lambda x: abs(x - volume_percent))
-
         return self.music_animation_images[closest_level]
 
     def _load_images_and_tracks(self):
@@ -149,18 +141,11 @@ class MusicSettingsMenu(Menu):
         else:
             value = self.sound_manager.get_track_volume(track_type)
         volume_percent = int(value * 100)
-        hovered_level = None
+        # hovered_level больше не влияет на отображение картинки
         img_sample = self.slider_images[0] or self.slider_images['default']
         slider_w, slider_h = img_sample.get_width(), img_sample.get_height()
-        if mouse_pos:
-            seg_w = slider_w // 11
-            for idx, level in enumerate([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]):
-                seg_rect = pygame.Rect(slider_x + idx * seg_w, slider_y, seg_w, slider_h)
-                if seg_rect.collidepoint(mouse_pos):
-                    hovered_level = level
-                    break
-        img = self.slider_images[hovered_level] if hovered_level is not None else self.slider_images.get(
-            self._nearest_level(volume_percent), self.slider_images['default'])
+        # Картинка всегда соответствует текущему уровню громкости
+        img = self.slider_images.get(self._nearest_level(volume_percent), self.slider_images['default'])
         if img:
             img_rect = img.get_rect()
             img_rect.x = slider_x
