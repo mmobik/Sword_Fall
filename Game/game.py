@@ -12,6 +12,7 @@ from level.camera import Camera
 from level.level_renderer import LevelRenderer
 from level.collisions import CollisionHandler
 import pytmx
+from dialogues.npc_dialogues import KingDialogue
 
 
 class DoorInteractionHandler:
@@ -98,6 +99,13 @@ class Game:
         except Exception as e:
             if config.DEBUG_MODE:
                 print(f"Guard image not loaded: {e}")
+
+        self.king_img = None
+        try:
+            self.king_img = pygame.image.load("assets/images/game/King.png").convert_alpha()
+        except Exception as e:
+            if config.DEBUG_MODE:
+                print(f"King image not loaded: {e}")
 
         self.door_handler = DoorInteractionHandler(self)
 
@@ -423,7 +431,7 @@ class Game:
         for obj in self.interactive_objects:
             obj_rect = pygame.Rect(int(obj.x), int(obj.y), int(obj.width), int(obj.height))
             npc_type = obj.properties.get('interactive_type', '').lower()
-            if ((npc_type == 'the guard' or npc_type == 'royal_guard') or npc_type == 'doors') and player_rect.colliderect(obj_rect.inflate(10, 10)):
+            if ((npc_type == 'the guard' or npc_type == 'royal_guard') or npc_type == 'doors' or npc_type == 'king') and player_rect.colliderect(obj_rect.inflate(10, 10)):
                 in_zone = True
                 self.active_npc_obj = obj
                 break
@@ -464,7 +472,16 @@ class Game:
             if npc_id not in self.npc_dialogues:
                 self.npc_dialogues[npc_id] = RoyalGuardDialogue(npc_id)
             dialogue = self.npc_dialogues[npc_id]
-            # Показываем диалог на экране вместо вывода в терминал
+            self.dialogue_text = dialogue.get_current_dialogue()
+            self.dialogue_text_shown = ""
+            self.dialogue_type_time = time.time()
+            self.show_dialogue = True
+            self.dialogue_start_time = time.time()
+            dialogue.next_dialogue()
+        elif npc_type == 'king':
+            if npc_id not in self.npc_dialogues:
+                self.npc_dialogues[npc_id] = KingDialogue(npc_id)
+            dialogue = self.npc_dialogues[npc_id]
             self.dialogue_text = dialogue.get_current_dialogue()
             self.dialogue_text_shown = ""
             self.dialogue_type_time = time.time()
@@ -512,25 +529,34 @@ class Game:
         x = (config.VIRTUAL_WIDTH - panel_w) // 2
         y = config.VIRTUAL_HEIGHT - panel_h - config.DIALOGUE_PANEL["OFFSET_Y"]
 
-        # --- ДОБАВЛЕНО: Картинка стражника слева над панелью ---
-        if self.guard_img and self.active_npc_obj:
+        # --- Картинка стражника или короля ---
+        if self.active_npc_obj:
             npc_type = self.active_npc_obj.properties.get('interactive_type', '').lower()
-            if npc_type == 'the guard' or npc_type == 'royal_guard':
+            if (npc_type == 'the guard' or npc_type == 'royal_guard') and self.guard_img:
                 guard_w, guard_h = self.guard_img.get_size()
-                guard_x = x - guard_w + 50  # слева от панели, с небольшим отступом
+                guard_x = x - guard_w + 50
                 guard_y = y - guard_h // 1.65
                 self.virtual_screen.blit(self.guard_img, (guard_x, guard_y))
+            elif npc_type == 'king' and self.king_img:
+                king_w, king_h = self.king_img.get_size()
+                king_x = x - king_w + 50
+                king_y = y - king_h // 1.65
+                self.virtual_screen.blit(self.king_img, (king_x, king_y))
         # --- КОНЕЦ ДОБАВЛЕНИЯ ---
         
         # Отрисовка панели
         self.virtual_screen.blit(self.dialogue_panel_img, (x, y))
         
-        # Имя NPC (пока всегда 'Стражник', можно расширить)
+        # Имя NPC
         npc_name = "Стражник"
+        if self.active_npc_obj:
+            npc_type = self.active_npc_obj.properties.get('interactive_type', '').lower()
+            if npc_type == 'king':
+                npc_name = "Король"
         name_font = pygame.font.SysFont('Arial', config.DIALOGUE_PANEL["FONT_SIZE"] + 8, bold=True)
         name_surface = name_font.render(npc_name, True, config.DIALOGUE_PANEL["FONT_COLOR"])
         name_x = x + config.DIALOGUE_PANEL["TEXT_OFFSET_X"]
-        name_y = y  # небольшой отступ сверху панели
+        name_y = y
         self.virtual_screen.blit(name_surface, (name_x, name_y))
         
         # Отрисовка текста
@@ -541,7 +567,7 @@ class Game:
                 config.DIALOGUE_PANEL["FONT_COLOR"]
             )
             text_x = x + config.DIALOGUE_PANEL["TEXT_OFFSET_X"]
-            text_y = name_y + name_surface.get_height() + 8  # текст под именем
+            text_y = name_y + name_surface.get_height() + 8
             self.virtual_screen.blit(text_surface, (text_x, text_y))
 
     def _load_new_map(self, map_path):

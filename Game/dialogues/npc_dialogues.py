@@ -75,4 +75,48 @@ class RoyalGuardDialogue:
 
     def is_finished(self):
         # Стражник всегда что-то говорит, но после final_start только финальные реплики
+        return False
+
+class KingDialogue:
+    def __init__(self, npc_id):
+        self.npc_id = npc_id
+        self.dialogue_file = os.path.join(os.path.dirname(__file__), 'king.json')
+        self._load_dialogues()
+        self.interaction_count = 0
+        self.phase = 'initial'
+        self.phase_index = 0
+
+    def _load_dialogues(self):
+        with open(self.dialogue_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        king_data = data['interactive']['king']
+        self.dialog_flow = king_data['dialog_flow']
+        self.thresholds = king_data['interaction_thresholds']
+
+    def get_current_dialogue(self):
+        phase = self._get_phase()
+        lines = self.dialog_flow[phase]
+        idx = self.phase_index % len(lines)
+        return lines[idx]
+
+    def next_dialogue(self):
+        prev_phase = self._get_phase()
+        self.interaction_count += 1
+        new_phase = self._get_phase()
+        if new_phase != prev_phase:
+            self.phase_index = 0
+        else:
+            self.phase_index += 1
+
+    def _get_phase(self):
+        if self.interaction_count >= self.thresholds['final_start']:
+            return 'final'
+        elif self.interaction_count >= self.thresholds['angry_start']:
+            return 'angry'
+        elif self.interaction_count >= self.thresholds['repeat_start']:
+            return 'repeat'
+        else:
+            return 'initial'
+
+    def is_finished(self):
         return False 
