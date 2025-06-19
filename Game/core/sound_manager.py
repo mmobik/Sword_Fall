@@ -28,8 +28,12 @@ class SoundManager:
     def load_settings(self):
         """Загружает настройки звука из файла"""
         try:
-            if os.path.exists("sound_settings.json"):
-                with open("sound_settings.json", "r") as f:
+            dir_path = "userdata"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            sound_path = os.path.join(dir_path, "sound_settings.json")
+            if os.path.exists(sound_path):
+                with open(sound_path, "r") as f:
                     settings = json.load(f)
                     self.music_volume = settings.get("music_volume", 0.5)
                     self.sound_volume = settings.get("sound_volume", 0.7)
@@ -41,12 +45,16 @@ class SoundManager:
     def save_settings(self):
         """Сохраняет настройки звука в файл"""
         try:
+            dir_path = "userdata"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            sound_path = os.path.join(dir_path, "sound_settings.json")
             settings = {
                 "music_volume": self.music_volume,
                 "sound_volume": self.sound_volume,
                 "music_volumes": self.music_volumes
             }
-            with open("sound_settings.json", "w") as f:
+            with open(sound_path, "w") as f:
                 json.dump(settings, f)
         except Exception as e:
             if config.DEBUG_MODE:

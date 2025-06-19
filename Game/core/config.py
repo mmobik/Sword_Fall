@@ -4,12 +4,15 @@
 """
 
 from typing import Dict, Union
+import json
+import os
 
 
 class GameConfig:
     def __init__(self):
         # Языковые настройки
         self.current_language = "english"
+        self._load_language_setting()
         
         # Настройки экрана
         self.WIDTH = 1920
@@ -298,9 +301,41 @@ class GameConfig:
         }
 
     def set_language(self, lang: str) -> None:
-        """Устанавливает текущий язык интерфейса (english/russian)"""
+        """Устанавливает текущий язык интерфейса (english/russian) и сохраняет его"""
         if lang in ["english", "russian"]:
             self.current_language = lang
+            self._save_language_setting()
+
+    def _load_language_setting(self):
+        try:
+            dir_path = "userdata"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            config_path = os.path.join(dir_path, "config_settings.json")
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
+                    settings = json.load(f)
+                    lang = settings.get("language")
+                    if lang in ["english", "russian"]:
+                        self.current_language = lang
+        except:
+            pass
+
+    def _save_language_setting(self):
+        try:
+            dir_path = "userdata"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            config_path = os.path.join(dir_path, "config_settings.json")
+            settings = {}
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
+                    settings = json.load(f)
+            settings["language"] = self.current_language
+            with open(config_path, "w") as f:
+                json.dump(settings, f)
+        except:
+            pass
 
     def get_text(self, key: str) -> str:
         """Возвращает локализованный текст по ключу"""
@@ -323,20 +358,27 @@ class GameConfig:
         if not path:
             return None
 
-        if isinstance(path, dict) and state:
-            return path.get(state)
-        return path
+        if isinstance(path, dict):
+            if state is not None:
+                return path.get(state)
+            else:
+                # Если state не указан, возвращаем None (или можно вернуть дефолтное значение)
+                return None
+        if isinstance(path, str):
+            return path
+        return None
 
     def get_image_path(self, key: str, state: str = None) -> Union[str, None]:
         """Алиас для get_image (совместимость)"""
-        return self.get_image(key, state)
+        result = self.get_image(key, state) if state is not None else self.get_image(key)
+        return result if isinstance(result, str) else None
 
     def get_image_cached(self, key, state=None):
         cache_key = f"{key}_{state}"
         if cache_key not in self._image_cache:
-            img = self.get_image(key, state)
-            if img:  # Конвертируем в оптимальный формат
-                self._image_cache[cache_key] = img.convert_alpha()
+            img = self.get_image(key, state) if state is not None else self.get_image(key)
+            if isinstance(img, str):
+                self._image_cache[cache_key] = img
         return self._image_cache.get(cache_key)
 
     def set_debug_mode(self, value: bool):
