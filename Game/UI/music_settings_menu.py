@@ -56,9 +56,22 @@ class MusicSettingsMenu(Menu):
         for level in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
             path = f"assets/images/menu/settings/music_change/{level}.jpg"
             self.music_images[level] = load_image(path)
-        # Кнопка music (before, локализованная)
         self.music_btn_img = load_image(config.get_image("MUSIC_SETTINGS_BTN", "before"))
         self.music_btn_img_rus = load_image(config.get_image("MUSIC_SETTINGS_BTN_RUS", "before"))
+        # Ручная разметка сегментов (примерные значения, подправьте под свой ассет)
+        self.music_segments = [
+            {"level": 0,   "x": 460, "y": 490, "width": 65, "height": 100},
+            {"level": 10,  "x": 525, "y": 490, "width": 81, "height": 100},
+            {"level": 20,  "x": 605, "y": 490, "width": 95, "height": 100},
+            {"level": 30,  "x": 698, "y": 490, "width": 95, "height": 100},
+            {"level": 40,  "x": 790, "y": 490, "width": 95, "height": 100},
+            {"level": 50,  "x": 883, "y": 490, "width": 100, "height": 100},
+            {"level": 60,  "x": 980, "y": 490, "width": 94, "height": 100},
+            {"level": 70,  "x": 1070, "y": 490, "width": 98, "height": 100},
+            {"level": 80,  "x": 1166, "y": 490, "width": 96, "height": 100},
+            {"level": 90,  "x": 1260, "y": 490, "width": 91, "height": 100},
+            {"level": 100, "x": 1350, "y": 490, "width": 110, "height": 100},
+        ]
 
     def _create_buttons(self):
         """Создаем кнопки с обработчиками"""
@@ -130,14 +143,10 @@ class MusicSettingsMenu(Menu):
         img = self.default_img
         hovered_level = None
         if mouse_pos and self.default_img:
-            img_rect = self.default_img.get_rect()
-            img_rect.centerx = config.WIDTH // 2
-            img_rect.centery = config.HEIGHT // 2
-            seg_w = img_rect.width // 11
-            for idx, level in enumerate([0,10,20,30,40,50,60,70,80,90,100]):
-                seg_rect = pygame.Rect(img_rect.x + idx*seg_w, img_rect.y, seg_w, img_rect.height)
+            for seg in self.music_segments:
+                seg_rect = pygame.Rect(seg["x"], seg["y"], seg["width"], seg["height"])
                 if seg_rect.collidepoint(mouse_pos):
-                    hovered_level = level
+                    hovered_level = seg["level"]
                     break
         if hovered_level is not None and self.music_images[hovered_level]:
             img = self.music_images[hovered_level]
@@ -146,6 +155,15 @@ class MusicSettingsMenu(Menu):
             img_rect.centerx = config.WIDTH // 2
             img_rect.centery = config.HEIGHT // 2
             surface.blit(img, img_rect)
+            # DEBUG: рисуем сегменты
+            if config.DEBUG_MODE:
+                font = pygame.font.Font(None, 24)
+                for seg in self.music_segments:
+                    seg_rect = pygame.Rect(seg["x"], seg["y"], seg["width"], seg["height"])
+                    pygame.draw.rect(surface, (0,255,0,80), seg_rect, 2)
+                    text = font.render(str(seg["level"]), True, (0,255,0))
+                    text_rect = text.get_rect(center=seg_rect.center)
+                    surface.blit(text, text_rect)
 
     def update(self, dt=1/60):
         pass
@@ -166,18 +184,12 @@ class MusicSettingsMenu(Menu):
 
     def handle_event(self, event, mouse_pos=None):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # Проверяем клик по сегменту
-            img = self.default_img
-            if img:
-                img_rect = img.get_rect()
-                img_rect.centerx = config.WIDTH // 2
-                img_rect.centery = config.HEIGHT // 2
-                seg_w = img_rect.width // 11
-                for idx, level in enumerate([0,10,20,30,40,50,60,70,80,90,100]):
-                    seg_rect = pygame.Rect(img_rect.x + idx*seg_w, img_rect.y, seg_w, img_rect.height)
-                    if seg_rect.collidepoint(event.pos):
-                        self.sound_manager.set_music_volume(level / 100.0)
-                        break
+            for seg in self.music_segments:
+                seg_rect = pygame.Rect(seg["x"], seg["y"], seg["width"], seg["height"])
+                if seg_rect.collidepoint(event.pos):
+                    self.sound_manager.set_music_volume(seg["level"] / 100.0)
+                    self.sound_manager.play_sound("button_click")
+                    break
         # Передаём событие кнопке Back
         for button in self.buttons:
             button.handle_event(event, mouse_pos) 
