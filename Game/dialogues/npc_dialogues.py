@@ -85,6 +85,10 @@ class KingDialogue:
         self.interaction_count = 0
         self.phase = 'initial'
         self.phase_index = 0
+        # Новые поля для цепочек диалогов
+        self.current_chain_index = 0  # Индекс текущей цепочки в фазе
+        self.current_chain_position = 0  # Позиция в текущей цепочке
+        self.in_dialogue_chain = False  # Флаг, что мы в процессе цепочки диалогов
 
     def _load_dialogues(self):
         with open(self.dialogue_file, 'r', encoding='utf-8') as f:
@@ -96,17 +100,63 @@ class KingDialogue:
     def get_current_dialogue(self):
         phase = self._get_phase()
         lines = self.dialog_flow[phase]
+        
+        # Если мы в процессе цепочки диалогов
+        if self.in_dialogue_chain and self.current_chain_index < len(lines):
+            chain_data = lines[self.current_chain_index]
+            if isinstance(chain_data, dict) and 'chain' in chain_data:
+                chain = chain_data['chain']
+                if self.current_chain_position < len(chain):
+                    return chain[self.current_chain_position]
+        
+        # Обычный режим (для обратной совместимости)
         idx = self.phase_index % len(lines)
-        return lines[idx]
+        line = lines[idx]
+        if isinstance(line, dict) and 'chain' in line:
+            return line['chain'][0] if line['chain'] else ""
+        return line
 
     def next_dialogue(self):
         prev_phase = self._get_phase()
         self.interaction_count += 1
         new_phase = self._get_phase()
+        
         if new_phase != prev_phase:
             self.phase_index = 0
+            self.current_chain_index = 0
+            self.current_chain_position = 0
+            self.in_dialogue_chain = False
         else:
-            self.phase_index += 1
+            # Если мы в процессе цепочки диалогов
+            if self.in_dialogue_chain:
+                phase = self._get_phase()
+                lines = self.dialog_flow[phase]
+                if self.current_chain_index < len(lines):
+                    chain_data = lines[self.current_chain_index]
+                    if isinstance(chain_data, dict) and 'chain' in chain_data:
+                        chain = chain_data['chain']
+                        self.current_chain_position += 1
+                        # Если достигли конца цепочки
+                        if self.current_chain_position >= len(chain):
+                            self.in_dialogue_chain = False
+                            self.current_chain_position = 0
+                            self.phase_index += 1
+                            return None  # Сигнал для закрытия диалога
+                        return chain[self.current_chain_position]
+            else:
+                # Начинаем новую цепочку
+                phase = self._get_phase()
+                lines = self.dialog_flow[phase]
+                if self.phase_index < len(lines):
+                    line = lines[self.phase_index]
+                    if isinstance(line, dict) and 'chain' in line:
+                        self.in_dialogue_chain = True
+                        self.current_chain_index = self.phase_index
+                        self.current_chain_position = 0
+                        chain = line['chain']
+                        if chain:
+                            return chain[0]
+                self.phase_index += 1
 
     def _get_phase(self):
         if self.interaction_count >= self.thresholds['final_start']:

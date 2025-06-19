@@ -95,7 +95,7 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
   </properties>
-  <object id="408" x="0.03125" y="1" width="991.787" height="383.146"/>
+  <object id="408" x="0.03125" y="1" width="991.787" height="353.146"/>
   <object id="413" x="287.25" y="448.25" width="32.75" height="31.75">
    <properties>
     <property name="interactive" type="bool" value="true"/>
@@ -196,7 +196,7 @@
   <object id="444" x="671" y="288.25" width="33" height="159.75"/>
  </objectgroup>
  <objectgroup id="6" name="Triggers">
-  <object id="446" x="479" y="384.667" width="33" height="31.3333">
+  <object id="446" x="479.5" y="355.667" width="33" height="31.3333">
    <properties>
     <property name="interactive" type="bool" value="true"/>
     <property name="interactive_type" value="king"/>

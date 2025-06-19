@@ -6,6 +6,7 @@
 from typing import Dict, Union
 import json
 import os
+import pygame
 
 
 class GameConfig:
@@ -57,6 +58,12 @@ class GameConfig:
             "FONT_SIZE": 24,
             "FONT_COLOR": (255, 255, 255),  # Белый цвет текста
             "SHOW_DURATION": 3.0  # Время показа диалога в секундах
+        }
+
+        # Изображения NPC для диалогов
+        self.NPC_IMAGES = {
+            "GUARD": "assets/images/game/The guard_4.png",
+            "KING": "assets/images/game/King.png"
         }
 
         # Цветовая палитра
@@ -383,6 +390,20 @@ class GameConfig:
 
     def set_debug_mode(self, value: bool):
         self.DEBUG_MODE = value
+
+    def load_npc_image(self, npc_type: str) -> Union[pygame.Surface, None]:
+        """Безопасная загрузка изображения NPC с обработкой ошибок"""
+        try:
+            if npc_type.upper() in self.NPC_IMAGES:
+                return pygame.image.load(self.NPC_IMAGES[npc_type.upper()]).convert_alpha()
+            else:
+                if self.DEBUG_MODE:
+                    print(f"NPC image not found in config: {npc_type}")
+                return None
+        except Exception as e:
+            if self.DEBUG_MODE:
+                print(f"Failed to load NPC image {npc_type}: {e}")
+            return None
 
 
 # Глобальный экземпляр конфигурации
