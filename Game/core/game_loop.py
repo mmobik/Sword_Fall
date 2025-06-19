@@ -1,0 +1,121 @@
+import time
+import pygame
+from core.config import config
+from core.dialogue_panel import DialoguePanel
+from core.door_handler import DoorInteractionHandler
+from dialogues.npc_dialogues import KingDialogue, RoyalGuardDialogue
+
+class GameLoop:
+    def __init__(self, game):
+        self.game = game
+
+    def run(self):
+        running = True
+        while running:
+            self.game.dt = self.game.clock.tick(self.game.target_fps) / 1000.0
+            current_time = time.time()
+            if current_time - self.game.last_log_time >= 2.0:
+                self._log_performance()
+                self.game.last_log_time = current_time
+            running = self._handle_events()
+            self._update_game_state()
+            self._render_frame()
+
+    def _handle_events(self) -> bool:
+        self.game._update_talk_button_state()
+        if self.game.waiting_for_first_update:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+            return True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F3:
+                    config.set_debug_mode(not config.DEBUG_MODE)
+                if event.key == pygame.K_ESCAPE and self.game.game_state_manager.game_state == "new_game":
+                    steps_channel = getattr(self.game.player, '_steps_channel', None)
+                    if steps_channel:
+                        steps_channel.stop()
+                        setattr(self.game.player, '_steps_channel', None)
+                    if self.game.player:
+                        self.game.player.is_walking = False
+                    self.game.show_main_menu()
+                if event.key == pygame.K_e and self.game.game_state_manager.game_state == "new_game":
+                    self.game.dialogue_handler.try_interact_with_npc()
+            if self.game.game_state_manager.current_menu:
+                mouse_pos = pygame.mouse.get_pos()
+                self.game.game_state_manager.current_menu.handle_event(event, mouse_pos)
+        return True
+
+    def _update_game_state(self):
+        if self.game.game_state_manager.current_menu:
+            self.game.game_state_manager.current_menu.update(self.game.dt)
+        if self.game.game_state_manager.game_state == "new_game":
+            if not self.game.player or not self.game.camera or not self.game.level:
+                self.game._load_game_resources()
+                self.game.waiting_for_first_update = True
+            if self.game.player and self.game.camera and self.game.level and self.game.all_sprites and not self.game.waiting_for_first_update:
+                if not self.game.wait_for_key_release:
+                    self.game.all_sprites.update(
+                        self.game.dt,
+                        self.game.level.width * self.game.level.tilewidth,
+                        self.game.level.height * self.game.level.tileheight,
+                        self.game.collision_objects
+                    )
+                    self.game.camera.update(self.game.player)
+                else:
+                    keys = pygame.key.get_pressed()
+                    move_keys = [pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d,
+                                 pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
+                    if not any(keys[k] for k in move_keys):
+                        self.game.wait_for_key_release = False
+            if self.game.waiting_for_first_update and self.game.player and self.game.camera and self.game.level and self.game.all_sprites:
+                self.game.waiting_for_first_update = False
+                self.game.wait_for_key_release = True
+
+    def _render_frame(self):
+        if self.game.game_state_manager.current_menu:
+            self.game.screen.fill((0, 0, 0))
+            mouse_pos = pygame.mouse.get_pos()
+            self.game.game_state_manager.current_menu.draw(self.game.screen, mouse_pos)
+            pygame.display.flip()
+        elif self.game.game_state_manager.game_state == "new_game":
+            self.game.virtual_screen.fill((0, 0, 0))
+            self.game._render_game()
+            self.game._update_talk_button_alpha()
+            if self.game.talk_button_img and self.game.talk_button_alpha > 0 and not self.game.show_dialogue:
+                btn_w, btn_h = self.game.talk_button_img.get_size()
+                if self.game.player and self.game.camera:
+                    player_screen_x = self.game.player.hitbox.centerx - self.game.camera.offset.x
+                    player_screen_y = self.game.player.hitbox.centery - self.game.camera.offset.y
+                    x = player_screen_x - btn_w // 2
+                    y = player_screen_y - btn_h + config.DIALOGUE_BUTTON["OFFSET_Y"]
+                else:
+                    x = (config.VIRTUAL_WIDTH - btn_w) // 2
+                    y = config.VIRTUAL_HEIGHT - btn_h - config.DIALOGUE_BUTTON["FALLBACK_Y"]
+                btn_img = self.game.talk_button_img.copy()
+                btn_img.set_alpha(int(self.game.talk_button_alpha))
+                self.game.virtual_screen.blit(btn_img, (x, y))
+                self.game.talk_button_rect = pygame.Rect(x, y, btn_w, btn_h)
+            if self.game.show_dialogue and self.game.dialogue_panel_img:
+                self.game._update_typewriter_text()
+                self.game.dialogue_panel.render()
+                if self.game.active_npc_obj:
+                    npc_type = self.game.active_npc_obj.properties.get('interactive_type', '').lower()
+                    if npc_type != 'king':
+                        if time.time() - self.game.dialogue_start_time > config.DIALOGUE_PANEL["SHOW_DURATION"]:
+                            self.game.show_dialogue = False
+                            self.game.dialogue_text = ""
+                            self.game.dialogue_text_shown = ""
+                            self.game.active_npc_obj = None
+            scaled_screen = pygame.transform.scale(self.game.virtual_screen, (config.WIDTH, config.HEIGHT))
+            self.game.screen.blit(scaled_screen, (0, 0))
+            pygame.display.flip()
+
+    def _log_performance(self):
+        current_fps = self.game.clock.get_fps()
+        self.game.fps_history.append(current_fps)
+        if config.DEBUG_MODE:
+            print(f"[PERF] FPS: {current_fps:.1f} | State: {self.game.game_state_manager.game_state}") 
