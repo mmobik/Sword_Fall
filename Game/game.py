@@ -77,6 +77,14 @@ class Game:
         self.unlock_control_time = 0  # (больше не используется)
         self.wait_for_key_release = False  # Ждать отпускания всех клавиш после fade
 
+        # --- ДОБАВЛЕНО: Картинка стражника ---
+        self.guard_img = None
+        try:
+            self.guard_img = pygame.image.load("assets/images/game/The guard_4.png").convert_alpha()
+        except Exception as e:
+            if config.DEBUG_MODE:
+                print(f"Guard image not loaded: {e}")
+
     def _init_menus(self):
         self.main_menu = MainMenu(
             self.sound_manager,
@@ -483,6 +491,16 @@ class Game:
         # Позиция панели снизу экрана
         x = (config.VIRTUAL_WIDTH - panel_w) // 2
         y = config.VIRTUAL_HEIGHT - panel_h - config.DIALOGUE_PANEL["OFFSET_Y"]
+
+        # --- ДОБАВЛЕНО: Картинка стражника слева над панелью ---
+        if self.guard_img and self.active_npc_obj:
+            npc_type = self.active_npc_obj.properties.get('interactive_type', '').lower()
+            if npc_type == 'the guard' or npc_type == 'royal_guard':
+                guard_w, guard_h = self.guard_img.get_size()
+                guard_x = x - guard_w + 50  # слева от панели, с небольшим отступом
+                guard_y = y - guard_h // 1.5  # чуть выше панели
+                self.virtual_screen.blit(self.guard_img, (guard_x, guard_y))
+        # --- КОНЕЦ ДОБАВЛЕНИЯ ---
         
         # Отрисовка панели
         self.virtual_screen.blit(self.dialogue_panel_img, (x, y))
