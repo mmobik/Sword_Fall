@@ -206,6 +206,7 @@
    <properties>
     <property name="interactive" type="bool" value="true"/>
     <property name="interactive_type" value="doors"/>
+    <property name="spawn_point_name" value="royal_door_spawn"/>
     <property name="target_map" value="assets/Tiles/Royal_one.tmx"/>
    </properties>
   </object>

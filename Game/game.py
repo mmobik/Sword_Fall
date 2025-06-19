@@ -32,6 +32,8 @@ class DoorInteractionHandler:
             player.is_walking = False
         # Путь к новой карте можно хранить в свойстве объекта или задать явно
         new_map_path = obj.properties.get('target_map', 'assets/Tiles/Audience Hall .tmx')
+        spawn_point_name = obj.properties.get('spawn_point_name', 'royal_door_spawn')
+        self.game.next_spawn_point_name = spawn_point_name
         self.game._load_new_map(new_map_path)
 
 
@@ -253,19 +255,40 @@ class Game:
             spawn_x = 200
             spawn_y = 200
 
-            for layer in self.level.layers:
-                if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
-                    for obj in layer:
-                        if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
-                            spawn_x = int(obj.x)
-                            spawn_y = int(obj.y)
-                            if config.DEBUG_MODE:
-                                print(f"Найден спавн игрока: ({spawn_x}, {spawn_y})")
+            # --- Новый блок: поддержка спавна в точке двери ---
+            spawn_found = False
+            spawn_point_name = getattr(self, 'next_spawn_point_name', None)
+            if spawn_point_name:
+                for layer in self.level.layers:
+                    if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
+                        for obj in layer:
+                            # По object_type или по имени
+                            if (hasattr(obj, 'properties') and obj.properties.get("object_type") == spawn_point_name) or \
+                               (hasattr(obj, 'name') and obj.name == spawn_point_name):
+                                spawn_x = int(obj.x)
+                                spawn_y = int(obj.y)
+                                spawn_found = True
+                                break
+                        if spawn_found:
                             break
-                    break
-            else:
-                if config.DEBUG_MODE:
-                    print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
+                self.next_spawn_point_name = None  # Сбросить после использования
+            # --- Конец нового блока ---
+
+            # Если специальный спавн не найден, используем fallback
+            if not spawn_found:
+                for layer in self.level.layers:
+                    if hasattr(layer, 'name') and layer.name == "PlayerSpawn":
+                        for obj in layer:
+                            if hasattr(obj, 'properties') and obj.properties.get("object_type") == "player_spawn":
+                                spawn_x = int(obj.x)
+                                spawn_y = int(obj.y)
+                                if config.DEBUG_MODE:
+                                    print(f"Найден спавн игрока: ({spawn_x}, {spawn_y})")
+                                break
+                        break
+                else:
+                    if config.DEBUG_MODE:
+                        print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
             
             self.player = Player(spawn_x, spawn_y, self.sound_manager)
             if config.DEBUG_MODE:

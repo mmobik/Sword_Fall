@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="400">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="403">
  <tileset firstgid="1" source="room1.tsx"/>
  <tileset firstgid="129" source="room_2.tsx"/>
  <tileset firstgid="321" source="room_5.tsx"/>
@@ -90,6 +90,12 @@
   <object id="352" name="точка спавна" x="607.356" y="1062.75">
    <properties>
     <property name="object_type" value="player_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="402" x="603.333" y="261">
+   <properties>
+    <property name="object_type" value="royal_door_spawn"/>
    </properties>
    <point/>
   </object>
@@ -226,7 +232,7 @@
   <object id="396" x="1199.82" y="128.364" width="15.8182" height="831.455"/>
  </objectgroup>
  <objectgroup id="6" name="Triggers">
-  <object id="398" x="576.364" y="95.8182" width="63.6364" height="40.9091">
+  <object id="398" x="585" y="131.667" width="46.6364" height="40.9091">
    <properties>
     <property name="interactive" type="bool" value="true"/>
     <property name="interactive_type" value="doors"/>

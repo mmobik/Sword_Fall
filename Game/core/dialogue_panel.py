@@ -1,6 +1,7 @@
 import pygame
 from core.config import config
 
+
 class DialoguePanel:
     def __init__(self, game):
         self.game = game

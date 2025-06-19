@@ -1,10 +1,6 @@
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from core.game import Game
-
 class DoorInteractionHandler:
     """Класс для обработки интерактивных дверей и перехода между локациями."""
-    def __init__(self, game: 'Game'):
+    def __init__(self, game):
         self.game = game
 
     def interact(self, obj):
@@ -18,4 +14,7 @@ class DoorInteractionHandler:
             player.is_walking = False
         # Путь к новой карте можно хранить в свойстве объекта или задать явно
         new_map_path = obj.properties.get('target_map', 'assets/Tiles/Audience Hall .tmx')
-        self.game._load_new_map(new_map_path) 
+        # Если у двери указано spawn_point_name, передаем его
+        spawn_point_name = obj.properties.get('spawn_point_name', 'royal_door_spawn')
+        self.game.next_spawn_point_name = spawn_point_name
+        self.game._load_new_map(new_map_path)
