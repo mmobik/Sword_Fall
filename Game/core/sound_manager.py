@@ -9,6 +9,7 @@ class SoundManager:
         # Инициализация громкости
         self.music_volume = 0.5
         self.sound_volume = 0.7
+        self.music_volumes = {}  # индивидуальные громкости для треков
         
         # Загружаем сохраненные настройки
         self.load_settings()
@@ -32,6 +33,7 @@ class SoundManager:
                     settings = json.load(f)
                     self.music_volume = settings.get("music_volume", 0.5)
                     self.sound_volume = settings.get("sound_volume", 0.7)
+                    self.music_volumes = settings.get("music_volumes", {})
         except Exception as e:
             if config.DEBUG_MODE:
                 print(f"Ошибка загрузки настроек звука: {e}")
@@ -41,7 +43,8 @@ class SoundManager:
         try:
             settings = {
                 "music_volume": self.music_volume,
-                "sound_volume": self.sound_volume
+                "sound_volume": self.sound_volume,
+                "music_volumes": self.music_volumes
             }
             with open("sound_settings.json", "w") as f:
                 json.dump(settings, f)
@@ -70,14 +73,17 @@ class SoundManager:
         """Воспроизводит музыку из assets/sounds/soundtracks/"""
         # Формируем полный путь к музыке
         full_path = os.path.join("assets", "sounds", "soundtracks", music_name)
-
+        # Определяем индивидуальную громкость для этого трека (без расширения, в нижнем регистре)
+        key = os.path.splitext(music_name)[0].lower()
+        volume = self.music_volumes.get(key, 1.0)
         try:
             if self.current_music != full_path:
                 pygame.mixer.music.stop()
                 pygame.mixer.music.load(full_path)
-                pygame.mixer.music.set_volume(self.music_volume)
+                pygame.mixer.music.set_volume(volume)
                 pygame.mixer.music.play(-1 if loop else 0)
                 self.current_music = full_path
+                self.music_volume = volume
         except pygame.error as e:
             if config.DEBUG_MODE:
                 print(f"[SoundManager] Ошибка загрузки музыки {full_path}: {e}")
@@ -107,3 +113,19 @@ class SoundManager:
             sound.set_volume(self.sound_volume)
         # Сохраняем настройки при изменении
         self.save_settings()
+
+    def set_track_volume(self, track_type, value):
+        # Приводим к нижнему регистру для ключа
+        key = track_type.lower()
+        self.music_volumes[key] = value
+        # Если сейчас играет этот трек — применяем громкость
+        if self.current_music:
+            current_base = os.path.splitext(os.path.basename(self.current_music))[0].lower()
+            if current_base == key:
+                pygame.mixer.music.set_volume(value)
+                self.music_volume = value
+        self.save_settings()
+
+    def get_track_volume(self, track_type):
+        key = track_type.lower()
+        return self.music_volumes.get(key, 1.0)
