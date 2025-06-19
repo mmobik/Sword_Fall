@@ -292,6 +292,7 @@ class Game:
                     self.show_dialogue = False
                     self.dialogue_text = ""
                     self.dialogue_text_shown = ""
+                    self.active_npc_obj = None  # Сбросить активного NPC, чтобы убрать картинку стражника
             scaled_screen = pygame.transform.scale(self.virtual_screen, (config.WIDTH, config.HEIGHT))
             self.screen.blit(scaled_screen, (0, 0))
             pygame.display.flip()
@@ -395,7 +396,8 @@ class Game:
     def _update_talk_button_state(self):
         prev = self.show_talk_button
         self.show_talk_button = False
-        self.active_npc_obj = None
+        if not self.show_dialogue:
+            self.active_npc_obj = None
         in_zone = False
         if not self.player or not self.interactive_objects:
             self.talk_button_target_alpha = 0
@@ -498,7 +500,7 @@ class Game:
             if npc_type == 'the guard' or npc_type == 'royal_guard':
                 guard_w, guard_h = self.guard_img.get_size()
                 guard_x = x - guard_w + 50  # слева от панели, с небольшим отступом
-                guard_y = y - guard_h // 1.5  # чуть выше панели
+                guard_y = y - guard_h // 1.65
                 self.virtual_screen.blit(self.guard_img, (guard_x, guard_y))
         # --- КОНЕЦ ДОБАВЛЕНИЯ ---
         
