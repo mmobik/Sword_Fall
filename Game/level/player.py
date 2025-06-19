@@ -9,7 +9,7 @@ class Player(pygame.sprite.Sprite):
     Класс, представляющий игрока.
     """
 
-    def __init__(self, x: int, y: int, *groups) -> None:
+    def __init__(self, x: int, y: int, sound_manager=None, *groups) -> None:
         super().__init__(*groups)
         self.state_name = "idle_front"
         self.state = config.PLAYER_STATES[self.state_name]
@@ -38,6 +38,8 @@ class Player(pygame.sprite.Sprite):
 
         self.speed = config.PLAYER_SPEED
         self.movement_handler = PlayerMovementHandler(self)
+        self.sound_manager = sound_manager
+        self.is_walking = False
 
         if config.DEBUG_MODE:
             print(f"Игрок создан: rect={self.rect}, hitbox={self.hitbox}")

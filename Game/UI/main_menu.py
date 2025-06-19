@@ -97,7 +97,7 @@ class MainMenu(Menu):
     def start_new_game(self):
         """Обработчик начала игры"""
         if self.sound_manager:
-            self.sound_manager.play_music("house.mp3")
+            self.sound_manager.play_music("Central Hall.mp3")
         self.game_callback("new_game")
 
     def open_settings_menu(self):

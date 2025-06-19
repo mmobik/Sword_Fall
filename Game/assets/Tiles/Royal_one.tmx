@@ -55,7 +55,7 @@
    <property name="render_order" value="foreground"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJztz8ENgCAMQFGM7j8AbqCDsYYDyEFE8ND3kl5KQn5TAgCAePL2dwEAEeT1vtsru9mOSsP5QVdZ+mb2v09vevM2mq42utpE7LoAP1Es5Q==
+   eJztz8ENgCAMQFEM+y8gG8BgruEAchCkXHwv6aUk5DclAAAAACKc+bkrnd1utdPQFnRdx7fZ/e/bm2beoukao2vMH7tuwx0sRw==
   </data>
  </layer>
  <layer id="14" name="fence" width="38" height="39">

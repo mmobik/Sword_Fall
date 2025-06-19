@@ -141,6 +141,13 @@ class Game:
                 if event.key == pygame.K_F3:
                     config.set_debug_mode(not config.DEBUG_MODE)
                 if event.key == pygame.K_ESCAPE and self.game_state_manager.game_state == "new_game":
+                    # Остановить звук шагов при выходе в меню
+                    steps_channel = getattr(self.player, '_steps_channel', None)
+                    if steps_channel:
+                        steps_channel.stop()
+                        setattr(self.player, '_steps_channel', None)
+                    if self.player:
+                        self.player.is_walking = False
                     self.show_main_menu()
                 if event.key == pygame.K_e and self.game_state_manager.game_state == "new_game":
                     self._try_interact_with_npc()
@@ -222,7 +229,7 @@ class Game:
                 if config.DEBUG_MODE:
                     print(f"Спавн не найден, используем fallback: ({spawn_x}, {spawn_y})")
             
-            self.player = Player(spawn_x, spawn_y)
+            self.player = Player(spawn_x, spawn_y, self.sound_manager)
             if config.DEBUG_MODE:
                 print(f"Игрок создан. Позиция: {self.player.hitbox.topleft}")
                 print(f"Размер спрайта: {self.player.image.get_size()}")
@@ -373,7 +380,7 @@ class Game:
             self.waiting_for_first_update = True
             self.wait_for_key_release = False
             self.game_state_manager.change_state(state, None)
-            self.sound_manager.play_music("house.mp3")
+            self.sound_manager.play_music("Central Hall.mp3")
         else:
             self.game_state_manager.change_state(state)
 

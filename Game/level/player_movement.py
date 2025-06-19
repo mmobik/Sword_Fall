@@ -70,6 +70,26 @@ class PlayerMovementHandler:
         # Анимация с улучшенной логикой
         self._update_animation_state(move_x, move_y, dt)
 
+        # --- Логика звука шагов ---
+        is_moving = (abs(move_x) > 0 or abs(move_y) > 0)
+        if hasattr(self.player, 'sound_manager') and self.player.sound_manager:
+            steps_channel = getattr(self.player, '_steps_channel', None)
+            if is_moving:
+                if not self.player.is_walking:
+                    # Начать проигрывать звук шагов
+                    self.player.is_walking = True
+                    sound = self.player.sound_manager.sounds.get('steps')
+                    if sound:
+                        self.player._steps_channel = sound.play(loops=-1)
+            else:
+                if self.player.is_walking:
+                    # Остановить звук шагов
+                    self.player.is_walking = False
+                    if steps_channel:
+                        steps_channel.stop()
+                        self.player._steps_channel = None
+        # --- Конец логики звука шагов ---
+
     def _update_animation_state(self, move_x, move_y, dt):
         self.state_change_time += dt
         

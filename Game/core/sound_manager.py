@@ -21,9 +21,13 @@ class SoundManager:
         # Загружаем звуки с проверкой существования файлов
         self.sounds = {
             'button_click': self._load_sound("button.mp3"),
-            # Убираем StartGame.mp3, так как его нет в ваших файлах
+            'steps': self._load_sound("steps.mp3"),  # Добавлен звук шагов
         }
         self.current_music = None
+        # Синхронизируем громкость шага с музыкой при инициализации
+        steps = self.sounds.get('steps')
+        if steps:
+            steps.set_volume(self.music_volumes.get('central_hall', 1.0))
 
     def load_settings(self):
         """Загружает настройки звука из файла"""
@@ -38,6 +42,10 @@ class SoundManager:
                     self.music_volume = settings.get("music_volume", 0.5)
                     self.sound_volume = settings.get("sound_volume", 0.7)
                     self.music_volumes = settings.get("music_volumes", {})
+            # Синхронизируем громкость шага с музыкой после загрузки настроек
+            steps = self.sounds.get('steps')
+            if steps:
+                steps.set_volume(self.music_volumes.get('central_hall', 1.0))
         except Exception as e:
             if config.DEBUG_MODE:
                 print(f"Ошибка загрузки настроек звука: {e}")
@@ -100,6 +108,12 @@ class SoundManager:
     def play_sound(self, sound_name: str) -> None:
         """Воспроизводит заранее загруженный звук"""
         if sound_name in self.sounds:
+            # Для шага выставляем громкость по игровому треку (central_hall)
+            if sound_name == 'steps':
+                steps_volume = self.music_volumes.get('central_hall', 1.0)
+                self.sounds['steps'].set_volume(steps_volume)
+                if steps_volume == 0:
+                    return  # Не проигрывать шаги при нулевой громкости игры
             self.sounds[sound_name].play()
 
     def stop_music(self) -> None:
@@ -108,17 +122,25 @@ class SoundManager:
         self.current_music = None
 
     def set_music_volume(self, volume: float) -> None:
-        """Устанавливает громкость музыки (0.0-1.0)"""
+        """Устанавливает громкость музыки (0.0-1.0) и синхронизирует с шагами"""
         self.music_volume = max(0.0, min(1.0, volume))
         pygame.mixer.music.set_volume(self.music_volume)
+        # Синхронизируем громкость шагов с central_hall
+        steps = self.sounds.get('steps')
+        if steps:
+            steps.set_volume(self.music_volumes.get('central_hall', 1.0))
         # Сохраняем настройки при изменении
         self.save_settings()
 
     def set_sound_volume(self, volume: float) -> None:
-        """Устанавливает громкость звуков (0.0-1.0)"""
+        """Устанавливает громкость звуков (0.0-1.0) и синхронизирует с музыкой"""
         self.sound_volume = max(0.0, min(1.0, volume))
-        for sound in self.sounds.values():
-            sound.set_volume(self.sound_volume)
+        for name, sound in self.sounds.items():
+            # steps всегда равен громкости central_hall
+            if name == 'steps':
+                sound.set_volume(self.music_volumes.get('central_hall', 1.0))
+            else:
+                sound.set_volume(self.sound_volume)
         # Сохраняем настройки при изменении
         self.save_settings()
 
@@ -132,6 +154,9 @@ class SoundManager:
             if current_base == key:
                 pygame.mixer.music.set_volume(value)
                 self.music_volume = value
+        # Синхронизируем громкость шага с игровым треком
+        if key == 'central_hall' and 'steps' in self.sounds:
+            self.sounds['steps'].set_volume(value)
         self.save_settings()
 
     def get_track_volume(self, track_type):
