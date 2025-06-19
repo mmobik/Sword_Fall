@@ -154,7 +154,7 @@ class GameConfig:
             "DEFAULT_COLLISION": True
         }
 
-        self.DEBUG_MODE = False
+        self.DEBUG_MODE = True
         self.DEBUG_COLORS = {
             "COLLISION": (255, 0, 0),    # Красный - объекты коллизий
             "HITBOX": (0, 255, 0),       # Зеленый - хитбокс игрока

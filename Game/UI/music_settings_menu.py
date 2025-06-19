@@ -15,6 +15,52 @@ class MusicSettingsMenu(Menu):
         self._last_mouse_pos = None
         self._last_language = config.current_language
 
+        # --- Кастомные хитбоксы для сегментов слайдера (шаблон для всех трёх полосок) ---
+        # Для каждого трека: 11 сегментов (0, 10, ..., 100)
+        # Координаты: (x, y, w, h) — абсолютные или относительные к левому верхнему углу слайдера
+        # Примерные значения — подставьте свои!
+        self.slider_hitboxes = {
+            "dark_fantasm": [  # Главное меню
+                (566, 335, 60, 95),  # 0%
+                (625, 335, 81, 95),  # 10%
+                (705, 335, 92, 95),  # 20%
+                (795, 335, 95, 95),  # 30%
+                (890, 335, 95, 95),  # 40%
+                (985, 335, 97, 95),  # 50%
+                (1080, 335, 95, 95),  # 60%
+                (1170, 335, 95, 95),  # 70%
+                (1265, 335, 95, 95),  # 80%
+                (1360, 335, 90, 95),  # 90%
+                (1447, 335, 105, 95),  # 100%
+            ],
+            "house": [  # Игра
+                (566, 450, 60, 95),  # 0%
+                (625, 450, 81, 95),  # 10%
+                (705, 450, 92, 95),  # 20%
+                (795, 450, 95, 95),  # 30%
+                (890, 450, 95, 95),  # 60%
+                (985, 450, 97, 95),  # 50%
+                (1080, 450, 95, 95),  # 9%
+                (1170, 450, 95, 95),  # 70%
+                (1265, 450, 95, 95),  # 80%
+                (1360, 450, 90, 95),  # 90%
+                (1447, 450, 105, 95),  # 100%
+            ],
+            "button": [  # Кнопки
+                (566, 565, 60, 95),  # 0%
+                (625, 565, 81, 95),  # 10%
+                (705, 565, 92, 95),  # 20%
+                (795, 565, 95, 95),  # 30%
+                (890, 565, 95, 95),  # 60%
+                (985, 565, 97, 95),  # 50%
+                (1080, 565, 95, 95),  # 95%
+                (1170, 565, 95, 95),  # 70%
+                (1265, 565, 95, 95),  # 80%
+                (1360, 565, 90, 95),  # 90%
+                (1447, 565, 105, 95),  # 100%
+            ],
+        }
+
         # Анимация музыки
         self.music_animation_images = {}
         self._load_music_animation()
@@ -62,7 +108,9 @@ class MusicSettingsMenu(Menu):
             self.slider_images[level] = load_image(os.path.join(folder, f"{level}.jpg"))
         self.slider_images['default'] = load_image(os.path.join(folder, "default.jpg"))
         # --- Новое размещение: относительно кнопки Music ---
-        music_img = load_image(config.get_image("MUSIC_SETTINGS_BTN", "before")) if config.current_language == "english" else load_image(config.get_image("MUSIC_SETTINGS_BTN_RUS", "before"))
+        music_img = load_image(
+            config.get_image("MUSIC_SETTINGS_BTN", "before")) if config.current_language == "english" else load_image(
+            config.get_image("MUSIC_SETTINGS_BTN_RUS", "before"))
         music_rect = music_img.get_rect() if music_img else pygame.Rect(0, 0, 0, 0)
         music_rect.centerx = config.WIDTH // 2
         music_rect.y = 100
@@ -141,10 +189,8 @@ class MusicSettingsMenu(Menu):
         else:
             value = self.sound_manager.get_track_volume(track_type)
         volume_percent = int(value * 100)
-        # hovered_level больше не влияет на отображение картинки
         img_sample = self.slider_images[0] or self.slider_images['default']
         slider_w, slider_h = img_sample.get_width(), img_sample.get_height()
-        # Картинка всегда соответствует текущему уровню громкости
         img = self.slider_images.get(self._nearest_level(volume_percent), self.slider_images['default'])
         if img:
             img_rect = img.get_rect()
@@ -152,10 +198,15 @@ class MusicSettingsMenu(Menu):
             img_rect.y = slider_y
             surface.blit(img, img_rect)
         if config.DEBUG_MODE:
-            seg_w = slider_w // 11
             font = pygame.font.Font(None, 24)
-            for idx, level in enumerate([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]):
-                seg_rect = pygame.Rect(slider_x + idx * seg_w, slider_y, seg_w, slider_h)
+            levels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+            hitboxes = self.slider_hitboxes.get(track_type, None)
+            for idx, level in enumerate(levels):
+                if hitboxes and idx < len(hitboxes) and hitboxes[idx]:
+                    seg_rect = pygame.Rect(*hitboxes[idx])
+                else:
+                    seg_w = slider_w // 11
+                    seg_rect = pygame.Rect(slider_x + idx * seg_w, slider_y, seg_w, slider_h)
                 pygame.draw.rect(surface, (0, 255, 0, 80), seg_rect, 2)
                 text = font.render(str(level), True, (0, 255, 0))
                 text_rect = text.get_rect(center=seg_rect.center)
@@ -171,9 +222,14 @@ class MusicSettingsMenu(Menu):
                 slider_y = rect.y
                 img_sample = self.slider_images[0] or self.slider_images['default']
                 slider_w, slider_h = img_sample.get_width(), img_sample.get_height()
-                seg_w = slider_w // 11
-                for i, level in enumerate([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]):
-                    seg_rect = pygame.Rect(slider_x + i * seg_w, slider_y, seg_w, slider_h)
+                levels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+                hitboxes = self.slider_hitboxes.get(track_type, None)
+                for i, level in enumerate(levels):
+                    if hitboxes and i < len(hitboxes) and hitboxes[i]:
+                        seg_rect = pygame.Rect(*hitboxes[i])
+                    else:
+                        seg_w = slider_w // 11
+                        seg_rect = pygame.Rect(slider_x + i * seg_w, slider_y, seg_w, slider_h)
                     if seg_rect.collidepoint(event.pos):
                         if track_type == "button":
                             self.sound_manager.set_sound_volume(level / 100.0)
