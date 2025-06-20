@@ -18,7 +18,7 @@ class Button:
     def draw(self, surface, mouse_pos=None):
         """Отрисовка кнопки с оптимизацией"""
         current_hover = mouse_pos and self.rect.collidepoint(mouse_pos)
-        
+
         # Всегда рисуем кнопку, но с правильным состоянием
         if current_hover:
             surface.blit(self.hover_image, self.position)

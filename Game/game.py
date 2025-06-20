@@ -145,7 +145,8 @@ class Game:
         self.npc_dialogues = {}
         self.interactive_objects = []
 
-    def time(self):
+    @staticmethod
+    def time():
         """Возвращает текущее время."""
         return time.time()
 

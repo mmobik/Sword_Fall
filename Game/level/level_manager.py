@@ -47,4 +47,4 @@ class LevelManager:
         if self.tmx_data:
             return (self.tmx_data.width * self.tmx_data.tilewidth,
                     self.tmx_data.height * self.tmx_data.tileheight)
-        return (config.DEFAULT_LEVEL_WIDTH, config.DEFAULT_LEVEL_HEIGHT)
+        return config.DEFAULT_LEVEL_WIDTH, config.DEFAULT_LEVEL_HEIGHT

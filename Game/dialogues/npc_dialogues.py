@@ -1,6 +1,7 @@
 import json
 import os
 
+
 class NPCDialogue:
     def __init__(self, npc_id, dialogue_file):
         self.npc_id = npc_id
@@ -30,6 +31,7 @@ class NPCDialogue:
 
     def is_finished(self):
         return self.state >= len(self.dialogues)
+
 
 class RoyalGuardDialogue:
     def __init__(self, npc_id):
@@ -73,9 +75,11 @@ class RoyalGuardDialogue:
         else:
             return 'initial'
 
-    def is_finished(self):
+    @staticmethod
+    def is_finished():
         # Стражник всегда что-то говорит, но после final_start только финальные реплики
         return False
+
 
 class KingDialogue:
     def __init__(self, npc_id):
@@ -100,7 +104,7 @@ class KingDialogue:
     def get_current_dialogue(self):
         phase = self._get_phase()
         lines = self.dialog_flow[phase]
-        
+
         # Если мы в процессе цепочки диалогов
         if self.in_dialogue_chain and self.current_chain_index < len(lines):
             chain_data = lines[self.current_chain_index]
@@ -108,7 +112,7 @@ class KingDialogue:
                 chain = chain_data['chain']
                 if self.current_chain_position < len(chain):
                     return chain[self.current_chain_position]
-        
+
         # Обычный режим (для обратной совместимости)
         idx = self.phase_index % len(lines)
         line = lines[idx]
@@ -120,7 +124,7 @@ class KingDialogue:
         prev_phase = self._get_phase()
         self.interaction_count += 1
         new_phase = self._get_phase()
-        
+
         if new_phase != prev_phase:
             self.phase_index = 0
             self.current_chain_index = 0
@@ -168,5 +172,6 @@ class KingDialogue:
         else:
             return 'initial'
 
-    def is_finished(self):
-        return False 
+    @staticmethod
+    def is_finished():
+        return False

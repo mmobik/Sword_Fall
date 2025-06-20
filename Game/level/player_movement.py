@@ -92,8 +92,6 @@ class PlayerMovementHandler:
 
     def _update_animation_state(self, move_x, move_y, dt):
         self.state_change_time += dt
-        
-        new_state = None
 
         # Новая логика:
         if move_y < 0:

@@ -17,7 +17,9 @@ class Menu:
         if self._cached_bg is None and self._bg_key:
             try:
                 self._cached_bg = load_image(config.MENU_IMAGES[self._bg_key])
-            except:
+            except (KeyError, pygame.error, TypeError) as e:
+                if config.DEBUG_MODE:
+                    print(f"Ошибка загрузки фона меню: {e}")
                 self._cached_bg = pygame.Surface(config.SCREEN_SIZE)
                 self._cached_bg.fill((0, 0, 0))
 
@@ -56,6 +58,6 @@ class Menu:
         self._last_language = config.current_language
         self._ensure_background()
 
-    def update(self, dt=1/60):
+    def update(self, dt=1 / 60):
         """Обновление состояния меню (может переопределяться в дочерних классах)"""
         pass

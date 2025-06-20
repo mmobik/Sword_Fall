@@ -15,7 +15,7 @@ class SettingsMenu(Menu):
         self._static_surface = None  # Кэш статичной части
         self._last_mouse_pos = None
         self._last_language = config.current_language  # Отслеживаем смену языка
-        
+
         self._create_buttons()
         self._pre_render_static()  # Предварительный рендеринг
 
@@ -78,7 +78,7 @@ class SettingsMenu(Menu):
         # Проверяем, нужно ли обновить кэш
         if self._static_surface is None:
             self._pre_render_static()
-        
+
         # Если мышь не двигалась и язык не менялся - рисуем кэшированную статичную версию
         if mouse_pos == self._last_mouse_pos and self._last_language == config.current_language:
             surface.blit(self._static_surface, (0, 0))
@@ -96,16 +96,18 @@ class SettingsMenu(Menu):
 
         # Поверх рисуем все кнопки с учетом hover-эффектов
         for button in self.buttons:
-                button.draw(surface, mouse_pos)
+            button.draw(surface, mouse_pos)
 
-    def settings_game_menu(self):
+    @staticmethod
+    def settings_game_menu():
         """Обработчик кнопки настроек игры"""
         if config.DEBUG_MODE:
             print("Открыты настройки игры")
         # Здесь будет логика меню настроек игры
         # Например: self.game_state_manager.change_state("game_settings")
 
-    def settings_graphics_menu(self):
+    @staticmethod
+    def settings_graphics_menu():
         """Обработчик графических настроек"""
         if config.DEBUG_MODE:
             print("Открыты графические настройки")
@@ -122,7 +124,7 @@ class SettingsMenu(Menu):
         if self.music_callback:
             self.music_callback()
 
-    def update(self, dt=1/60):
+    def update(self, dt=1 / 60):
         """Обновление состояния меню (если нужно)"""
         pass
 
@@ -137,7 +139,9 @@ class SettingsMenu(Menu):
                 self._static_surface.blit(bg, (0, 0))
             else:
                 self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
-        except:
+        except (KeyError, pygame.error, TypeError) as e:
+            if config.DEBUG_MODE:
+                print(f"Ошибка загрузки фона настроек: {e}")
             self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
 
         # Рисуем все кнопки в их обычном состоянии

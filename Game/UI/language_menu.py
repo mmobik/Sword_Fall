@@ -23,7 +23,8 @@ class LanguageMenu(Menu):
         self._create_buttons()
         self._pre_render_static()  # Предварительный рендеринг
 
-    def _get_background_key(self):
+    @staticmethod
+    def _get_background_key():
         """Определяем ключ фона с fallback-логикой"""
         return "LANGUAGE_BG" if "LANGUAGE_BG" in config.MENU_IMAGES else "SETTINGS_BG"
 
@@ -95,7 +96,7 @@ class LanguageMenu(Menu):
         # Проверяем, нужно ли обновить кэш
         if self._static_surface is None:
             self._pre_render_static()
-        
+
         # Если мышь не двигалась и язык не менялся - рисуем кэшированную версию
         if mouse_pos == self._last_mouse_pos and self._last_language == config.current_language:
             surface.blit(self._static_surface, (0, 0))
@@ -106,7 +107,8 @@ class LanguageMenu(Menu):
                         button.draw(surface, mouse_pos)
             return
 
-            self._last_mouse_pos = mouse_pos
+        # Обновляем позицию мыши
+        self._last_mouse_pos = mouse_pos
 
         # Рисуем статичную часть
         surface.blit(self._static_surface, (0, 0))
@@ -132,8 +134,8 @@ class LanguageMenu(Menu):
             self._static_surface.fill((30, 30, 50))  # Фон по умолчанию
 
         # Рисуем все кнопки в их обычном состоянии
-            for button in self.buttons:
-                button.draw(self._static_surface, None)  # None - без hover-эффекта
+        for button in self.buttons:
+            button.draw(self._static_surface, None)  # None - без hover-эффекта
 
-    def update(self, dt=1/60):
+    def update(self, dt=1 / 60):
         pass

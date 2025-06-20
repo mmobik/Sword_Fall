@@ -5,11 +5,6 @@ from .menu import Menu
 from .button import Button
 import sys
 
-from .menu import Menu
-from .button import Button
-from core.config import config
-from core.utils import load_image
-
 
 class MainMenu(Menu):
     def __init__(self, sound_manager, settings_callback, game_callback):
@@ -56,7 +51,7 @@ class MainMenu(Menu):
         # Проверяем, нужно ли обновить кэш
         if self._static_surface is None:
             self._pre_render_static()
-        
+
         # Если мышь не двигалась и язык не менялся - рисуем кэшированную версию
         if mouse_pos == self._last_mouse_pos and self._last_language == config.current_language:
             surface.blit(self._static_surface, (0, 0))
@@ -87,7 +82,9 @@ class MainMenu(Menu):
                 self._static_surface.blit(bg, (0, 0))
             else:
                 self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
-        except:
+        except (KeyError, pygame.error, TypeError) as e:
+            if config.DEBUG_MODE:
+                print(f"Ошибка загрузки фона: {e}")
             self._static_surface.fill((40, 40, 60))  # Фон по умолчанию
 
         # Рисуем все кнопки в их обычном состоянии
@@ -104,10 +101,11 @@ class MainMenu(Menu):
         """Обработчик открытия настроек"""
         self.settings_callback()
 
-    def exit_game(self):
+    @staticmethod
+    def exit_game():
         """Обработчик выхода из игры"""
         pygame.quit()
         sys.exit()
 
-    def update(self, dt=1/60):
+    def update(self, dt=1 / 60):
         pass

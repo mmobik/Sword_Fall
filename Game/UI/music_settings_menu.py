@@ -76,9 +76,9 @@ class MusicSettingsMenu(Menu):
             try:
                 image_path = f"assets/images/menu/settings/music_change/{level}.jpg"
                 self.music_animation_images[level] = load_image(image_path)
-            except:
+            except (KeyError, pygame.error, TypeError, FileNotFoundError) as e:
                 if config.DEBUG_MODE:
-                    print(f"Не удалось загрузить изображение анимации музыки для уровня {level}")
+                    print(f"Не удалось загрузить изображение анимации музыки для уровня {level}: {e}")
                 self.music_animation_images[level] = pygame.Surface((200, 100))
                 self.music_animation_images[level].fill((100, 100, 100))
 
@@ -90,12 +90,9 @@ class MusicSettingsMenu(Menu):
         return self.music_animation_images[closest_level]
 
     def _load_images_and_tracks(self):
-        std = {"default.jpg", "0.jpg", "10.jpg", "20.jpg", "30.jpg", "40.jpg", "50.jpg", "60.jpg", "70.jpg", "80.jpg",
-               "90.jpg", "100.jpg"}
         self.track_images = []
         self.slider_images = {}
         folder = "assets/images/menu/settings/music_change"
-        files = [f for f in os.listdir(folder) if f.endswith(".jpg") and f not in std]
         lang = "rus" if config.current_language == "russian" else "eng"
         # Связь: название для UI -> имя файла
         self.track_file_map = {
@@ -169,7 +166,7 @@ class MusicSettingsMenu(Menu):
         # Рисуем все треки и их ползунки
         for idx, (track_type, img, rect) in enumerate(self.track_images):
             surface.blit(img, rect)
-            self._draw_slider(surface, track_type, rect, mouse_pos)
+            self._draw_slider(surface, track_type, rect)
         for button in self.buttons:
             button.draw(surface, mouse_pos)
 
@@ -181,7 +178,7 @@ class MusicSettingsMenu(Menu):
             rect.y = 150
             surface.blit(img, rect)
 
-    def _draw_slider(self, surface, track_type, track_rect, mouse_pos):
+    def _draw_slider(self, surface, track_type, track_rect):
         slider_x = track_rect.right + 40
         slider_y = track_rect.y
         if track_type == "button":
@@ -212,7 +209,8 @@ class MusicSettingsMenu(Menu):
                 text_rect = text.get_rect(center=seg_rect.center)
                 surface.blit(text, text_rect)
 
-    def _nearest_level(self, percent):
+    @staticmethod
+    def _nearest_level(percent):
         return min([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], key=lambda x: abs(x - percent))
 
     def handle_event(self, event, mouse_pos=None):
@@ -251,7 +249,9 @@ class MusicSettingsMenu(Menu):
                 self._static_surface.blit(bg, (0, 0))
             else:
                 self._static_surface.fill((40, 40, 60))
-        except:
+        except (KeyError, pygame.error, TypeError) as e:
+            if config.DEBUG_MODE:
+                print(f"Ошибка загрузки фона настроек музыки: {e}")
             self._static_surface.fill((40, 40, 60))
         self._draw_title(self._static_surface)
         for button in self.buttons:
