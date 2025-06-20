@@ -88,7 +88,6 @@ class PlayerMovementHandler:
                     if steps_channel:
                         steps_channel.stop()
                         self.player._steps_channel = None
-        # --- Конец логики звука шагов ---
 
     def _update_animation_state(self, move_x, move_y, dt):
         self.state_change_time += dt

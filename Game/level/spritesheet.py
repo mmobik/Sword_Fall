@@ -7,7 +7,7 @@ class SpriteSheet:
     def __init__(self, filename: str, width: int = 128, height: int = 64) -> None:
         self.width = width
         self.height = height
-        self.sheet = None  # Важно инициализировать атрибут
+        self.sheet = None
 
         try:
             # Проверяем существование файла

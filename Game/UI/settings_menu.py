@@ -104,7 +104,6 @@ class SettingsMenu(Menu):
         if config.DEBUG_MODE:
             print("Открыты настройки игры")
         # Здесь будет логика меню настроек игры
-        # Например: self.game_state_manager.change_state("game_settings")
 
     @staticmethod
     def settings_graphics_menu():
@@ -112,7 +111,6 @@ class SettingsMenu(Menu):
         if config.DEBUG_MODE:
             print("Открыты графические настройки")
         # Здесь будет логика графических настроек
-        # Например: self.game_state_manager.change_state("graphics_settings")
 
     def open_language_menu(self):
         """Обработчик кнопки языковых настроек"""

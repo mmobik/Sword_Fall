@@ -15,10 +15,8 @@ class MusicSettingsMenu(Menu):
         self._last_mouse_pos = None
         self._last_language = config.current_language
 
-        # --- Кастомные хитбоксы для сегментов слайдера (шаблон для всех трёх полосок) ---
+        # Кастомные хитбоксы для сегментов слайдера (шаблон для всех трёх полосок)
         # Для каждого трека: 11 сегментов (0, 10, ..., 100)
-        # Координаты: (x, y, w, h) — абсолютные или относительные к левому верхнему углу слайдера
-        # Примерные значения — подставьте свои!
         self.slider_hitboxes = {
             "dark_fantasm": [  # Главное меню
                 (566, 335, 60, 95),  # 0%
@@ -104,7 +102,7 @@ class MusicSettingsMenu(Menu):
         for level in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
             self.slider_images[level] = load_image(os.path.join(folder, f"{level}.jpg"))
         self.slider_images['default'] = load_image(os.path.join(folder, "default.jpg"))
-        # --- Новое размещение: относительно кнопки Music ---
+        # Новое размещение: относительно кнопки Music
         music_img = load_image(
             config.get_image("MUSIC_SETTINGS_BTN", "before")) if config.current_language == "english" else load_image(
             config.get_image("MUSIC_SETTINGS_BTN_RUS", "before"))
