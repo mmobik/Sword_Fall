@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="31" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="448">
+ <tileset firstgid="1" source="room1.tsx"/>
+ <tileset firstgid="129" source="room_2.tsx"/>
+ <tileset firstgid="321" source="room_5.tsx"/>
+ <tileset firstgid="577" source="room_3.tsx"/>
+ <tileset firstgid="833" source="room_6.tsx"/>
+ <tileset firstgid="1089" source="room_8.tsx"/>
+ <tileset firstgid="1345" source="room_7.tsx"/>
+ <tileset firstgid="1601" name="sun_god" tilewidth="32" tileheight="32" tilecount="9" columns="3">
+  <image source="Tilesets/sun_god.png" width="96" height="106"/>
+ </tileset>
+ <tileset firstgid="1610" name="carpet" tilewidth="32" tileheight="32" tilecount="9" columns="3">
+  <image source="Tilesets/cover+.png" width="96" height="96"/>
+ </tileset>
+ <tileset firstgid="1619" name="royal_tile" tilewidth="32" tileheight="32" tilecount="2" columns="2">
+  <image source="Tilesets/royal_tile.png" width="64" height="32"/>
+ </tileset>
+ <tileset firstgid="1621" name="chest" tilewidth="32" tileheight="32" tilecount="12" columns="3">
+  <image source="Tilesets/chest.png" width="96" height="128"/>
+ </tileset>
+ <layer id="1" name="Floor" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJwzZmBgMCYRM5ChZxSP4lE8srAeFlyHRz0DGXbU4bDnOSMmBoorUNl/CtjsGbV71G5i7PZng+CB8vdItXskprVRu0ftHrV71O5Ru0ftHrV71O6RZDcAPXfEmQ==
+  </data>
+ </layer>
+ <layer id="18" name="carpet" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJzt0bEJACAMRUErl1Nw/22s0lkIiiLeg9THJykpann/vWCPKpNGXXTYbDb7Rzu6tfum/eO/2Ww2m81ms9ln7A7eXIvU
+  </data>
+ </layer>
+ <layer id="17" name="Wall" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztxjENACAQBEEaLIADcAD+nfECvgSqmWRz12spLeqPN/szGh82+ztaHzb7AAAAANx1AFDmD80=
+  </data>
+ </layer>
+ <layer id="19" name="doors" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20ON6AAAAAA4NsAEuQAAQ==
+  </data>
+ </layer>
+ <layer id="10" name="statue" width="31" height="39">
+  <properties>
+   <property name="render_order" value="foreground"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20ON6AAAAAA4NsAEuQAAQ==
+  </data>
+ </layer>
+ <layer id="14" name="fence" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20ON6AAAAAA4NsAEuQAAQ==
+  </data>
+ </layer>
+ <layer id="15" name="columns" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztyLsNgDAQBFEHNIehAcANGGiAT/FMAZdeguZJE+zWoZSJZhqpJu3oX2mjRkvijv6dDjqpJ+7ov+mhl67EHf2SJEmSJEl/9AGe5zGl
+  </data>
+ </layer>
+ <layer id="16" name="TheGuardians" width="31" height="39">
+  <properties>
+   <property name="overlap_player" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztlLEJADEMA1Pk4UfIuD9eRsgIGeHLTGCQ4YgbXS24QrJbMxF/T+c/yv0+6TzmHkn3AN0m3h25r4hod+S+IqLdeV8sM/nXJri7lXQv0L2T7n3h3m7gvuU85q7Efct5zF2J+5bzmLsS9y3nMXcl7lvOY+5K3Lecl9wHI3o2MQ==
+  </data>
+ </layer>
+ <layer id="9" name="chairs" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztzbERQEAUANEfXP/9oAJUcFSACpzktgMzAj/ZN7PxRkjvhhIx0lT+f888F1oT3pXnRnvC++B50pXwvnk2ehLekiRJkiR90QEVdA0D
+  </data>
+ </layer>
+ <layer id="3" name="tables" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20ON6AAAAAA4NsAEuQAAQ==
+  </data>
+ </layer>
+ <layer id="4" name="Decorations" width="31" height="39">
+  <data encoding="base64" compression="zlib">
+   eJztzrENACEMQ9EUESMyGmzAbQAbwFqk5USFEFD81zmy5IgAb8oqUnS8BctR5/2dqm20306y/B3Yxl3e3f4AAAAAALCiAzlQBfE=
+  </data>
+ </layer>
+ <objectgroup id="13" name="PlayerSpawn">
+  <properties>
+   <property name="type" value="player_spawn"/>
+  </properties>
+  <object id="397" x="499.667" y="1183.17">
+   <properties>
+    <property name="object_type" value="player_spawn"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="2" name="CollisionLayer">
+  <properties>
+   <property name="collision" type="bool" value="true"/>
+  </properties>
+  <object id="408" x="0.03125" y="1" width="991.787" height="353.146"/>
+  <object id="413" x="287.25" y="448.25" width="32.75" height="31.75">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="414" x="287.625" y="575.25" width="32.375" height="32.75">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="415" x="287.75" y="704" width="32.25" height="32">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="416" x="288" y="832.25" width="32" height="31.75">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="417" x="287.875" y="959.375" width="32.125" height="32.625">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="418" x="287.25" y="1087.38" width="32.75" height="32.625">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="419" x="288.125" y="1215.88" width="31.875" height="32.125">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="420" x="671.5" y="1215.5" width="32.5" height="32.5">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="421" x="671.75" y="1087.88" width="32.25" height="32.125">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="422" x="671.5" y="960.125" width="32.5" height="31.875">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="423" x="671.625" y="831.625" width="32.375" height="32.375">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="424" x="671.75" y="703.875" width="32.25" height="32.125">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="425" x="671.5" y="575.875" width="32.5" height="32.125">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="426" x="671.75" y="447.875" width="32.25" height="32.125">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="royal_guard"/>
+   </properties>
+  </object>
+  <object id="428" x="288" y="288.333" width="32" height="159.667"/>
+  <object id="429" x="287.333" y="480.333" width="32.6667" height="95.6667"/>
+  <object id="430" x="287.667" y="607.667" width="32.3333" height="96.3333"/>
+  <object id="432" x="287.333" y="864" width="32.6667" height="96"/>
+  <object id="433" x="288.667" y="735.667" width="31.3333" height="96.3333"/>
+  <object id="434" x="287.667" y="991.333" width="32.3333" height="96.6667"/>
+  <object id="436" x="287" y="1120.33" width="33" height="95.6667"/>
+  <object id="437" x="671.333" y="1119.67" width="32.6667" height="96.3333"/>
+  <object id="439" x="672" y="992" width="32" height="96"/>
+  <object id="440" x="672.333" y="864.333" width="31.6667" height="95.6667"/>
+  <object id="441" x="671.75" y="736" width="32.25" height="96"/>
+  <object id="442" x="671.75" y="608.25" width="32.25" height="95.75"/>
+  <object id="443" x="671.5" y="479.75" width="32.5" height="96.25"/>
+  <object id="444" x="671" y="288.25" width="33" height="159.75"/>
+ </objectgroup>
+ <objectgroup id="6" name="Triggers">
+  <object id="446" x="479.5" y="355.667" width="33" height="31.3333">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="king"/>
+   </properties>
+  </object>
+  <object id="447" x="342.494" y="1215.46" width="311.178" height="32.4924">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="doors"/>
+    <property name="spawn_point_name" value="royal_door_spawn"/>
+    <property name="target_map" value="assets/Tiles/Royal_one.tmx"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="7" name="SpawnPoints"/>
+</map>
