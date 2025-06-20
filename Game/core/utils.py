@@ -6,7 +6,6 @@
 """
 
 import pygame
-from core.config import config
 
 
 def load_image(path: str) -> pygame.Surface | None:
@@ -19,10 +18,10 @@ def load_image(path: str) -> pygame.Surface | None:
     Returns:
         Загруженная поверхность pygame или None в случае ошибки.
     """
-    full_path = path
+    from core.pathutils import resource_path
+    full_path = resource_path(path)
     try:
         return pygame.image.load(full_path).convert_alpha()
     except (pygame.error, FileNotFoundError) as e:
-        if config.DEBUG_MODE:
-            print(f"Ошибка загрузки изображения: {full_path}, {e}")
+        print(f"Ошибка загрузки изображения: {full_path}, {e}")
         return None

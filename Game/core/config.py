@@ -7,6 +7,7 @@ from typing import Dict, Union
 import json
 import os
 import pygame
+from core.pathutils import resource_path
 
 
 class GameConfig:
@@ -398,7 +399,7 @@ class GameConfig:
         """Безопасная загрузка изображения NPC с обработкой ошибок"""
         try:
             if npc_type.upper() in self.NPC_IMAGES:
-                return pygame.image.load(self.NPC_IMAGES[npc_type.upper()]).convert_alpha()
+                return pygame.image.load(resource_path(self.NPC_IMAGES[npc_type.upper()])).convert_alpha()
             else:
                 if self.DEBUG_MODE:
                     print(f"NPC image not found in config: {npc_type}")

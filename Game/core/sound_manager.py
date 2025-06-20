@@ -9,6 +9,7 @@ import pygame
 import os
 import json
 from core.config import config
+from core.pathutils import resource_path
 
 
 class SoundManager:
@@ -97,7 +98,7 @@ class SoundManager:
             Загруженный звук или пустой звук в случае ошибки.
         """
         # Формируем правильный путь
-        full_path = os.path.join("assets", "sounds", "game_sounds", filename)
+        full_path = resource_path(os.path.join("assets", "sounds", "game_sounds", filename))
 
         try:
             sound = pygame.mixer.Sound(full_path)
@@ -120,7 +121,7 @@ class SoundManager:
             loop: Зацикливать ли музыку.
         """
         # Формируем полный путь к музыке
-        full_path = os.path.join("assets", "sounds", "soundtracks", music_name)
+        full_path = resource_path(os.path.join("assets", "sounds", "soundtracks", music_name))
         
         # Определяем индивидуальную громкость для этого трека
         key = os.path.splitext(music_name)[0].lower()

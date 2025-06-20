@@ -12,6 +12,7 @@ from level.camera import Camera
 from level.level_renderer import LevelRenderer
 from level.collisions import CollisionHandler
 from core.config import config
+from core.pathutils import resource_path
 
 
 class GameResources:
@@ -42,7 +43,7 @@ class GameResources:
             if config.DEBUG_MODE:
                 print("Загрузка карты...")
 
-            self.game.level = pytmx.TiledMap(config.LEVEL_MAP_PATH)
+            self.game.level = pytmx.TiledMap(resource_path(config.LEVEL_MAP_PATH))
             map_width = self.game.level.width * self.game.level.tilewidth
             map_height = self.game.level.height * self.game.level.tileheight
 

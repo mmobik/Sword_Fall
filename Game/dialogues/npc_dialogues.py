@@ -1,5 +1,6 @@
 import json
 import os
+from core.pathutils import resource_path
 
 
 class NPCDialogue:
@@ -10,9 +11,9 @@ class NPCDialogue:
         self.dialogues = self._load_dialogues()
 
     def _load_dialogues(self):
-        if not os.path.exists(self.dialogue_file):
+        if not os.path.exists(resource_path(self.dialogue_file)):
             return []
-        with open(self.dialogue_file, 'r', encoding='utf-8') as f:
+        with open(resource_path(self.dialogue_file), 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data.get('dialogues', [])
 
@@ -43,7 +44,7 @@ class RoyalGuardDialogue:
         self.phase_index = 0
 
     def _load_dialogues(self):
-        with open(self.dialogue_file, 'r', encoding='utf-8') as f:
+        with open(resource_path(self.dialogue_file), 'r', encoding='utf-8') as f:
             data = json.load(f)
         guard_data = data['interactive']['royal_guard']
         self.dialog_flow = guard_data['dialog_flow']
@@ -95,7 +96,7 @@ class KingDialogue:
         self.in_dialogue_chain = False  # Флаг, что мы в процессе цепочки диалогов
 
     def _load_dialogues(self):
-        with open(self.dialogue_file, 'r', encoding='utf-8') as f:
+        with open(resource_path(self.dialogue_file), 'r', encoding='utf-8') as f:
             data = json.load(f)
         king_data = data['interactive']['king']
         self.dialog_flow = king_data['dialog_flow']

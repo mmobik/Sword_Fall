@@ -5,7 +5,8 @@ echo ================================================
 
 echo.
 echo 🎮 Запуск сборки...
-python build_exe.py
+cd ..
+python build_tools\build_exe.py
 
 echo.
 echo 📁 Проверка результата...
