@@ -49,7 +49,7 @@ class GameLoop:
         Returns:
             True, если игра должна продолжиться, False для выхода.
         """
-        self.game._update_talk_button_state()
+        self.game.update_talk_button_state()
 
         if self.game.waiting_for_first_update:
             for event in pygame.event.get():
@@ -130,8 +130,8 @@ class GameLoop:
 
         elif self.game.game_state_manager.game_state == "new_game":
             self.game.virtual_screen.fill((0, 0, 0))
-            self.game._render_game()
-            self.game._update_talk_button_alpha()
+            self.game.render_game()
+            self.game.update_talk_button_alpha()
 
             # Отрисовка кнопки разговора
             if (self.game.talk_button_img and self.game.talk_button_alpha > 0 and
@@ -156,7 +156,7 @@ class GameLoop:
 
             # Отрисовка диалогов
             if self.game.show_dialogue and self.game.dialogue_panel_img:
-                self.game._update_typewriter_text()
+                self.game.update_typewriter_text()
                 self.game.dialogue_panel.render()
 
                 if self.game.active_npc_obj:

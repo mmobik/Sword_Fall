@@ -252,6 +252,26 @@ class Game:
         """Загрузить новую карту."""
         self.game_resources.load_new_map(map_path)
 
+    def load_new_map(self, map_path):
+        """Публичный метод для загрузки новой карты."""
+        self._load_new_map(map_path)
+
+    def update_talk_button_state(self):
+        """Публичный метод для обновления состояния кнопки разговора."""
+        self._update_talk_button_state()
+
+    def render_game(self):
+        """Публичный метод для отрисовки игровой сцены."""
+        self._render_game()
+
+    def update_talk_button_alpha(self):
+        """Публичный метод для обновления прозрачности кнопки разговора."""
+        self._update_talk_button_alpha()
+
+    def update_typewriter_text(self):
+        """Публичный метод для обновления текста с эффектом печатной машинки."""
+        self._update_typewriter_text()
+
 
 def main():
     """Главная функция запуска игры."""

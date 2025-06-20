@@ -79,7 +79,8 @@ class GameResources:
                 print(f"Размер хитбокса: {self.game.player.hitbox.size}")
 
             self.game.all_sprites = pygame.sprite.Group()
-            self.game.all_sprites.add(self.game.player)
+            # Player наследуется от pygame.sprite.Sprite, поэтому можно добавлять в группу
+            self.game.all_sprites.add(self.game.player)  # type: ignore
             self.game.camera = Camera(map_width, map_height)
             self.game.level_renderer = LevelRenderer(self.game.level, self.game.camera)
 

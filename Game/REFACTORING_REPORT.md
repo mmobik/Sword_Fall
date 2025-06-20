@@ -58,6 +58,7 @@
 - ✅ **Добавлен метод `load_new_map()` для загрузки новых карт**
 - ✅ Добавлены типизированные аннотации
 - ✅ Исправлена ошибка типизации с использованием `setattr`
+- ✅ **Исправлено предупреждение типизации в `core/game_resources.py`: добавлен комментарий `# type: ignore` для подавления предупреждения при добавлении Player в группу спрайтов**
 
 #### 5.2 `core/game_loop.py`
 - ✅ Добавлен модульный докстринг
@@ -67,6 +68,7 @@
 - ✅ Добавлены комментарии для разделения логики
 - ✅ **Удалены неиспользуемые импорты: `DialoguePanel`, `DoorInteractionHandler`, `KingDialogue`, `RoyalGuardDialogue`**
 - ✅ **Обновлен вызов загрузки ресурсов: теперь используется `game_resources.load_game_resources()`**
+- ✅ **Исправлены обращения к защищенным членам в `core/game_loop.py`: добавлены публичные методы для `_update_talk_button_state`, `_render_game`, `_update_talk_button_alpha`, `_update_typewriter_text`**
 
 #### 5.3 `core/dialogue_panel.py`
 - ✅ Добавлен модульный докстринг
@@ -173,3 +175,5 @@
 - ✅ **Исправлены слишком широкие блоки `except` в `UI/settings_menu.py` и `UI/music_settings_menu.py`: указаны конкретные исключения**
 - ✅ **Исправлены слишком широкие блоки `except` в `core/config.py`: указаны конкретные исключения `FileNotFoundError`, `json.JSONDecodeError`, `OSError`**
 - ✅ **Исправлена проблема с автоматическим возвратом при смене языка: убран автоматический переход в меню настроек**
+- ✅ **Исправлен доступ к защищенному члену `_load_new_map` в `core/door_handler.py`: добавлен публичный метод `load_new_map` в `game.py`**
+- ✅ **Исправлены обращения к защищенным членам в `core/game_loop.py`: добавлены публичные методы для `_update_talk_button_state`, `_render_game`, `_update_talk_button_alpha`, `_update_typewriter_text`**

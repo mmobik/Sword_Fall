@@ -47,4 +47,4 @@ class DoorInteractionHandler:
         spawn_point_name = obj.properties.get('spawn_point_name',
                                               'royal_door_spawn')
         self.game.next_spawn_point_name = spawn_point_name
-        self.game._load_new_map(new_map_path)
+        self.game.load_new_map(new_map_path)
