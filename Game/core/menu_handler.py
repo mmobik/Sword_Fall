@@ -69,8 +69,7 @@ class MenuHandler:
             if menu and hasattr(menu, 'update_textures'):
                 menu.update_textures()
 
-        self.show_settings()
-
+        # Не возвращаемся автоматически - пользователь сам нажмет "Назад"
         if self.game.game_state_manager.current_menu:
             self.game.game_state_manager.current_menu.draw(
                 self.game.screen, current_mouse_pos)

@@ -325,7 +325,9 @@ class GameConfig:
                     lang = settings.get("language")
                     if lang in ["english", "russian"]:
                         self.current_language = lang
-        except:
+        except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+            if self.DEBUG_MODE:
+                print(f"Ошибка загрузки настроек языка: {e}")
             pass
 
     def _save_language_setting(self):
@@ -341,7 +343,9 @@ class GameConfig:
             settings["language"] = self.current_language
             with open(config_path, "w") as f:
                 json.dump(settings, f)
-        except:
+        except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+            if self.DEBUG_MODE:
+                print(f"Ошибка сохранения настроек языка: {e}")
             pass
 
     def get_text(self, key: str) -> str:
