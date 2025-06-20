@@ -87,7 +87,7 @@
   <properties>
    <property name="type" value="player_spawn"/>
   </properties>
-  <object id="352" name="точка спавна" x="604.689" y="212.083">
+  <object id="352" name="точка спавна" x="605.356" y="1210.08">
    <properties>
     <property name="object_type" value="player_spawn"/>
    </properties>

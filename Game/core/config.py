@@ -104,19 +104,19 @@ class GameConfig:
         self.PLAYER_STATES = {
             # Idle-анимации (стоит на месте)
             "idle_front": {
-                "sprite_sheet": "assets/sprites/player/armed/idle_front.png",
+                "sprite_sheet": "assets/sprites/player/unarmed/idle_front.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
             },
             "idle_right": {
-                "sprite_sheet": "assets/sprites/player/armed/idle_right.png",
+                "sprite_sheet": "assets/sprites/player/unarmed/idle_right.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
             },
             "idle_left": {
-                "sprite_sheet": "assets/sprites/player/armed/idle_left.png",
+                "sprite_sheet": "assets/sprites/player/unarmed/idle_left.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
@@ -130,16 +130,16 @@ class GameConfig:
 
             # Run-анимации (движение)
             "run_right": {
-                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "sprite_sheet": "assets/sprites/player/unarmed/run_right.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.13,
                 "flip": False
             },
             "run_left": {
-                "sprite_sheet": "assets/sprites/player/armed/run_down.png",
+                "sprite_sheet": "assets/sprites/player/unarmed/run_left.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.13,
-                "flip": True
+                "flip": False
             },
             "run_up": {
                 "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",

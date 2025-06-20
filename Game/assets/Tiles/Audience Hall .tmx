@@ -84,7 +84,7 @@
   <properties>
    <property name="type" value="player_spawn"/>
   </properties>
-  <object id="397" x="489.167" y="450.17">
+  <object id="397" x="499.667" y="1183.17">
    <properties>
     <property name="object_type" value="player_spawn"/>
    </properties>
