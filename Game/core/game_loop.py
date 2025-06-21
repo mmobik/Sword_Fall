@@ -63,7 +63,9 @@ class GameLoop:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F3:
+                    old_debug = config.DEBUG_MODE
                     config.set_debug_mode(not config.DEBUG_MODE)
+                    print(f"[DEBUG] Режим отладки {'включен' if config.DEBUG_MODE else 'выключен'} (был: {old_debug})")
 
                 if (event.key == pygame.K_ESCAPE and
                         self.game.game_state_manager.game_state == "new_game"):
@@ -78,6 +80,59 @@ class GameLoop:
                 if (event.key == pygame.K_e and
                         self.game.game_state_manager.game_state == "new_game"):
                     self.game.dialogue_handler.try_interact_with_npc()
+                
+                # Воскрешение игрока
+                if (event.key == pygame.K_r and
+                        self.game.game_state_manager.game_state == "new_game" and
+                        self.game.player and not self.game.player.is_alive()):
+                    self.game.player.revive()
+                
+                # Тестовые клавиши для демонстрации системы характеристик (только в режиме отладки)
+                if config.DEBUG_MODE and self.game.game_state_manager.game_state == "new_game" and self.game.player:
+                    print(f"[DEBUG] Проверка тестовых клавиш: DEBUG_MODE={config.DEBUG_MODE}, state={self.game.game_state_manager.game_state}, player={self.game.player is not None}")
+                    if event.key == pygame.K_h:
+                        damage = self.game.player.take_damage(10.0)
+                        print(f"[DEBUG] Игрок получил урон: {damage} HP")
+                    elif event.key == pygame.K_j:
+                        heal = self.game.player.heal(20.0)
+                        print(f"[DEBUG] Игрок восстановился: {heal} HP")
+                    elif event.key == pygame.K_k:
+                        if self.game.player.stats.use_stamina(30.0):
+                            print("[DEBUG] Использовано 30 SP")
+                        else:
+                            print("[DEBUG] Недостаточно выносливости!")
+                    elif event.key == pygame.K_l:
+                        levels = self.game.player.add_experience(50.0)
+                        print(f"[DEBUG] Получено 50 XP, уровней: {levels}")
+                elif event.key in [pygame.K_h, pygame.K_j, pygame.K_k, pygame.K_l]:
+                    print(f"[DEBUG] Тестовая клавиша нажата, но условия не выполнены:")
+                    print(f"  DEBUG_MODE: {config.DEBUG_MODE}")
+                    print(f"  game_state: {self.game.game_state_manager.game_state}")
+                    print(f"  player exists: {self.game.player is not None}")
+                
+                # Альтернативные тестовые клавиши (работают всегда, если игрок существует)
+                if (self.game.game_state_manager.game_state == "new_game" and 
+                    self.game.player and event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5]):
+                    if event.key == pygame.K_1:  # Цифра 1
+                        damage = self.game.player.take_damage(10.0, source="test")
+                        print(f"[TEST] Игрок получил урон: {damage} HP")
+                    elif event.key == pygame.K_2:  # Цифра 2
+                        heal = self.game.player.heal(20.0, source="test")
+                        print(f"[TEST] Игрок восстановился: {heal} HP")
+                    elif event.key == pygame.K_3:  # Цифра 3
+                        if self.game.player.stats.use_stamina(30.0):
+                            print("[TEST] Использовано 30 SP")
+                        else:
+                            print("[TEST] Недостаточно выносливости!")
+                    elif event.key == pygame.K_4:  # Цифра 4
+                        levels = self.game.player.add_experience(50.0)
+                        print(f"[TEST] Получено 50 XP, уровней: {levels}")
+                    elif event.key == pygame.K_5:  # Цифра 5
+                        if not self.game.player.is_alive():
+                            self.game.player.revive()
+                            print("[TEST] Игрок воскрешен!")
+                        else:
+                            print("[TEST] Игрок уже жив!")
 
             if self.game.game_state_manager.current_menu:
                 mouse_pos = pygame.mouse.get_pos()

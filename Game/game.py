@@ -21,6 +21,7 @@ from UI.settings_menu import SettingsMenu
 from UI.language_menu import LanguageMenu
 from UI.music_settings_menu import MusicSettingsMenu
 from UI.talk_button import TalkButton
+from UI.player_ui import PlayerUI
 
 
 class Game:
@@ -144,6 +145,9 @@ class Game:
         self.all_sprites = None
         self.npc_dialogues = {}
         self.interactive_objects = []
+        
+        # UI игрока (будет инициализирован после создания игрока)
+        self.player_ui = None
 
     @staticmethod
     def time():
@@ -200,6 +204,10 @@ class Game:
             for sprite in self.all_sprites:
                 self.virtual_screen.blit(sprite.image, self.camera.apply(sprite.rect))
 
+        # Отрисовка индикаторов урона и лечения
+        if self.player:
+            self.player.draw_indicators(self.virtual_screen)
+
         # Отладочная отрисовка
         if config.DEBUG_MODE and self.player and self.camera:
             pygame.draw.rect(self.virtual_screen, (0, 255, 0),
@@ -215,6 +223,15 @@ class Game:
                 self.virtual_screen,
                 (self.player.hitbox.centerx, self.player.hitbox.centery)
             )
+
+        # Отрисовка UI игрока
+        if self.player_ui:
+            self.player_ui.update(self.dt)
+            self.player_ui.draw()
+            
+            # Отрисовка экрана смерти
+            if not self.player.is_alive():
+                self.player_ui.draw_death_screen()
 
         if config.DEBUG_MODE:
             self._draw_debug_info()

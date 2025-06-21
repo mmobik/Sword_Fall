@@ -79,6 +79,19 @@ class GameResources:
                 print(f"Размер спрайта: {self.game.player.image.get_size()}")
                 print(f"Размер хитбокса: {self.game.player.hitbox.size}")
 
+            # Инициализация UI игрока
+            from UI.player_ui import PlayerUI
+            # Используем virtual_screen для отрисовки UI
+            self.game.player_ui = PlayerUI(self.game.virtual_screen, self.game.player.stats)
+            
+            # Подписываем UI на изменения характеристик
+            self.game.player.stats.add_observer(self.game.player_ui)
+            
+            if config.DEBUG_MODE:
+                print(f"[RESOURCES DEBUG] UI игрока создан: {self.game.player_ui}")
+                print(f"[RESOURCES DEBUG] Статистика игрока: HP={self.game.player.stats.health.current_value}/{self.game.player.stats.health.max_value}")
+                print(f"[RESOURCES DEBUG] UI подписан на изменения характеристик")
+
             self.game.all_sprites = pygame.sprite.Group()
             # Player наследуется от pygame.sprite.Sprite, поэтому можно добавлять в группу
             self.game.all_sprites.add(self.game.player)  # type: ignore

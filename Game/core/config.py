@@ -3,7 +3,7 @@
 Все настройки доступны через глобальный экземпляр config.
 """
 
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 import json
 import os
 import pygame
@@ -162,7 +162,7 @@ class GameConfig:
             "DEFAULT_COLLISION": True
         }
 
-        self.DEBUG_MODE = False
+        self.DEBUG_MODE = True  # Включено для отладки системы характеристик
         self.DEBUG_COLORS = {
             "COLLISION": (255, 0, 0),  # Красный - объекты коллизий
             "HITBOX": (0, 255, 0),  # Зеленый - хитбокс игрока
@@ -353,7 +353,7 @@ class GameConfig:
         """Возвращает локализованный текст по ключу"""
         return self.LANGUAGE_TEXT[self.current_language].get(key, key)
 
-    def get_image(self, key: str, state: str = None) -> Union[str, Dict[str, str], None]:
+    def get_image(self, key: str, state: Optional[str] = None) -> Union[str, Dict[str, str], None]:
         """
         Возвращает путь к изображению с учетом языка
         :param key: Ключ изображения
@@ -379,12 +379,12 @@ class GameConfig:
             return path
         return None
 
-    def get_image_path(self, key: str, state: str = None) -> Union[str, None]:
+    def get_image_path(self, key: str, state: Optional[str] = None) -> Union[str, None]:
         """Алиас для get_image (совместимость)"""
         result = self.get_image(key, state) if state is not None else self.get_image(key)
         return result if isinstance(result, str) else None
 
-    def get_image_cached(self, key, state=None):
+    def get_image_cached(self, key, state: Optional[str] = None):
         cache_key = f"{key}_{state}"
         if cache_key not in self._image_cache:
             img = self.get_image(key, state) if state is not None else self.get_image(key)
