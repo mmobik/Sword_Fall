@@ -101,9 +101,11 @@ class MainMenu(Menu):
         """Обработчик открытия настроек"""
         self.settings_callback()
 
-    @staticmethod
-    def exit_game():
+    def exit_game(self):
         """Обработчик выхода из игры"""
+        # Сохраняем настройки звука перед выходом
+        if self.sound_manager:
+            self.sound_manager.save_settings()
         pygame.quit()
         sys.exit()
 

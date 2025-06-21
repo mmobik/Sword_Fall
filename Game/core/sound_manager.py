@@ -22,6 +22,9 @@ class SoundManager:
 
     def __init__(self):
         """Инициализация менеджера звука."""
+        # Ссылка на объект Game для доступа к глобальному состоянию
+        self.game = None
+        
         # Инициализация громкости
         self.music_volume = 0.5
         self.sound_volume = 0.7
@@ -60,11 +63,14 @@ class SoundManager:
                     self.music_volume = settings.get("music_volume", 0.5)
                     self.sound_volume = settings.get("sound_volume", 0.7)
                     self.music_volumes = settings.get("music_volumes", {})
-                    
-            # Синхронизируем громкость шага с музыкой после загрузки настроек
-            steps = self.sounds.get('steps')
-            if steps:
-                steps.set_volume(self.music_volumes.get('central_hall', 1.0))
+            
+            # Явно применяем громкость музыки и звуков после загрузки настроек
+            pygame.mixer.music.set_volume(self.music_volume)
+            for name, sound in self.sounds.items():
+                if name == 'steps':
+                    sound.set_volume(self.music_volume)
+                else:
+                    sound.set_volume(self.sound_volume)
         except Exception as e:
             if config.DEBUG_MODE:
                 print(f"Ошибка загрузки настроек звука: {e}")
@@ -125,16 +131,15 @@ class SoundManager:
         
         # Определяем индивидуальную громкость для этого трека
         key = os.path.splitext(music_name)[0].lower()
-        volume = self.music_volumes.get(key, 1.0)
+        volume = self.music_volumes.get(key, self.music_volume)
         
         try:
             if self.current_music != full_path:
                 pygame.mixer.music.stop()
                 pygame.mixer.music.load(full_path)
-                pygame.mixer.music.set_volume(volume)
+                pygame.mixer.music.set_volume(self.music_volume)
                 pygame.mixer.music.play(-1 if loop else 0)
                 self.current_music = full_path
-                self.music_volume = volume
         except pygame.error as e:
             if config.DEBUG_MODE:
                 print(f"[SoundManager] Ошибка загрузки музыки {full_path}: {e}")
@@ -148,12 +153,11 @@ class SoundManager:
             sound_name: Имя звука для воспроизведения.
         """
         if sound_name in self.sounds:
-            # Для шага выставляем громкость по игровому треку (central_hall)
+            # Для шага используем общую громкость музыки
             if sound_name == 'steps':
-                steps_volume = self.music_volumes.get('central_hall', 1.0)
-                self.sounds['steps'].set_volume(steps_volume)
-                if steps_volume == 0:
-                    return  # Не проигрывать шаги при нулевой громкости игры
+                self.sounds['steps'].set_volume(self.music_volume)
+                if self.music_volume == 0:
+                    return  # Не проигрывать шаги при нулевой громкости
             self.sounds[sound_name].play()
 
     def stop_music(self) -> None:
@@ -171,11 +175,11 @@ class SoundManager:
         self.music_volume = max(0.0, min(1.0, volume))
         pygame.mixer.music.set_volume(self.music_volume)
         
-        # Синхронизируем громкость шагов с central_hall
+        # Синхронизируем громкость шагов с общей громкостью музыки
         steps = self.sounds.get('steps')
         if steps:
-            steps.set_volume(self.music_volumes.get('central_hall', 1.0))
-            
+            steps.set_volume(self.music_volume)
+        
         # Сохраняем настройки при изменении
         self.save_settings()
 
@@ -189,9 +193,9 @@ class SoundManager:
         self.sound_volume = max(0.0, min(1.0, volume))
         
         for name, sound in self.sounds.items():
-            # steps всегда равен громкости central_hall
+            # steps всегда равен громкости музыки
             if name == 'steps':
-                sound.set_volume(self.music_volumes.get('central_hall', 1.0))
+                sound.set_volume(self.music_volume)
             else:
                 sound.set_volume(self.sound_volume)
                 
@@ -218,10 +222,9 @@ class SoundManager:
                 pygame.mixer.music.set_volume(value)
                 self.music_volume = value
                 
-        # Синхронизируем громкость шага с игровым треком
-        if key == 'central_hall' and 'steps' in self.sounds:
-            self.sounds['steps'].set_volume(value)
-            
+        # Звук ходьбы всегда синхронизирован с общей громкостью музыки
+        # Никаких дополнительных действий не требуется
+        
         self.save_settings()
 
     def get_track_volume(self, track_type: str) -> float:

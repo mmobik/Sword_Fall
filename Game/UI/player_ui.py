@@ -27,37 +27,48 @@ class PlayerUI(StatObserver):
         # Загружаем изображение game_bar
         self.game_bar_image = self._load_game_bar_image()
         
-        # Загружаем изображение экипировки
-        self.equipment_image = self._load_equipment_image()
+        # Загружаем изображение belt
+        self.belt_image = self._load_belt_image()
         
-        # Создаем инвентарь
-        self.inventory = Inventory(screen, player_stats)
+        # Создаем инвентарь с восстановлением состояния
+        initial_open = False
+        if hasattr(player_stats, 'game') and player_stats.game is not None and hasattr(player_stats.game, 'inventory_open_state'):
+            initial_open = player_stats.game.inventory_open_state
+            if config.DEBUG_MODE:
+                print(f"[UI DEBUG] Получено состояние из game: {initial_open}")
+        else:
+            if config.DEBUG_MODE:
+                print(f"[UI DEBUG] game не найден в player_stats, используем False")
+        self.inventory = Inventory(screen, player_stats, initial_open=initial_open)
         
         # Настройки UI
         self.ui_padding = 20
         self.game_bar_x = 20  # Сдвигаем правее
-        self.game_bar_y = 50   # Сдвигаем вниз
-        self.text_color = config.COLORS["WHITE"]
+        self.game_bar_y = 20
         
-        # Настройки позиционирования изображения экипировки
-        self.equipment_offset_x = - 400  # Отступ от game_bar по X
-        self.equipment_offset_y = 350   # Отступ от game_bar по Y
+        # Позиция belt (внизу экрана)
+        self.belt_y = config.VIRTUAL_HEIGHT - 100  # Отступ снизу
         
-        # Шрифты
+        # Анимации для изменений характеристик
+        self.animation_duration = 1.0  # секунды
+        self.animation_timers = {}
+        self.old_values = {}
+        
+        # Кэшируем проверки для оптимизации
+        self._has_health = hasattr(player_stats, 'health')
+        self._has_stamina = hasattr(player_stats, 'stamina')
+        
+        # Шрифты и цвета
         self.font_small = pygame.font.Font(None, 20)
         self.font_medium = pygame.font.Font(None, 24)
         self.font_large = pygame.font.Font(None, 28)
-        
-        # Анимация изменений
-        self.animation_duration = 0.5
-        self.animation_timers = {}
-        self.old_values = {}
+        self.text_color = config.COLORS["WHITE"]
     
     def _load_game_bar_image(self) -> Optional[pygame.Surface]:
         """Загружает изображение game_bar.png."""
         try:
             # Путь к изображению
-            image_path = "assets/images/game/game_bar.png"
+            image_path = "assets/images/game/playerData/game_bar.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
                 if config.DEBUG_MODE:
@@ -70,28 +81,25 @@ class PlayerUI(StatObserver):
             print(f"[UI ERROR] Ошибка загрузки game_bar: {e}")
             return None
     
-    def _load_equipment_image(self) -> Optional[pygame.Surface]:
-        """Загружает изображение equipment.png."""
+    def _load_belt_image(self) -> Optional[pygame.Surface]:
+        """Загружает изображение belt.png."""
         try:
             # Путь к изображению
-            image_path = "assets/images/game/equipment.png"
+            image_path = "assets/images/game/playerData/belt.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
                 if config.DEBUG_MODE:
-                    print(f"[UI DEBUG] Изображение equipment загружено: {image.get_size()}")
+                    print(f"[UI DEBUG] Изображение belt загружено: {image.get_size()}")
                 return image
             else:
                 print(f"[UI ERROR] Файл не найден: {image_path}")
                 return None
         except Exception as e:
-            print(f"[UI ERROR] Ошибка загрузки equipment: {e}")
+            print(f"[UI ERROR] Ошибка загрузки belt: {e}")
             return None
     
     def on_stat_changed(self, stat_name: str, old_value: float, new_value: float):
         """Вызывается при изменении характеристики."""
-        if config.DEBUG_MODE:
-            print(f"[UI DEBUG] Изменение характеристики: {stat_name} {old_value:.1f} -> {new_value:.1f} (разница: {new_value - old_value:.1f})")
-        
         self.old_values[stat_name] = old_value
         self.animation_timers[stat_name] = self.animation_duration
     
@@ -112,7 +120,7 @@ class PlayerUI(StatObserver):
                 # Открыть/закрыть инвентарь
                 self.inventory.toggle_inventory()
                 if config.DEBUG_MODE:
-                    print(f"[UI DEBUG] Инвентарь {'открыт' if self.inventory.inventory_open else 'закрыт'}")
+                    print(f"[UI DEBUG] Инвентарь переключен")
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Левый клик
@@ -122,16 +130,16 @@ class PlayerUI(StatObserver):
     def draw(self):
         """Отрисовывает интерфейс игрока."""
         # Отладочная информация только в режиме отладки
-        if hasattr(self.player_stats, 'health') and config.DEBUG_MODE:
+        if self._has_health and config.DEBUG_MODE:
             print(f"[UI DEBUG] Отрисовка UI: HP={self.player_stats.health.current_value}/{self.player_stats.health.max_value}, SP={self.player_stats.stamina.current_value}/{self.player_stats.stamina.max_value}")
         
         # Отрисовываем только изображение game_bar
         if self.game_bar_image:
             self.screen.blit(self.game_bar_image, (self.game_bar_x, self.game_bar_y))
         
-        # Отрисовываем изображение экипировки
-        if self.equipment_image and self.game_bar_image:
-            self.screen.blit(self.equipment_image, (self.game_bar_x + self.game_bar_image.get_width() + self.equipment_offset_x, self.game_bar_y + self.equipment_offset_y))
+        # Отрисовываем изображение belt
+        if self.belt_image:
+            self.screen.blit(self.belt_image, (self.game_bar_x, self.belt_y))
         
         # Отрисовываем инвентарь
         self.inventory.draw()

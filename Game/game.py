@@ -110,6 +110,9 @@ class Game:
         self.talk_button = TalkButton(self)
         self.game_resources = GameResources(self)
 
+        # Глобальное состояние инвентаря
+        self.inventory_open_state = False
+
     def _init_menus(self):
         """Инициализация всех меню игры."""
         self.main_menu = MainMenu(
@@ -176,6 +179,7 @@ class Game:
 
     def start_game(self, state: str):
         """Начать игру с указанным состоянием."""
+        self.inventory_open_state = False  # Сброс состояния инвентаря при старте новой игры
         self.menu_handler.start_game(state)
 
     def _update_talk_button_state(self):

@@ -43,7 +43,10 @@ class Player(pygame.sprite.Sprite):
         self.is_walking = False
 
         # Система характеристик
-        self.stats = PlayerStats(max_health=100.0, max_stamina=100.0)
+        game = None
+        if sound_manager and hasattr(sound_manager, 'game'):
+            game = sound_manager.game
+        self.stats = PlayerStats(max_health=100.0, max_stamina=100.0, game=game)
         
         # Настройки движения и выносливости
         self.stamina_cost_per_second = 10.0  # Расход выносливости в секунду при движении
@@ -132,8 +135,6 @@ class Player(pygame.sprite.Sprite):
         """Обрабатывает расход выносливости при движении."""
         if self.is_walking:
             stamina_cost = self.stamina_cost_per_second * dt
-            if config.DEBUG_MODE:
-                print(f"[PLAYER DEBUG] Расход выносливости: {stamina_cost:.2f} SP (ходьба)")
             
             if not self.stats.use_stamina(stamina_cost):
                 # Если выносливости недостаточно, замедляем игрока

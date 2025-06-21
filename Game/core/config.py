@@ -162,7 +162,7 @@ class GameConfig:
             "DEFAULT_COLLISION": True
         }
 
-        self.DEBUG_MODE = False  # Включено для отладки системы характеристик
+        self.DEBUG_MODE = False  # Отключено для лучшей производительности
         self.DEBUG_COLORS = {
             "COLLISION": (255, 0, 0),  # Красный - объекты коллизий
             "HITBOX": (0, 255, 0),  # Зеленый - хитбокс игрока

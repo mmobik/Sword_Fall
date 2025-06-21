@@ -13,6 +13,7 @@ from level.level_renderer import LevelRenderer
 from level.collisions import CollisionHandler
 from core.config import config
 from core.pathutils import resource_path
+from core.sound_manager import SoundManager
 
 
 class GameResources:
@@ -65,13 +66,25 @@ class GameResources:
             if config.DEBUG_MODE:
                 print(f"Загружено объектов коллизий: {len(self.game.collision_objects)}")
 
+            # Создаем менеджер звука
+            self.sound_manager = SoundManager()
+            if config.DEBUG_MODE:
+                print(f"[RESOURCES DEBUG] Создан sound_manager: {self.sound_manager}")
+            
+            # Устанавливаем ссылку на game в sound_manager для доступа к глобальному состоянию
+            self.sound_manager.game = self.game
+            if config.DEBUG_MODE:
+                print(f"[RESOURCES DEBUG] Установлен game в sound_manager: {self.sound_manager.game}")
+                print(f"[RESOURCES DEBUG] inventory_open_state: {getattr(self.game, 'inventory_open_state', 'NOT_FOUND')}")
+
             # Создание игрока
             if config.DEBUG_MODE:
                 print("Создание игрока...")
 
             spawn_x, spawn_y = self._find_spawn_point()
 
-            # Создание игрока и связанных объектов
+            # Передаем ссылку на game в sound_manager, чтобы Player мог получить game
+            self.game.sound_manager.game = self.game
             self.game.player = Player(spawn_x, spawn_y, self.game.sound_manager)
 
             if config.DEBUG_MODE:
@@ -79,9 +92,21 @@ class GameResources:
                 print(f"Размер спрайта: {self.game.player.image.get_size()}")
                 print(f"Размер хитбокса: {self.game.player.hitbox.size}")
 
+            # Сохраняем состояние инвентаря в глобальное поле игры ПЕРЕД созданием нового UI
+            if hasattr(self.game, 'player_ui') and self.game.player_ui:
+                self.game.inventory_open_state = self.game.player_ui.inventory.inventory_open
+                if config.DEBUG_MODE:
+                    print(f"[RESOURCES DEBUG] Сохраняем состояние инвентаря в game: {self.game.inventory_open_state}")
+            else:
+                self.game.inventory_open_state = False
+                if config.DEBUG_MODE:
+                    print(f"[RESOURCES DEBUG] player_ui не существует, используем False")
+
+            if config.DEBUG_MODE:
+                print(f"[RESOURCES DEBUG] Перед созданием UI: inventory_open_state={self.game.inventory_open_state}")
+
             # Инициализация UI игрока
             from UI.player_ui import PlayerUI
-            # Используем virtual_screen для отрисовки UI
             self.game.player_ui = PlayerUI(self.game.virtual_screen, self.game.player.stats)
             
             # Подписываем UI на изменения характеристик

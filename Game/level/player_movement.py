@@ -108,7 +108,18 @@ class PlayerMovementHandler:
                     self.player._was_walking = True
                     sound = self.player.sound_manager.sounds.get('steps')
                     if sound:
+                        # Устанавливаем громкость перед воспроизведением
+                        sound.set_volume(self.player.sound_manager.music_volume)
                         self.player._steps_channel = sound.play(loops=-1)
+                else:
+                    # Обновляем громкость уже играющего звука
+                    if steps_channel:
+                        sound = self.player.sound_manager.sounds.get('steps')
+                        if sound:
+                            old_volume = sound.get_volume()
+                            sound.set_volume(self.player.sound_manager.music_volume)
+                            if config.DEBUG_MODE and abs(old_volume - self.player.sound_manager.music_volume) > 0.01:
+                                print(f"[MOVEMENT DEBUG] Громкость шагов изменена: {old_volume:.2f} -> {self.player.sound_manager.music_volume:.2f}")
             else:
                 if hasattr(self.player, '_was_walking') and self.player._was_walking:
                     # Остановить звук шагов

@@ -54,11 +54,15 @@ class GameLoop:
         if self.game.waiting_for_first_update:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    # Сохраняем настройки звука при выходе
+                    self.game.sound_manager.save_settings()
                     return False
             return True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # Сохраняем настройки звука при выходе
+                self.game.sound_manager.save_settings()
                 return False
 
             if event.type == pygame.KEYDOWN:

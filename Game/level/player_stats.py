@@ -65,10 +65,6 @@ class BaseStat(ABC):
     
     def _notify_observers(self, old_value: float, new_value: float):
         """Уведомляет всех наблюдателей об изменении."""
-        from core.config import config
-        if config.DEBUG_MODE:
-            print(f"[STATS DEBUG] Уведомление наблюдателей: {self.name} {old_value} -> {new_value}, наблюдателей: {len(self.observers)}")
-        
         for observer in self.observers:
             observer.on_stat_changed(self.name, old_value, new_value)
     
@@ -259,11 +255,13 @@ class ExperienceStat(BaseStat):
 class PlayerStats:
     """Управляет всеми характеристиками игрока."""
     
-    def __init__(self, max_health: float = 100.0, max_stamina: float = 100.0):
+    def __init__(self, max_health: float = 100.0, max_stamina: float = 100.0, game=None):
         self.health = HealthStat(max_health)
         self.stamina = StaminaStat(max_stamina)
         self.experience = ExperienceStat()
         
+        # Сохраняем ссылку на game, если передана
+        self.game = game
         # Словарь для быстрого доступа к характеристикам
         self.stats = {
             "health": self.health,
