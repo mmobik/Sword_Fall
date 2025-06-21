@@ -13,6 +13,30 @@ class PlayerMovementHandler:
         self.state_change_time = 0  # Время последнего изменения состояния
 
     def handle_movement(self, dt, level_width, level_height, collision_objects):
+        # Проверяем, жив ли игрок - если нет, блокируем движение
+        if not self.player.is_alive():
+            # Устанавливаем состояние idle и останавливаем движение
+            if self.player.state_name.startswith("run"):
+                if self.player.state_name.startswith("run_right"):
+                    self.player.set_state("idle_right")
+                elif self.player.state_name.startswith("run_left"):
+                    self.player.set_state("idle_left")
+                elif self.player.state_name.startswith("run_up"):
+                    self.player.set_state("idle_back")
+                elif self.player.state_name.startswith("run_down"):
+                    self.player.set_state("idle_front")
+            
+            # Останавливаем звук шагов
+            if hasattr(self.player, '_was_walking') and self.player._was_walking:
+                self.player._was_walking = False
+                if hasattr(self.player, '_steps_channel') and self.player._steps_channel:
+                    self.player._steps_channel.stop()
+                    self.player._steps_channel = None
+            
+            # Устанавливаем флаг движения в False
+            self.player.is_walking = False
+            return
+        
         pygame.event.pump()  # Обновляем состояние клавиш
         keys = pygame.key.get_pressed()
         move_x = keys[pygame.K_d] - keys[pygame.K_a]

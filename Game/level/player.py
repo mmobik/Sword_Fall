@@ -163,6 +163,10 @@ class Player(pygame.sprite.Sprite):
                 self.heal_indicators.remove(indicator)
 
     def _animate(self, dt):
+        # Останавливаем анимацию, если игрок мертв
+        if not self.is_alive():
+            return
+            
         self.animation_time += dt
         if self.animation_time >= self.animation_speed:
             self.animation_time = 0

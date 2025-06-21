@@ -115,28 +115,40 @@ class GameLoop:
                     self.game.player and event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5]):
                     if event.key == pygame.K_1:  # Цифра 1
                         damage = self.game.player.take_damage(10.0, source="test")
-                        print(f"[TEST] Игрок получил урон: {damage} HP")
+                        if config.DEBUG_MODE:
+                            print(f"[TEST] Игрок получил урон: {damage} HP")
                     elif event.key == pygame.K_2:  # Цифра 2
                         heal = self.game.player.heal(20.0, source="test")
-                        print(f"[TEST] Игрок восстановился: {heal} HP")
+                        if config.DEBUG_MODE:
+                            print(f"[TEST] Игрок восстановился: {heal} HP")
                     elif event.key == pygame.K_3:  # Цифра 3
                         if self.game.player.stats.use_stamina(30.0):
-                            print("[TEST] Использовано 30 SP")
+                            if config.DEBUG_MODE:
+                                print("[TEST] Использовано 30 SP")
                         else:
-                            print("[TEST] Недостаточно выносливости!")
+                            if config.DEBUG_MODE:
+                                print("[TEST] Недостаточно выносливости!")
                     elif event.key == pygame.K_4:  # Цифра 4
                         levels = self.game.player.add_experience(50.0)
-                        print(f"[TEST] Получено 50 XP, уровней: {levels}")
+                        if config.DEBUG_MODE:
+                            print(f"[TEST] Получено 50 XP, уровней: {levels}")
                     elif event.key == pygame.K_5:  # Цифра 5
                         if not self.game.player.is_alive():
                             self.game.player.revive()
-                            print("[TEST] Игрок воскрешен!")
+                            if config.DEBUG_MODE:
+                                print("[TEST] Игрок воскрешен!")
                         else:
-                            print("[TEST] Игрок уже жив!")
+                            if config.DEBUG_MODE:
+                                print("[TEST] Игрок уже жив!")
 
             if self.game.game_state_manager.current_menu:
                 mouse_pos = pygame.mouse.get_pos()
                 self.game.game_state_manager.current_menu.handle_event(event, mouse_pos)
+            
+            # Обрабатываем события UI (инвентарь)
+            if (self.game.game_state_manager.game_state == "new_game" and 
+                self.game.player_ui):
+                self.game.player_ui.handle_event(event)
 
         return True
 
