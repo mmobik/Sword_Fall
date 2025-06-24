@@ -28,6 +28,13 @@ class TalkButton:
 
     def update_talk_button_state(self):
         """Обновляет состояние кнопки разговора."""
+        # Не показывать кнопку, если открыто меню или инвентарь
+        if self.game.game_state_manager.current_menu:
+            self.game.show_talk_button = False
+            self.game.talk_button_target_alpha = 0
+            self.game.talk_button_alpha = 0
+            return
+
         self.game.show_talk_button = False
 
         if not self.game.show_dialogue:
@@ -118,3 +125,14 @@ class TalkButton:
             return pixel_color[3] > 0
 
         return False
+
+    def force_show(self):
+        """Принудительно показать кнопку E сразу после закрытия меню, если игрок в зоне взаимодействия."""
+        # Не показывать, если меню всё ещё открыто
+        if self.game.game_state_manager.current_menu:
+            self.game.show_talk_button = False
+            self.game.talk_button_target_alpha = 0
+            self.game.talk_button_alpha = 0
+            return
+        self.game.talk_button_enter_time = time.time() - self.game.talk_button_show_delay
+        self.update_talk_button_state()

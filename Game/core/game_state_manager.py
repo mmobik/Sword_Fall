@@ -40,8 +40,10 @@ class GameStateManager:
             new_state: Новое состояние игры.
             menu: Меню для отображения в новом состоянии.
         """
-        if new_state == "new_game":
+        # Fade-переход только для перехода main_menu -> new_game (New Game)
+        if self.game_state == "main_menu" and new_state == "new_game":
             self.animate_transition(menu, config.FADE_DURATION)
+        if new_state == "new_game":
             self.should_process_menu = False  # Отключаем обработку меню
         else:
             self.should_process_menu = True  # Включаем обработку меню

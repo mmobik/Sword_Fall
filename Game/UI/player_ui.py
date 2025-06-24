@@ -17,6 +17,7 @@ class PlayerUI(StatObserver):
     def __init__(self, screen: pygame.Surface, player_stats: PlayerStats):
         self.screen = screen
         self.player_stats = player_stats
+        self.just_closed_inventory = False
         
         # Подписываемся на изменения характеристик
         self.player_stats.add_observer(self)
@@ -115,12 +116,20 @@ class PlayerUI(StatObserver):
     
     def handle_event(self, event):
         """Обрабатывает события для UI."""
+        if self.just_closed_inventory:
+            self.just_closed_inventory = False
+            return
+        
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_i:
-                # Открыть/закрыть инвентарь
                 self.inventory.toggle_inventory()
-                if config.DEBUG_MODE:
-                    print(f"[UI DEBUG] Инвентарь переключен")
+                if hasattr(self.player_stats, 'game') and self.player_stats.game is not None:
+                    game = self.player_stats.game
+                    if self.inventory.inventory_open:
+                        game.game_state_manager.change_state("inventory_menu", self.inventory)
+                    else:
+                        game.game_state_manager.change_state("new_game", None)
+                return
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Левый клик
@@ -142,7 +151,7 @@ class PlayerUI(StatObserver):
             self.screen.blit(self.belt_image, (self.game_bar_x, self.belt_y))
         
         # Отрисовываем инвентарь
-        self.inventory.draw()
+        self.inventory.draw(self.screen)
     
     def draw_damage_indicator(self, damage: float, position: Tuple[int, int]):
         """Отрисовывает индикатор урона."""

@@ -13,6 +13,15 @@ class PlayerMovementHandler:
         self.state_change_time = 0  # Время последнего изменения состояния
 
     def handle_movement(self, dt, level_width, level_height, collision_objects):
+        # Гарантированно останавливаем звук шагов при открытом меню/инвентаре
+        if hasattr(self.player, 'game') and self.player.game.game_state_manager.current_menu:
+            if hasattr(self.player, '_steps_channel') and self.player._steps_channel:
+                self.player._steps_channel.stop()
+                self.player._steps_channel = None
+            self.player._was_walking = False
+            self.player.is_walking = False
+            return
+        
         # Проверяем, жив ли игрок - если нет, блокируем движение
         if not self.player.is_alive():
             # Устанавливаем состояние idle и останавливаем движение
@@ -99,6 +108,15 @@ class PlayerMovementHandler:
         
         # Обновляем флаг движения для системы выносливости
         self.player.is_walking = is_moving
+        
+        # Блокируем запуск звука шагов, если открыт любой current_menu
+        if hasattr(self.player, 'game') and self.player.game.game_state_manager.current_menu:
+            # Остановить звук шагов, если он уже играет
+            if hasattr(self.player, '_steps_channel') and self.player._steps_channel:
+                self.player._steps_channel.stop()
+                self.player._steps_channel = None
+            self.player._was_walking = False
+            return
         
         if hasattr(self.player, 'sound_manager') and self.player.sound_manager:
             steps_channel = getattr(self.player, '_steps_channel', None)

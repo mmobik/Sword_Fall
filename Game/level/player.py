@@ -107,16 +107,13 @@ class Player(pygame.sprite.Sprite):
     def update(self, dt, level_width, level_height, collision_objects):
         # Обновляем характеристики
         self.stats.update(dt)
-        
         # Обновляем неуязвимость
         if self.is_invulnerable:
             self.invulnerability_timer -= dt
             if self.invulnerability_timer <= 0:
                 self.is_invulnerable = False
-        
         # Сначала двигаем hitbox
         self.movement_handler.handle_movement(dt, level_width, level_height, collision_objects)
-
         # Затем синхронизируем rect (спрайт) с hitbox
         self.rect.midbottom = (
             self.hitbox.centerx - config.PLAYER_HITBOX["X_OFFSET"],

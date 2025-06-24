@@ -65,21 +65,30 @@ class GameLoop:
                 self.game.sound_manager.save_settings()
                 return False
 
+            # --- Блокировка открытия меню и инвентаря при любом диалоге с NPC или открытом инвентаре ---
+            is_any_npc_dialogue = self.game.show_dialogue and self.game.active_npc_obj is not None
+            is_inventory_open = getattr(self.game, 'inventory_open_state', False)
+
+            # --- Разрешаем ESC даже при диалоге/инвентаре ---
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and self.game.game_state_manager.game_state == "new_game":
+                steps_channel = getattr(self.game.player, '_steps_channel', None)
+                if steps_channel:
+                    steps_channel.stop()
+                    setattr(self.game.player, '_steps_channel', None)
+                if self.game.player:
+                    self.game.player.is_walking = False
+                self.game.show_main_menu()
+                continue
+
+            # Блокируем обработку остальных меню и UI, кроме событий для диалога/инвентаря
+            if is_any_npc_dialogue or is_inventory_open:
+                continue
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F3:
                     old_debug = config.DEBUG_MODE
                     config.set_debug_mode(not config.DEBUG_MODE)
                     print(f"[DEBUG] Режим отладки {'включен' if config.DEBUG_MODE else 'выключен'} (был: {old_debug})")
-
-                if (event.key == pygame.K_ESCAPE and
-                        self.game.game_state_manager.game_state == "new_game"):
-                    steps_channel = getattr(self.game.player, '_steps_channel', None)
-                    if steps_channel:
-                        steps_channel.stop()
-                        setattr(self.game.player, '_steps_channel', None)
-                    if self.game.player:
-                        self.game.player.is_walking = False
-                    self.game.show_main_menu()
 
                 if (event.key == pygame.K_e and
                         self.game.game_state_manager.game_state == "new_game"):
@@ -151,8 +160,12 @@ class GameLoop:
             
             # Обрабатываем события UI (инвентарь)
             if (self.game.game_state_manager.game_state == "new_game" and 
-                self.game.player_ui):
+                self.game.player_ui and not self.game.game_state_manager.current_menu):
                 self.game.player_ui.handle_event(event)
+
+            # Блокируем взаимодействие (E) при открытом меню
+            if self.game.game_state_manager.current_menu:
+                continue
 
         return True
 
@@ -160,6 +173,8 @@ class GameLoop:
         """Обновляет игровое состояние."""
         if self.game.game_state_manager.current_menu:
             self.game.game_state_manager.current_menu.update(self.game.dt)
+            # Не обновляем игру, если открыто меню или инвентарь
+            return
 
         if self.game.game_state_manager.game_state == "new_game":
             if not all([self.game.player, self.game.camera, self.game.level]):
@@ -206,7 +221,7 @@ class GameLoop:
 
             # Отрисовка кнопки разговора
             if (self.game.talk_button_img and self.game.talk_button_alpha > 0 and
-                    not self.game.show_dialogue):
+                    not self.game.show_dialogue and not self.game.game_state_manager.current_menu):
                 btn_w, btn_h = self.game.talk_button_img.get_size()
 
                 if self.game.player and self.game.camera:
@@ -233,13 +248,12 @@ class GameLoop:
                 if self.game.active_npc_obj:
                     npc_type = self.game.active_npc_obj.properties.get(
                         'interactive_type', '').lower()
-                    if npc_type != 'king':
-                        if (time.time() - self.game.dialogue_start_time >
-                                config.DIALOGUE_PANEL["SHOW_DURATION"]):
-                            self.game.show_dialogue = False
-                            self.game.dialogue_text = ""
-                            self.game.dialogue_text_shown = ""
-                            self.game.active_npc_obj = None
+                    # --- Авто-закрытие диалога для всех NPC, включая короля ---
+                    if (time.time() - self.game.dialogue_start_time > config.DIALOGUE_PANEL["SHOW_DURATION"]):
+                        self.game.show_dialogue = False
+                        self.game.dialogue_text = ""
+                        self.game.dialogue_text_shown = ""
+                        self.game.active_npc_obj = None
 
             scaled_screen = pygame.transform.scale(
                 self.game.virtual_screen, (config.WIDTH, config.HEIGHT))
