@@ -7,6 +7,13 @@
 
 import pygame
 import time
+import sys
+if sys.platform == "win32":
+    import ctypes
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
 from core.config import config
 from core.game_loop import GameLoop
 from core.dialogue_handler import DialogueHandler
@@ -41,7 +48,7 @@ class Game:
         self.virtual_screen = pygame.Surface((config.VIRTUAL_WIDTH, config.VIRTUAL_HEIGHT))
         self.screen = pygame.display.set_mode(
             config.SCREEN_SIZE,
-            pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.SCALED,
+            pygame.HWSURFACE | pygame.DOUBLEBUF,
             vsync=1
         )
         pygame.display.set_caption(config.GAME_NAME)
