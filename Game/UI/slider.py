@@ -33,7 +33,7 @@ class MusicSlider:
 
         for level in volume_levels:
             try:
-                image_path = f"assets/images/menu/settings/music_change/{level}.jpg"
+                image_path = f"Game/assets/images/menu/settings/music_change/{level}.jpg"
                 self.slider_images[level] = load_image(image_path)
             except (KeyError, pygame.error, TypeError, FileNotFoundError) as e:
                 if config.DEBUG_MODE:

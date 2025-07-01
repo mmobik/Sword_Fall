@@ -72,7 +72,7 @@ class MusicSettingsMenu(Menu):
         volume_levels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         for level in volume_levels:
             try:
-                image_path = f"assets/images/menu/settings/music_change/{level}.jpg"
+                image_path = f"Game/assets/images/menu/settings/music_change/{level}.jpg"
                 self.music_animation_images[level] = load_image(image_path)
             except (KeyError, pygame.error, TypeError, FileNotFoundError) as e:
                 if config.DEBUG_MODE:
@@ -90,7 +90,7 @@ class MusicSettingsMenu(Menu):
     def _load_images_and_tracks(self):
         self.track_images = []
         self.slider_images = {}
-        folder = "assets/images/menu/settings/music_change"
+        folder = "Game/assets/images/menu/settings/music_change"
         lang = "rus" if config.current_language == "russian" else "eng"
         # Связь: название для UI -> имя файла
         self.track_file_map = {

@@ -39,7 +39,7 @@ class SoundManager:
 
         # Загружаем звуки с проверкой существования файлов
         self.sounds = {
-            'button_click': self._load_sound("button.mp3"),
+            'button_click': self._load_sound("Button.mp3"),
             'steps': self._load_sound("steps.mp3"),  # Добавлен звук шагов
         }
         self.current_music = None
@@ -104,7 +104,7 @@ class SoundManager:
             Загруженный звук или пустой звук в случае ошибки.
         """
         # Формируем правильный путь
-        full_path = resource_path(os.path.join("assets", "sounds", "game_sounds", filename))
+        full_path = resource_path(os.path.join("Game", "assets", "sounds", "game_sounds", filename))
 
         try:
             sound = pygame.mixer.Sound(full_path)
@@ -127,7 +127,7 @@ class SoundManager:
             loop: Зацикливать ли музыку.
         """
         # Формируем полный путь к музыке
-        full_path = resource_path(os.path.join("assets", "sounds", "soundtracks", music_name))
+        full_path = resource_path(os.path.join("Game", "assets", "sounds", "soundtracks", music_name))
         
         # Определяем индивидуальную громкость для этого трека
         key = os.path.splitext(music_name)[0].lower()

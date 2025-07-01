@@ -36,7 +36,7 @@ class Inventory:
         """Загружает изображение inventory.png."""
         try:
             # Путь к изображению
-            image_path = "assets/images/game/playerData/inventory.png"
+            image_path = "Game/assets/images/game/playerData/inventory.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
                 if config.DEBUG_MODE:

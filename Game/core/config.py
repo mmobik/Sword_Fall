@@ -38,20 +38,20 @@ class GameConfig:
 
         # Пути к игровым ресурсам
         self.ASSETS = {
-            "ICON": "assets/images/icons/icon_1.jpg",
-            "SOUNDTRACK": "assets/sounds/soundtracks/Dark_fantasm.mp3"
+            "ICON": "Game/assets/images/icons/icon_1.jpg",
+            "SOUNDTRACK": "Game/assets/sounds/soundtracks/Dark_fantasm.mp3"
         }
 
         # Настройки кнопки диалога
         self.DIALOGUE_BUTTON = {
-            "IMAGE_PATH": "assets/images/game/dialogue/talk_v3.png",
+            "IMAGE_PATH": "Game/assets/images/game/dialogue/talk_v3.png",
             "OFFSET_Y": 50,  # Отступ от игрока по Y
             "FALLBACK_Y": 120  # Отступ снизу экрана для fallback
         }
 
         # Настройки панели диалога
         self.DIALOGUE_PANEL = {
-            "IMAGE_PATH": "assets/images/game/dialogue/panel_v3.png",
+            "IMAGE_PATH": "Game/assets/images/game/dialogue/panel_v3.png",
             "POSITION": "bottom",  # bottom, center, top
             "OFFSET_Y": 20,  # Отступ снизу экрана
             "TEXT_OFFSET_X": 30,  # Отступ текста от края панели по X
@@ -63,8 +63,8 @@ class GameConfig:
 
         # Изображения NPC для диалогов
         self.NPC_IMAGES = {
-            "GUARD": "assets/images/game/The guard_4.png",
-            "KING": "assets/images/game/King.png"
+            "GUARD": "Game/assets/images/game/The guard_4.png",
+            "KING": "Game/assets/images/game/King.png"
         }
 
         # Цветовая палитра
@@ -88,7 +88,7 @@ class GameConfig:
 
         # Параметры игрового уровня
         self.TILE_SIZE = 100
-        self.LEVEL_MAP_PATH = "assets/Tiles/Royal_one.tmx"
+        self.LEVEL_MAP_PATH = "Game/assets/Tiles/Royal_one.tmx"
 
         # Параметры игрока
         self.PLAYER_SPEED = 180
@@ -105,25 +105,25 @@ class GameConfig:
         self.PLAYER_STATES = {
             # Idle-анимации (стоит на месте)
             "idle_front": {
-                "sprite_sheet": "assets/sprites/player/unarmed/idle_front.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/idle_front.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
             },
             "idle_right": {
-                "sprite_sheet": "assets/sprites/player/unarmed/idle_right.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/idle_right.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
             },
             "idle_left": {
-                "sprite_sheet": "assets/sprites/player/unarmed/idle_left.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/idle_left.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
             },
             "idle_back": {
-                "sprite_sheet": "assets/sprites/player/unarmed/idle_back.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/idle_back.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.17,
                 "flip": False
@@ -131,25 +131,25 @@ class GameConfig:
 
             # Run-анимации (движение)
             "run_right": {
-                "sprite_sheet": "assets/sprites/player/unarmed/run_right.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/run_right.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.13,
                 "flip": False
             },
             "run_left": {
-                "sprite_sheet": "assets/sprites/player/unarmed/run_left.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/run_left.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.13,
                 "flip": False
             },
             "run_up": {
-                "sprite_sheet": "assets/sprites/player/unarmed/run_up.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/run_up.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.13,
                 "flip": False
             },
             "run_down": {
-                "sprite_sheet": "assets/sprites/player/unarmed/run_down.png",
+                "sprite_sheet": "Game/assets/sprites/player/unarmed/run_down.png",
                 "frames": [(0, 0), (128, 0), (0, 64), (128, 64), (0, 128), (128, 128), (0, 192), (128, 192)],
                 "animation_speed": 0.13,
                 "flip": False
@@ -172,112 +172,112 @@ class GameConfig:
         # Изображения для меню
         self.MENU_IMAGES = {
             # Главное меню
-            "MAIN_BG": "assets/images/menu/main/backgrounds/dark_prince.jpg",
-            "MAIN_BG_RUS": "assets/images/menu/main/backgrounds/dark_prince.jpg",
+            "MAIN_BG": "Game/assets/images/menu/main/backgrounds/dark_prince.jpg",
+            "MAIN_BG_RUS": "Game/assets/images/menu/main/backgrounds/dark_prince.jpg",
 
             # Кнопки главного меню (EN)
             "START_BTN": {
-                "before": "assets/images/menu/main/eng/start/before.jpg",
-                "after": "assets/images/menu/main/eng/start/after.jpg"
+                "before": "Game/assets/images/menu/main/eng/start/before.jpg",
+                "after": "Game/assets/images/menu/main/eng/start/after.jpg"
             },
             "SETTINGS_BTN": {
-                "before": "assets/images/menu/main/eng/settings/before.jpg",
-                "after": "assets/images/menu/main/eng/settings/after.jpg"
+                "before": "Game/assets/images/menu/main/eng/settings/before.jpg",
+                "after": "Game/assets/images/menu/main/eng/settings/after.jpg"
             },
             "EXIT_BTN": {
-                "before": "assets/images/menu/main/eng/exit/before.jpg",
-                "after": "assets/images/menu/main/eng/exit/after.jpg"
+                "before": "Game/assets/images/menu/main/eng/exit/before.jpg",
+                "after": "Game/assets/images/menu/main/eng/exit/after.jpg"
             },
 
             # Кнопки главного меню (RU)
             "START_BTN_RUS": {
-                "before": "assets/images/menu/main/rus/start/before.jpg",
-                "after": "assets/images/menu/main/rus/start/after.jpg"
+                "before": "Game/assets/images/menu/main/rus/start/before.jpg",
+                "after": "Game/assets/images/menu/main/rus/start/after.jpg"
             },
             "SETTINGS_BTN_RUS": {
-                "before": "assets/images/menu/main/rus/settings/before.jpg",
-                "after": "assets/images/menu/main/rus/settings/after.jpg"
+                "before": "Game/assets/images/menu/main/rus/settings/before.jpg",
+                "after": "Game/assets/images/menu/main/rus/settings/after.jpg"
             },
             "EXIT_BTN_RUS": {
-                "before": "assets/images/menu/main/rus/exit/before.jpg",
-                "after": "assets/images/menu/main/rus/exit/after.jpg"
+                "before": "Game/assets/images/menu/main/rus/exit/before.jpg",
+                "after": "Game/assets/images/menu/main/rus/exit/after.jpg"
             },
 
             # Меню настроек (EN)
             "GAME_SETTINGS_BTN": {
-                "before": "assets/images/menu/settings/eng/settings/before.jpg",
-                "after": "assets/images/menu/settings/eng/settings/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/settings/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/settings/after.jpg"
             },
             "GRAPHICS_SETTINGS_BTN": {
-                "before": "assets/images/menu/settings/eng/graphics/before.jpg",
-                "after": "assets/images/menu/settings/eng/graphics/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/graphics/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/graphics/after.jpg"
             },
             "LANGUAGE_SETTINGS_BTN": {
-                "before": "assets/images/menu/settings/eng/language/before.jpg",
-                "after": "assets/images/menu/settings/eng/language/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/language/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/language/after.jpg"
             },
             "MUSIC_SETTINGS_BTN": {
-                "before": "assets/images/menu/settings/eng/music/before.jpg",
-                "after": "assets/images/menu/settings/eng/music/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/music/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/music/after.jpg"
             },
             "BACK_BTN": {
-                "before": "assets/images/menu/settings/eng/back/before.jpg",
-                "after": "assets/images/menu/settings/eng/back/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/back/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/back/after.jpg"
             },
 
             # Меню настроек (RU)
             "GAME_SETTINGS_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/settings/before.jpg",
-                "after": "assets/images/menu/settings/rus/settings/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/settings/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/settings/after.jpg"
             },
             "GRAPHICS_SETTINGS_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/graphics/before.jpg",
-                "after": "assets/images/menu/settings/rus/graphics/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/graphics/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/graphics/after.jpg"
             },
             "LANGUAGE_SETTINGS_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/language/before.jpg",
-                "after": "assets/images/menu/settings/rus/language/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/language/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/language/after.jpg"
             },
             "MUSIC_SETTINGS_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/music/before.jpg",
-                "after": "assets/images/menu/settings/rus/music/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/music/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/music/after.jpg"
             },
             "BACK_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/back/before.jpg",
-                "after": "assets/images/menu/settings/rus/back/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/back/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/back/after.jpg"
             },
 
             # Меню языка (EN)
             "ENGLISH_BTN": {
-                "before": "assets/images/menu/settings/eng/eng/before.jpg",
-                "after": "assets/images/menu/settings/eng/eng/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/eng/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/eng/after.jpg"
             },
             "RUSSIAN_BTN": {
-                "before": "assets/images/menu/settings/rus/rus/before.jpg",
-                "after": "assets/images/menu/settings/rus/rus/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/rus/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/rus/after.jpg"
             },
             "LANG_BACK_BTN": {
-                "before": "assets/images/menu/settings/eng/back/before.jpg",
-                "after": "assets/images/menu/settings/eng/back/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/back/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/back/after.jpg"
             },
 
             # Меню языка (RU)
             "ENGLISH_BTN_RUS": {
-                "before": "assets/images/menu/settings/eng/eng/before.jpg",
-                "after": "assets/images/menu/settings/eng/eng/after.jpg"
+                "before": "Game/assets/images/menu/settings/eng/eng/before.jpg",
+                "after": "Game/assets/images/menu/settings/eng/eng/after.jpg"
             },
             "RUSSIAN_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/rus/before.jpg",
-                "after": "assets/images/menu/settings/rus/rus/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/rus/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/rus/after.jpg"
             },
             "LANG_BACK_BTN_RUS": {
-                "before": "assets/images/menu/settings/rus/back/before.jpg",
-                "after": "assets/images/menu/settings/rus/back/after.jpg"
+                "before": "Game/assets/images/menu/settings/rus/back/before.jpg",
+                "after": "Game/assets/images/menu/settings/rus/back/after.jpg"
             },
 
             # Фон меню настроек
-            "SETTINGS_BG": "assets/images/menu/settings/backgrounds/dark_prince.jpg",
-            "LANGUAGE_BG": "assets/images/menu/settings/backgrounds/dark_prince.jpg"
+            "SETTINGS_BG": "Game/assets/images/menu/settings/backgrounds/dark_prince.jpg",
+            "LANGUAGE_BG": "Game/assets/images/menu/settings/backgrounds/dark_prince.jpg"
         }
 
         # Локализация

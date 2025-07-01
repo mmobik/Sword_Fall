@@ -189,4 +189,37 @@ python game.py
 
 ## Лицензия
 
-[Укажите лицензию проекта] 
+[Укажите лицензию проекта]
+
+## Быстрый старт
+
+1. **Установите Python 3.8+**
+2. **Создайте виртуальное окружение:**
+   ```sh
+   python -m venv venv
+   # или
+   python3 -m venv venv
+   ```
+3. **Активируйте окружение:**
+   - Windows: `venv\Scripts\activate`
+   - Linux/Mac: `source venv/bin/activate`
+4. **Установите зависимости:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+5. **Запустите игру:**
+   ```sh
+   python Game/game.py
+   ```
+
+---
+
+## Зависимости
+- pygame
+
+---
+
+## Запуск в Cursor
+- Откройте папку проекта в Cursor.
+- Убедитесь, что выбран Python-интерпретатор из venv.
+- Запустите `Game/game.py` через Run/Debug или терминал. 

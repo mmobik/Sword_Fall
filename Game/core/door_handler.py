@@ -41,7 +41,7 @@ class DoorInteractionHandler:
 
         # Путь к новой карте можно хранить в свойстве объекта или задать явно
         new_map_path = obj.properties.get('target_map',
-                                          'assets/Tiles/Audience Hall .tmx')
+                                          'Game/assets/Tiles/Audience Hall .tmx')
 
         # Если у двери указано spawn_point_name, передаем его
         spawn_point_name = obj.properties.get('spawn_point_name',

@@ -69,7 +69,7 @@ class PlayerUI(StatObserver):
         """Загружает изображение game_bar.png."""
         try:
             # Путь к изображению
-            image_path = "assets/images/game/playerData/game_bar.png"
+            image_path = "Game/assets/images/game/playerData/game_bar.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
                 if config.DEBUG_MODE:
@@ -86,7 +86,7 @@ class PlayerUI(StatObserver):
         """Загружает изображение belt.png."""
         try:
             # Путь к изображению
-            image_path = "assets/images/game/playerData/belt.png"
+            image_path = "Game/assets/images/game/playerData/belt.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
                 if config.DEBUG_MODE:

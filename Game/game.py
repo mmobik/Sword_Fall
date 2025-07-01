@@ -275,6 +275,9 @@ class Game:
 
     def load_new_map(self, map_path):
         """Публичный метод для загрузки новой карты."""
+        # Универсальная проверка и автодобавление префикса Game/
+        if not map_path.replace('\\', '/').startswith('Game/'):
+            map_path = f'Game/{map_path.lstrip("/\\")}'
         self._load_new_map(map_path)
 
     def update_talk_button_state(self):

@@ -31,7 +31,7 @@ def build_exe():
         "--onefile",  # Один файл
         "--windowed",  # Без консольного окна
         "--name=Падение_Меча",  # Имя исполняемого файла
-        "--icon=assets/images/icons/icon_1.jpg",  # Иконка
+        "--icon=Game/assets/images/icons/icon_1.jpg",  # Иконка
         "--add-data=assets;assets",  # Включить папку assets
         "--add-data=userdata;userdata",  # Включить папку userdata
         "--add-data=dialogues;dialogues",  # Включить папку dialogues
