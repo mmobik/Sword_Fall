@@ -81,7 +81,7 @@ class PlayerUI(StatObserver):
         except Exception as e:
             print(f"[UI ERROR] Ошибка загрузки game_bar: {e}")
             return None
-    
+   
     def _load_belt_image(self) -> Optional[pygame.Surface]:
         """Загружает изображение belt.png."""
         try:
@@ -145,7 +145,6 @@ class PlayerUI(StatObserver):
         # Отрисовываем только изображение game_bar
         if self.game_bar_image:
             self.screen.blit(self.game_bar_image, (self.game_bar_x, self.game_bar_y))
-        
         # Отрисовываем изображение belt
         if self.belt_image:
             self.screen.blit(self.belt_image, (self.game_bar_x, self.belt_y))

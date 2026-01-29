@@ -8,7 +8,6 @@ from typing import Optional
 from level.player_stats import PlayerStats
 from core.config import config
 
-
 class Inventory:
     """Простой класс инвентаря для отображения изображения."""
     
@@ -18,11 +17,8 @@ class Inventory:
         
         # Загружаем изображение инвентаря
         self.inventory_image = self._load_inventory_image()
-        
-        # Настройки позиционирования
-        self.inventory_x = 50
-        self.inventory_y = 50
-        
+        self.inventory_profile = self._load_inventory_profile_image()
+    
         # Состояние видимости инвентаря
         self.inventory_open = initial_open
         self.background = None  # Для хранения скриншота фона
@@ -39,6 +35,7 @@ class Inventory:
             image_path = "Game/assets/images/game/playerData/inventory.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
+                image = pygame.transform.scale(image, (1000, 600))
                 if config.DEBUG_MODE:
                     print(f"[INVENTORY DEBUG] Изображение inventory загружено: {image.get_size()}")
                 return image
@@ -48,6 +45,25 @@ class Inventory:
         except Exception as e:
             print(f"[INVENTORY ERROR] Ошибка загрузки inventory: {e}")
             return None
+        
+    def _load_inventory_profile_image(self) -> Optional[pygame.Surface]:
+        """Загружает изображение inventory_profile.png."""
+        try:
+            # Путь к изображению
+            image_path = "Game/assets/Images/game/player_profile.png"
+            if os.path.exists(image_path):
+                image = pygame.image.load(image_path).convert_alpha()
+                if config.DEBUG_MODE:
+                    print(f"[INVENTORY DEBUG] Изображение inventory_profile загружено: {image.get_size()}")
+                return image
+            else:
+                print(f"[INVENTORY ERROR] Файл не найден: {image_path}")
+                return None
+        except Exception as e:
+            print(f"[INVENTORY ERROR] Ошибка загрузки inventory_profile: {e}")
+            return None
+    
+     
     
     def toggle_inventory(self):
         """Переключает состояние инвентаря (открыт/закрыт)."""
@@ -114,7 +130,46 @@ class Inventory:
                 screen.blit(overlay, (0, 0))
             # Рисуем сам инвентарь
             if self.inventory_image:
-                screen.blit(self.inventory_image, (self.inventory_x, self.inventory_y))
+                screen.blit(self.inventory_image, (config.VIRTUAL_WIDTH // 2, config.VIRTUAL_HEIGHT // 2))
+
+            # Следует получить stats через player_stats:
+            stats = self.player_stats.stats
+            font = pygame.font.Font(None, 28)
+            # Получаем характеристики
+            health_stat = stats["health"]
+            stamina_stat = stats["stamina"]
+            exp_stat = stats["experience"]
+
+            base_x = config.VIRTUAL_WIDTH // 2 + 585
+            base_y = config.VIRTUAL_HEIGHT // 2 + 100
+
+            line_spacing = 36
+
+            health_text = f"Здоровье: {health_stat.get_display_value()}"
+            stamina_text = f"Выносливость: {stamina_stat.get_display_value()}"
+            level_text = f"Уровень: {exp_stat.level}"
+            exp_text = f"Опыт: {int(exp_stat.current_value)}/{int(exp_stat.experience_to_next)}"
+
+            health_surface = font.render(health_text, True, (220, 220, 240))
+            stamina_surface = font.render(stamina_text, True, (220, 220, 240))
+            level_surface = font.render(level_text, True, (220, 220, 240))
+            exp_surface = font.render(exp_text, True, (220, 220, 240))
+
+            screen.blit(health_surface, (base_x, base_y))
+            screen.blit(stamina_surface, (base_x, base_y + line_spacing))
+            screen.blit(level_surface, (base_x, base_y + 2 * line_spacing))
+            screen.blit(exp_surface, (base_x, base_y + 3 * line_spacing))
+
+            if self.inventory_profile:
+                profile_x = config.VIRTUAL_WIDTH // 2 + 135
+                profile_y = config.VIRTUAL_WIDTH // 2 - 125
+                screen.blit(self.inventory_profile, (profile_x, profile_y))
+                font = pygame.font.Font(None, 32)
+                nickname = "Алд"
+                text_surface = font.render(nickname, True, (255, 255, 255))
+                text_x = profile_x + (self.inventory_profile.get_width() - text_surface.get_width()) // 2
+                text_y = profile_y + self.inventory_profile.get_height()
+                screen.blit(text_surface, (text_x, text_y))
     
     def update(self, dt):
         """Обновляет состояние инвентаря (заглушка для совместимости)."""
