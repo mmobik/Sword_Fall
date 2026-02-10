@@ -5,7 +5,8 @@ from typing import Optional, Dict, Any, Tuple
 class InventoryItem:
     """Класс для представления предмета в инвентаре."""
     
-    # Размер слота по умолчанию
+    # Размер слота по умолчанию (используется как fallback,
+    # реальные иконки могут быть своего размера)
     SLOT_SIZE = 50
     
     def __init__(self, item_id: str, name: str, description: str = "", 
@@ -40,9 +41,9 @@ class InventoryItem:
         """Загружает и масштабирует изображение."""
         try:
             if os.path.exists(image_path):
+                # Загружаем изображение как есть, без дополнительного масштабирования.
+                # Размер иконки задаётся самим файлом (например, 127x107).
                 self.image = pygame.image.load(image_path).convert_alpha()
-                self.image = pygame.transform.scale(self.image, 
-                                                   (self.SLOT_SIZE, self.SLOT_SIZE))
             else:
                 print(f"[ITEM WARNING] Файл не найден: {image_path}")
                 # Создаем placeholder изображение
@@ -110,8 +111,15 @@ class InventoryItem:
     def draw(self, surface: pygame.Surface, x: int, y: int, 
              show_count: bool = True, selected: bool = False):
         """Отрисовка предмета в слоте."""
+        # Вычисляем реальный размер слота: по размеру иконки, если она есть,
+        # иначе используем SLOT_SIZE как квадрат по умолчанию.
+        if self.image:
+            slot_w, slot_h = self.image.get_width(), self.image.get_height()
+        else:
+            slot_w = slot_h = self.SLOT_SIZE
+
         # Рамка слота
-        slot_rect = pygame.Rect(x, y, self.SLOT_SIZE, self.SLOT_SIZE)
+        slot_rect = pygame.Rect(x, y, slot_w, slot_h)
         
         # Цвет рамки в зависимости от редкости
         rarity_color = self.get_rarity_color()
@@ -125,20 +133,20 @@ class InventoryItem:
         
         # Изображение предмета
         if self.image:
-            img_x = x + (self.SLOT_SIZE - self.image.get_width()) // 2
-            img_y = y + (self.SLOT_SIZE - self.image.get_height()) // 2
+            img_x = x + (slot_w - self.image.get_width()) // 2
+            img_y = y + (slot_h - self.image.get_height()) // 2
             surface.blit(self.image, (img_x, img_y))
             
             # Количество (если больше 1)
             if show_count and self.count > 1:
-                self._draw_count(surface, x, y)
+                self._draw_count(surface, x, y, slot_w, slot_h)
     
-    def _draw_count(self, surface: pygame.Surface, x: int, y: int):
+    def _draw_count(self, surface: pygame.Surface, x: int, y: int, slot_w: int, slot_h: int):
         """Отрисовка количества предметов."""
         font = pygame.font.Font(None, 20)
         count_text = font.render(str(self.count), True, (255, 255, 255))
-        text_x = x + self.SLOT_SIZE - 15
-        text_y = y + self.SLOT_SIZE - 20
+        text_x = x + slot_w - 15
+        text_y = y + slot_h - 20
         
         # Фон для текста
         text_bg = pygame.Surface((20, 20), pygame.SRCALPHA)

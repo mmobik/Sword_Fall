@@ -242,12 +242,93 @@ class Inventory:
                     "stats": {"luck": 5},
                     "max_stack": 1,
                     "rarity": "rare"
+                },
+                # --- Новые реальные предметы с добавленными изображениями ---
+                {
+                    "id": "steel_dagger",
+                    "name": "Стальной кинжал",
+                    "description": "Лёгкий стальной кинжал, быстрый и точный.",
+                    "type": "weapon",
+                    "image_path": "Game/assets/Images/game/playerData/steel_dagger.jpg",
+                    "stats": {"attack": 8, "attack_speed_bonus": 0.1},
+                    "max_stack": 1,
+                    "rarity": "uncommon"
+                },
+                {
+                    "id": "small_round_sun_shield",
+                    "name": "Малый круглый щит Солнца",
+                    "description": "Небольшой щит с символом Солнца, хорошо отражает удары.",
+                    "type": "shield",
+                    "image_path": "Game/assets/Images/game/playerData/small_round_sun_shield.jpg",
+                    "stats": {"defense": 12},
+                    "max_stack": 1,
+                    "rarity": "rare"
+                },
+                {
+                    "id": "steel_axe",
+                    "name": "Стальной топор",
+                    "description": "Тяжёлый стальной топор, наносящий мощные удары.",
+                    "type": "weapon",
+                    "image_path": "Game/assets/Images/game/playerData/steel_axe.jpg",
+                    "stats": {"attack": 15, "critical_chance_bonus": 2.0},
+                    "max_stack": 1,
+                    "rarity": "rare"
+                },
+                {
+                    "id": "steel_breastplate",
+                    "name": "Стальная кираса",
+                    "description": "Надёжная стальная кираса, значительно повышающая защиту.",
+                    "type": "armor",
+                    "image_path": "Game/assets/Images/game/playerData/steel_breastplate.jpg",
+                    "stats": {"defense": 20},
+                    "max_stack": 1,
+                    "rarity": "rare"
+                },
+                {
+                    "id": "robe_of_the_sun",
+                    "name": "Одеяние Солнца",
+                    "description": "Лёгкое магическое одеяние, усиливающее магию и ману.",
+                    "type": "armor",
+                    "image_path": "Game/assets/Images/game/playerData/robe_of_the_sun.jpg",
+                    "stats": {"defense": 8, "magic": 10, "max_mana_bonus": 30},
+                    "max_stack": 1,
+                    "rarity": "epic"
+                },
+                {
+                    "id": "bronze_helmet",
+                    "name": "Бронзовый шлем",
+                    "description": "Простой бронзовый шлем, дающий базовую защиту головы.",
+                    "type": "armor",
+                    "image_path": "Game/assets/Images/game/playerData/bronze_helmet.jpg",
+                    "stats": {"defense": 6},
+                    "max_stack": 1,
+                    "rarity": "common"
+                },
+                {
+                    "id": "golden_helmet",
+                    "name": "Золотой шлем",
+                    "description": "Украшенный золотом шлем, символ статуса и силы.",
+                    "type": "armor",
+                    "image_path": "Game/assets/Images/game/playerData/golden_helmet.jpg",
+                    "stats": {"defense": 10, "luck": 3},
+                    "max_stack": 1,
+                    "rarity": "epic"
                 }
             ]
             
             # Добавляем предметы в первые свободные слоты ACS инвентаря
             for item_data in items_data:
-                item = InventoryItem(**item_data)
+                # Аккуратно мапим поля под сигнатуру InventoryItem
+                item = InventoryItem(
+                    item_id=item_data["id"],
+                    name=item_data["name"],
+                    description=item_data.get("description", ""),
+                    item_type=item_data.get("type", "consumable"),
+                    image_path=item_data.get("image_path"),
+                    stats=item_data.get("stats"),
+                    max_stack=item_data.get("max_stack", 99),
+                    rarity=item_data.get("rarity", "common"),
+                )
                 self.add_item_to_free_slot(item)
                 
         except Exception as e:
