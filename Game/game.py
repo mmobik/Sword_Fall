@@ -227,7 +227,6 @@ class Game:
                 for obj in self.collision_objects:
                     pygame.draw.rect(self.virtual_screen, (255, 0, 0),
                                      self.camera.apply(obj['rect']), 1)
-
         # Отрисовка наложенных тайлов
         if self.level_renderer and self.player:
             self.level_renderer.render_overlap_tiles(

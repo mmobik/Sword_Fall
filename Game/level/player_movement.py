@@ -96,9 +96,11 @@ class PlayerMovementHandler:
         new_x = max(0, min(new_x, level_width - self.player.hitbox.width))
         new_y = max(0, min(new_y, level_height - self.player.hitbox.height))
         
+        # Двигаем только хитбокс. Привязка спрайта к хитбоксу
+        # происходит в Player.update (через rect.midbottom),
+        # как в предыдущей версии класса Player.
         self.player.hitbox.x = new_x
         self.player.hitbox.y = new_y
-        self.player.rect.topleft = (self.player.hitbox.x, self.player.hitbox.y)
 
         # Анимация с улучшенной логикой
         self._update_animation_state(move_x, move_y, dt)

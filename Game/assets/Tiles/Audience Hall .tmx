@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="31" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="448">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="31" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="20" nextobjectid="451">
  <tileset firstgid="1" source="room1.tsx"/>
  <tileset firstgid="129" source="room_2.tsx"/>
  <tileset firstgid="321" source="room_5.tsx"/>
@@ -77,10 +77,10 @@
  </layer>
  <layer id="4" name="Decorations" width="31" height="39">
   <data encoding="base64" compression="zlib">
-   eJztzrENACEMQ9EUESMyGmzAbQAbwFqk5USFEFD81zmy5IgAb8oqUnS8BctR5/2dqm20306y/B3Yxl3e3f4AAAAAALCiAzlQBfE=
+   eJztzsENABAQRNE9bHSoNTqgAzqgLXsljoLDf7fZTDIrAvypqEjV+RYsR933T2q20ZedZDlf2AZu8O71BwAAAABw1gDY+QXw
   </data>
  </layer>
- <objectgroup id="13" name="PlayerSpawn">
+ <objectgroup id="13" name="PlayerSpawn" visible="0">
   <properties>
    <property name="type" value="player_spawn"/>
   </properties>
@@ -194,6 +194,7 @@
   <object id="442" x="671.75" y="608.25" width="32.25" height="95.75"/>
   <object id="443" x="671.5" y="479.75" width="32.5" height="96.25"/>
   <object id="444" x="671" y="288.25" width="33" height="159.75"/>
+  <object id="448" x="352.063" y="394.625" width="32.0625" height="21.875"/>
  </objectgroup>
  <objectgroup id="6" name="Triggers">
   <object id="446" x="479.5" y="355.667" width="33" height="31.3333">
@@ -210,6 +211,12 @@
     <property name="target_map" value="assets/Tiles/Royal_one.tmx"/>
    </properties>
   </object>
+  <object id="450" x="352.114" y="416.591" width="32.0909" height="11.8239">
+   <properties>
+    <property name="interactive" type="bool" value="true"/>
+    <property name="interactive_type" value="chest"/>
+   </properties>
+  </object>
  </objectgroup>
- <objectgroup id="7" name="SpawnPoints"/>
+ <objectgroup id="7" name="SpawnPoints" visible="0"/>
 </map>
