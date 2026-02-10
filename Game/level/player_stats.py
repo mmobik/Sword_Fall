@@ -175,15 +175,22 @@ class HealthStat(BaseStat):
         """Устанавливает новое максимальное здоровье."""
         old_max = self.max_value
         old_current = self.current_value
-        
+
         # Сохраняем процент текущего здоровья
         health_percentage = old_current / old_max if old_max > 0 else 1.0
-        
-        self.max_value = new_max_health
-        self.current_value = new_max_health * health_percentage
-        
-        # ПЕРЕСЧИТЫВАЕМ значение с модификаторами
+
+        # Обновляем базовое значение, чтобы BaseStat._recalculate_value()
+        # не откатывало max_value обратно к старому base_value
+        self.base_value = new_max_health
+
+        # Пересчитываем максимум с учетом модификаторов
         self._recalculate_value()
+
+        # Обновляем текущее здоровье, сохраняя процент
+        new_current = self.max_value * health_percentage
+        if abs(new_current - self.current_value) > 0.001:
+            self.current_value = new_current
+            self._notify_observers(old_current, self.current_value)
 
 
 class StaminaStat(BaseStat):
@@ -237,16 +244,22 @@ class StaminaStat(BaseStat):
         """Устанавливает новое максимальное количество выносливости."""
         old_max = self.max_value
         old_current = self.current_value
-        
+
         # Сохраняем процент текущей выносливости
         stamina_percentage = old_current / old_max if old_max > 0 else 1.0
-        
-        self.max_value = new_max_stamina
-        self.current_value = new_max_stamina * stamina_percentage
-        
-        # ПЕРЕСЧИТЫВАЕМ значение с модификаторами
+
+        # Обновляем базовое значение, чтобы пересчет учитывал новый максимум
+        self.base_value = new_max_stamina
+
+        # Пересчитываем максимум с учетом модификаторов
         self._recalculate_value()
-        
+
+        # Обновляем текущее значение, сохраняя процент
+        new_current = self.max_value * stamina_percentage
+        if abs(new_current - self.current_value) > 0.001:
+            self.current_value = new_current
+            self._notify_observers(old_current, self.current_value)
+
         print(f"[STAMINA] Макс. выносливость изменена: {old_max} -> {self.max_value}")
         print(f"[STAMINA] Текущая выносливость: {old_current} -> {self.current_value}")
 
@@ -300,13 +313,22 @@ class ManaStat(BaseStat):
         """Устанавливает новое максимальное количество маны."""
         old_max = self.max_value
         old_current = self.current_value
-        
+
         # Сохраняем процент текущей маны
         mana_percentage = old_current / old_max if old_max > 0 else 1.0
-        
-        self.max_value = new_max_mana
-        self.current_value = new_max_mana * mana_percentage
-        
+
+        # Обновляем базовое значение, чтобы пересчет учитывал новый максимум
+        self.base_value = new_max_mana
+
+        # Пересчитываем максимум с учетом модификаторов
+        self._recalculate_value()
+
+        # Обновляем текущее значение, сохраняя процент
+        new_current = self.max_value * mana_percentage
+        if abs(new_current - self.current_value) > 0.001:
+            self.current_value = new_current
+            self._notify_observers(old_current, self.current_value)
+
         print(f"[MANA] Макс. мана изменена: {old_max} -> {self.max_value}")
         print(f"[MANA] Текущая мана: {old_current} -> {self.current_value}")
 
@@ -480,31 +502,51 @@ class PlayerStats:
         self.attributes = {
             # Физические характеристики
             "strength": Attribute(
-                "strength", "Сила", 10,
-                "Физическая мощь, мускульная сила. Влияет на урон в ближнем бою, проверки на подъем/слом, лазание.",
-                "Сил", "physical"
+                "strength",
+                "Сила",
+                10,
+                "Физическая мощь, мускульная сила. Влияет на урон в ближнем бою, "
+                "проверки на подъем/слом, лазание, а также на максимальное здоровье.",
+                "Сил",
+                "physical",
             ),
             "dexterity": Attribute(
-                "dexterity", "Ловкость", 10,
-                "Координация, реакция, проворство. Влияет на броню (Уклонение), инициативу, атаки дальнего боя, скрытность, ловкость рук.",
-                "Лов", "physical"
+                "dexterity",
+                "Ловкость",
+                10,
+                "Координация, реакция, проворство. Влияет на броню (Уклонение), инициативу, "
+                "атаки дальнего боя, скрытность, ловкость рук.",
+                "Лов",
+                "physical",
             ),
             "constitution": Attribute(
-                "constitution", "Телосложение", 10,
-                "Здоровье, выносливость, стойкость. Влияет на очки жизни (Хиты), сопротивления ядам/болезням, концентрацию при ранении.",
-                "Вын", "physical"
+                "constitution",
+                "Телосложение",
+                10,
+                "Запас сил, стойкость, сопротивляемость усталости. Влияет на выносливость и "
+                "сопротивления ядам/болезням, концентрацию при ранении.",
+                "Вын",
+                "physical",
             ),
             "speed": Attribute(
-                "speed", "Скорость", 10,
-                "Быстрота движения, скорость бега, резкость рывков. Влияет на скорость передвижения, уклонение от зонных эффектов, количество атак.",
-                "Спд", "physical"
+                "speed",
+                "Скорость",
+                10,
+                "Быстрота движения, скорость бега, резкость рывков. Влияет на скорость "
+                "передвижения, уклонение от зонных эффектов, количество атак.",
+                "Спд",
+                "physical",
             ),
             
             # === МЕНТАЛЬНЫЕ ХАРАКТЕРИСТИКИ ===
             "intelligence": Attribute(
-                "intelligence", "Интеллект", 10,
-                "Логика, память, аналитические способности. Влияет на количество навыков, магию волшебников/ученых, анализ слабостей.",
-                "Инт", "mental"
+                "intelligence",
+                "Интеллект",
+                10,
+                "Логика, память, аналитические способности. Влияет на количество навыков, "
+                "магические школы разума и на максимальный запас маны.",
+                "Инт",
+                "mental",
             ),
             "wisdom": Attribute(
                 "wisdom", "Мудрость", 10,
@@ -539,9 +581,13 @@ class PlayerStats:
                 "Рш", "spiritual"
             ),
             "spirit": Attribute(
-                "spirit", "Дух", 10,
-                "Внутренняя энергия, связь с нематериальным миром, эссенция. Влияет на очки маны/энергии, силу призывов.",
-                "Дх", "spiritual"
+                "spirit",
+                "Дух",
+                10,
+                "Внутренняя энергия, связь с нематериальным миром, эссенция. Влияет на силу "
+                "призывов и духовные эффекты.",
+                "Дх",
+                "spiritual",
             ),
             
             # === ПРОИЗВОДНЫЕ ХАРАКТЕРИСТИКИ ===
@@ -615,20 +661,20 @@ class PlayerStats:
         perception_mod = self.attributes["perception"].get_modifier()
         
         # === ФИКСИРУЕМ ВЛИЯНИЕ НА ХАРАКТЕРИСТИКИ ===
-        
-        # 1. Здоровье: зависит ОТ ТЕЛОСЛОЖЕНИЯ
-        # Каждый пункт телосложения дает +15 к максимальному здоровью
-        new_health_max = 100 + (constitution * 15)
+
+        # 1. Здоровье: теперь зависит ОТ СИЛЫ
+        # Каждый пункт силы дает +15 к максимальному здоровью
+        new_health_max = 100 + (strength * 15)
         self.health.set_max_health(new_health_max)
         
-        # 2. Мана: зависит ОТ ДУХА
-        # Каждый пункт духа дает +10 к максимальной мане
-        new_mana_max = 50 + (spirit * 10)
+        # 2. Мана: теперь зависит ОТ ИНТЕЛЛЕКТА
+        # Каждый пункт интеллекта дает +10 к максимальной мане
+        new_mana_max = 50 + (intelligence * 10)
         self.mana.set_max_mana(new_mana_max)
         
-        # 3. Выносливость: зависит ОТ ТЕЛОСЛОЖЕНИЯ И ДУХА
-        # Каждый пункт телосложения дает +5, каждый пункт духа дает +5
-        new_stamina_max = 100 + (constitution * 5) + (spirit * 5)
+        # 3. Выносливость: зависит ОТ ТЕЛОСЛОЖЕНИЯ
+        # Каждый пункт телосложения дает +10 к максимальной выносливости
+        new_stamina_max = 100 + (constitution * 10)
         self.stamina.set_max_stamina(new_stamina_max)
         
         # 4. Урон: зависит ОТ СИЛЫ
