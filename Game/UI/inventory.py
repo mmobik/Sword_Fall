@@ -53,6 +53,7 @@ class Inventory:
         self.inventory_scrollbar_rect = None
         self.inventory_scroll_thumb_rect = None
         self.inventory_dragging_scroll = False
+        self.inventory_scroll_thumb_image: Optional[pygame.Surface] = self._load_inventory_scroll_thumb_image()
         
         # Слоты экипировки (ТОЛЬКО В ACS)
         self.equipment_slots = {
@@ -136,7 +137,24 @@ class Inventory:
         except Exception as e:
             print(f"[INVENTORY ERROR] Ошибка загрузки ACS: {e}")
             return None
-        
+
+    def _load_inventory_scroll_thumb_image(self) -> Optional[pygame.Surface]:
+        """Загружает изображение ползунка для инвентаря ACS."""
+        try:
+            # Используем путь из запроса пользователя, но в относительном виде
+            image_path = "Game/assets/Images/game/playerData/slider.png"
+            if os.path.exists(image_path):
+                image = pygame.image.load(image_path).convert_alpha()
+                if config.DEBUG_MODE:
+                    print(f"[INVENTORY DEBUG] Изображение slider загружено: {image.get_size()}")
+                return image
+            else:
+                print(f"[INVENTORY WARNING] Файл slider не найден: {image_path}")
+                return None
+        except Exception as e:
+            print(f"[INVENTORY ERROR] Ошибка загрузки slider: {e}")
+            return None
+
     def _load_inventory_profile_image(self) -> Optional[pygame.Surface]:
         """Загружает изображение inventory_profile.png."""
         try:
@@ -1310,12 +1328,17 @@ class Inventory:
                     # Рисуем предмет внутри ячейки; если иконка меньше, она просто займет верхний‑левый угол
                     item.draw(screen, x, y)
 
-        # Отрисовываем скроллбар (только в debug‑режиме)
-        if config.DEBUG_MODE and self.inventory_scrollbar_rect:
-            # Фон трека
-            pygame.draw.rect(screen, (40, 40, 40), self.inventory_scrollbar_rect, border_radius=6)
-            # Ползунок
-            if self.inventory_scroll_thumb_rect:
+        # Отрисовываем только ползунок (без линии‑трека), всегда видимый
+        if self.inventory_scroll_thumb_rect:
+            if self.inventory_scroll_thumb_image:
+                # Масштабируем изображение под текущий размер ползунка
+                thumb_surf = pygame.transform.smoothscale(
+                    self.inventory_scroll_thumb_image,
+                    (self.inventory_scroll_thumb_rect.width, self.inventory_scroll_thumb_rect.height),
+                )
+                screen.blit(thumb_surf, self.inventory_scroll_thumb_rect.topleft)
+            else:
+                # Фолбэк — простой прямоугольник, если картинка не загрузилась
                 pygame.draw.rect(
                     screen,
                     (110, 110, 150),
