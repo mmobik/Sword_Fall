@@ -9,6 +9,7 @@ from level.player_stats import PlayerStats
 from core.config import config
 from UI.items import InventoryItem
 from UI.equipment_data import DEFAULT_ACS_ITEMS, ITEM_DATABASE
+from UI.equipment_logic import recalculate_equipment_bonuses
 
 class Inventory:
     """Класс инвентаря для отображения инвентаря (I) и ACS (O - аксессуары)."""
@@ -623,6 +624,9 @@ class Inventory:
             
             source_container[source_key], target_container[target_key] = \
                 target_item, source_item
+
+        # После любого изменения слотов пересчитываем бонусы экипировки
+        recalculate_equipment_bonuses(self.player_stats, self.equipment_slots.values())
     
     def _can_equip_to_slot(self, item: InventoryItem, slot_name: str) -> bool:
         """Проверяет, можно ли надеть предмет в указанный слот экипировки."""
