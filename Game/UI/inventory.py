@@ -1310,8 +1310,8 @@ class Inventory:
                     # Рисуем предмет внутри ячейки; если иконка меньше, она просто займет верхний‑левый угол
                     item.draw(screen, x, y)
 
-        # Отрисовываем скроллбар
-        if self.inventory_scrollbar_rect:
+        # Отрисовываем скроллбар (только в debug‑режиме)
+        if config.DEBUG_MODE and self.inventory_scrollbar_rect:
             # Фон трека
             pygame.draw.rect(screen, (40, 40, 40), self.inventory_scrollbar_rect, border_radius=6)
             # Ползунок
