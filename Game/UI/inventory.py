@@ -44,6 +44,23 @@ class Inventory:
         # Отступы между ячейками
         self.inventory_slot_spacing_x = 10
         self.inventory_slot_spacing_y = 10
+        # Базовые координаты левого верхнего угла решётки (можно легко сдвигать)
+        self.inventory_grid_start_x = 1037
+        self.inventory_grid_start_y = 221
+        # Базовые координаты ползунка прокрутки (независимы от решётки по X/Y)
+        grid_width_tmp = (
+            self.inventory_cols * (self.inventory_slot_width + self.inventory_slot_spacing_x)
+            - self.inventory_slot_spacing_x
+        )
+        self.inventory_scroll_x = self.inventory_grid_start_x + grid_width_tmp + 35
+        self.inventory_scroll_y = self.inventory_grid_start_y
+        # Диапазон по вертикали, в котором ползунок может перемещаться
+        track_height_tmp = (
+            self.inventory_visible_rows * (self.inventory_slot_height + self.inventory_slot_spacing_y)
+            - self.inventory_slot_spacing_y
+        )
+        self.inventory_scroll_track_top = self.inventory_scroll_y + 20
+        self.inventory_scroll_track_bottom = self.inventory_scroll_y + track_height_tmp - 20
 
         # Слоты инвентаря (4 × 32 = 128 слотов) - ТОЛЬКО В ACS
         self.inventory_slots = [None] * (self.inventory_cols * self.inventory_total_rows)
@@ -333,9 +350,9 @@ class Inventory:
             return
             
         # Начальные координаты для сетки инвентаря в ACS
-        # Левый верхний угол решетки должен быть в точке (968, 274)
-        inv_start_x = 1037
-        inv_start_y = 221
+        # Левый верхний угол решетки берём из настроек (inventory_grid_start_x/y)
+        inv_start_x = self.inventory_grid_start_x
+        inv_start_y = self.inventory_grid_start_y
         
         slot_w = self.inventory_slot_width
         slot_h = self.inventory_slot_height
@@ -354,13 +371,12 @@ class Inventory:
 
         # Обновляем скроллбар
         if self.inventory_total_rows > self.inventory_visible_rows:
-            # Общая ширина сетки
-            grid_width = cols * (slot_w + spacing_x) - spacing_x
-            # Сдвигаем ползунок правее от края сетки
-            slider_x = inv_start_x + grid_width + 40
-            slider_y = inv_start_y
+            # Координаты ползунка берём из настроек (inventory_scroll_x/y),
+            # а длину трека — из inventory_scroll_track_top/bottom
+            slider_x = self.inventory_scroll_x
+            slider_y = self.inventory_scroll_track_top
             slider_width = 18
-            slider_height = rows * (slot_h + spacing_y) - spacing_y
+            slider_height = max(0, self.inventory_scroll_track_bottom - self.inventory_scroll_track_top)
 
             self.inventory_scrollbar_rect = pygame.Rect(
                 slider_x, slider_y, slider_width, slider_height
@@ -1298,7 +1314,8 @@ class Inventory:
         slot_h = self.inventory_slot_height  # оставлено для читаемости, хотя ниже не используется
         spacing_x = self.inventory_slot_spacing_x
         grid_width = self.inventory_cols * (slot_w + spacing_x) - spacing_x
-        inv_start_x = acs_x + 900
+        # Используем те же базовые координаты, что и для решётки слотов
+        inv_start_x = self.inventory_grid_start_x
         title_x = inv_start_x + grid_width // 2 - title_surface.get_width() // 2
         title_y = acs_y + 100
         screen.blit(title_surface, (title_x, title_y))
