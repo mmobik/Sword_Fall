@@ -30,10 +30,29 @@ class Inventory:
         self.acs_background = None
         
         # === СИСТЕМА ПРЕДМЕТОВ И СЛОТОВ (ТОЛЬКО В ACS - КЛАВИША O) ===
-        
-        # Слоты инвентаря (5 рядов по 10 слотов) - ТОЛЬКО В ACS
-        self.inventory_slots = [None] * 50  # 50 слотов
-        self.inventory_slots_positions = []  # Координаты слотов
+
+        # Параметры сетки ACS‑инвентаря
+        # Видимая область: 4 столбца × 5 строк = 20 ячеек
+        # Максимальная высота: 32 строки (прокрутка по вертикали)
+        self.inventory_cols = 4
+        self.inventory_visible_rows = 5
+        self.inventory_total_rows = 32
+        self.inventory_scroll_row = 0  # индекс верхней видимой строки
+        # Размер одной ячейки (ширина × высота) в пикселях
+        self.inventory_slot_width = 132
+        self.inventory_slot_height = 115
+        # Отступы между ячейками
+        self.inventory_slot_spacing_x = 10
+        self.inventory_slot_spacing_y = 10
+
+        # Слоты инвентаря (4 × 32 = 128 слотов) - ТОЛЬКО В ACS
+        self.inventory_slots = [None] * (self.inventory_cols * self.inventory_total_rows)
+        self.inventory_slots_positions = []  # Координаты видимых слотов (только 4×8)
+
+        # Скроллбар для инвентаря (ACS, категория "Инвентарь")
+        self.inventory_scrollbar_rect = None
+        self.inventory_scroll_thumb_rect = None
+        self.inventory_dragging_scroll = False
         
         # Слоты экипировки (ТОЛЬКО В ACS)
         self.equipment_slots = {
@@ -296,22 +315,96 @@ class Inventory:
             return
             
         # Начальные координаты для сетки инвентаря в ACS
-        # Размещаем сетку 10x5 в правой части ACS изображения
-        inv_start_x = acs_x + 900  # Правая часть ACS
-        inv_start_y = acs_y + 150  # Отступ сверху
+        # Левый верхний угол решетки должен быть в точке (968, 274)
+        inv_start_x = 1037
+        inv_start_y = 221
         
-        slot_size = InventoryItem.SLOT_SIZE
-        slot_spacing = 10
-        cols = 10
-        rows = 5
+        slot_w = self.inventory_slot_width
+        slot_h = self.inventory_slot_height
+        spacing_x = self.inventory_slot_spacing_x
+        spacing_y = self.inventory_slot_spacing_y
+        cols = self.inventory_cols
+        rows = self.inventory_visible_rows
         
         self.inventory_slots_positions = []
         
         for row in range(rows):
             for col in range(cols):
-                x = inv_start_x + col * (slot_size + slot_spacing)
-                y = inv_start_y + row * (slot_size + slot_spacing)
+                x = inv_start_x + col * (slot_w + spacing_x)
+                y = inv_start_y + row * (slot_h + spacing_y)
                 self.inventory_slots_positions.append((x, y))
+
+        # Обновляем скроллбар
+        if self.inventory_total_rows > self.inventory_visible_rows:
+            # Общая ширина сетки
+            grid_width = cols * (slot_w + spacing_x) - spacing_x
+            # Сдвигаем ползунок правее от края сетки
+            slider_x = inv_start_x + grid_width + 40
+            slider_y = inv_start_y
+            slider_width = 18
+            slider_height = rows * (slot_h + spacing_y) - spacing_y
+
+            self.inventory_scrollbar_rect = pygame.Rect(
+                slider_x, slider_y, slider_width, slider_height
+            )
+
+            # Размер и позиция ползунка в зависимости от текущего скролла
+            scroll_range_rows = self.inventory_total_rows - self.inventory_visible_rows
+            thumb_min_height = 20
+            thumb_height = max(
+                thumb_min_height,
+                int(slider_height * (self.inventory_visible_rows / self.inventory_total_rows)),
+            )
+
+            if scroll_range_rows > 0:
+                max_thumb_offset = slider_height - thumb_height
+                thumb_offset = int(
+                    (self.inventory_scroll_row / scroll_range_rows) * max_thumb_offset
+                )
+            else:
+                thumb_offset = 0
+
+            self.inventory_scroll_thumb_rect = pygame.Rect(
+                slider_x + 2,
+                slider_y + thumb_offset,
+                slider_width - 4,
+                thumb_height,
+            )
+        else:
+            self.inventory_scrollbar_rect = None
+            self.inventory_scroll_thumb_rect = None
+
+    def _set_inventory_scroll_row(self, row: int):
+        """Устанавливает строку прокрутки инвентаря (ACS)."""
+        max_row = max(0, self.inventory_total_rows - self.inventory_visible_rows)
+        row = max(0, min(row, max_row))
+        if row != self.inventory_scroll_row:
+            self.inventory_scroll_row = row
+
+    def _set_inventory_scroll_from_position(self, mouse_y: int):
+        """Обновляет скролл инвентаря по позиции мыши на скроллбаре."""
+        if not self.inventory_scrollbar_rect or self.inventory_total_rows <= self.inventory_visible_rows:
+            return
+
+        track_top = self.inventory_scrollbar_rect.top
+        track_height = self.inventory_scrollbar_rect.height
+        if track_height <= 0:
+            return
+
+        rel = (mouse_y - track_top) / track_height
+        rel = max(0.0, min(1.0, rel))
+
+        scroll_range_rows = self.inventory_total_rows - self.inventory_visible_rows
+        target_row = int(round(rel * scroll_range_rows))
+        self._set_inventory_scroll_row(target_row)
+
+    def _visible_index_to_global(self, visible_index: int) -> int:
+        """Преобразует индекс видимой ячейки 0..(cols*visible_rows-1) в глобальный индекс слота."""
+        cols = self.inventory_cols
+        row_visible = visible_index // cols
+        col = visible_index % cols
+        row_global = self.inventory_scroll_row + row_visible
+        return row_global * cols + col
     
     def _calculate_equipment_slot_positions(self, acs_x: int, acs_y: int):
         """Вычисляет позиции слотов экипировки в ACS."""
@@ -333,14 +426,15 @@ class Inventory:
         }
     
     def _get_inventory_slot_at_position(self, pos: Tuple[int, int]) -> Optional[int]:
-        """Возвращает индекс слота инвентаря по позиции мыши (только в ACS)."""
+        """Возвращает ИНДЕКС ВИДИМОГО слота инвентаря по позиции мыши (только в ACS)."""
         if not self.inventory_slots_positions:
             return None
         
-        slot_size = InventoryItem.SLOT_SIZE
+        slot_w = self.inventory_slot_width
+        slot_h = self.inventory_slot_height
         
         for i, (x, y) in enumerate(self.inventory_slots_positions):
-            slot_rect = pygame.Rect(x, y, slot_size, slot_size)
+            slot_rect = pygame.Rect(x, y, slot_w, slot_h)
             if slot_rect.collidepoint(pos):
                 return i
         
@@ -425,17 +519,27 @@ class Inventory:
         # Проверяем клик по ползунку категорий
         if self._handle_slider_click(mouse_pos):
             return
+
+        # Скроллбар инвентаря (только категория "Инвентарь")
+        if self.current_acs_category == 0 and self.inventory_scrollbar_rect:
+            if self.inventory_scrollbar_rect.collidepoint(mouse_pos):
+                # Клик по области скроллбара — перемещаем ползунок
+                self.inventory_dragging_scroll = True
+                self._set_inventory_scroll_from_position(mouse_pos[1])
+                return
         
         # Определяем, в какой слот кликнули
         slot_type = None
-        slot_index = None
+        slot_index = None  # глобальный индекс слота инвентаря
+        visible_index = None
         slot_name = None
         item = None
         
         if self.current_acs_category == 0:  # Инвентарь
-            slot_index = self._get_inventory_slot_at_position(mouse_pos)
-            if slot_index is not None:
+            visible_index = self._get_inventory_slot_at_position(mouse_pos)
+            if visible_index is not None:
                 slot_type = "inventory"
+                slot_index = self._visible_index_to_global(visible_index)
                 item = self.inventory_slots[slot_index]
         elif self.current_acs_category == 1:  # Экипировка
             slot_name = self._get_equipment_slot_at_position(mouse_pos)
@@ -451,8 +555,15 @@ class Inventory:
                 # Начинаем перетаскивание
                 self.dragged_item = item
                 if slot_type == "inventory":
-                    self.drag_offset = (mouse_pos[0] - self.inventory_slots_positions[slot_index][0],
-                                      mouse_pos[1] - self.inventory_slots_positions[slot_index][1])
+                    # Для расчета смещения используем координаты ВИДИМОГО слота
+                    if visible_index is not None and 0 <= visible_index < len(self.inventory_slots_positions):
+                        slot_x, slot_y = self.inventory_slots_positions[visible_index]
+                    else:
+                        slot_x, slot_y = mouse_pos
+                    self.drag_offset = (
+                        mouse_pos[0] - slot_x,
+                        mouse_pos[1] - slot_y,
+                    )
                     self.selected_slot = ("inventory", slot_index)
                 elif slot_type == "equipment":
                     self.drag_offset = (mouse_pos[0] - self.equipment_slots_positions[slot_name][0],
@@ -473,9 +584,10 @@ class Inventory:
         target_item = None
         
         if self.current_acs_category == 0:  # Инвентарь
-            target_slot_index = self._get_inventory_slot_at_position(mouse_pos)
-            if target_slot_index is not None:
+            visible_index = self._get_inventory_slot_at_position(mouse_pos)
+            if visible_index is not None:
                 target_slot_type = "inventory"
+                target_slot_index = self._visible_index_to_global(visible_index)
                 target_item = self.inventory_slots[target_slot_index]
         elif self.current_acs_category == 1:  # Экипировка
             target_slot_name = self._get_equipment_slot_at_position(mouse_pos)
@@ -812,16 +924,27 @@ class Inventory:
                 if self.acs_open:
                     # Обрабатываем правый клик в ACS
                     self._handle_acs_mouse_click(mouse_pos)
+            # Прокрутка колесом мыши для инвентаря ACS
+            elif event.button in (4, 5) and self.acs_open and self.current_acs_category == 0:
+                # 4 - колесо вверх, 5 - вниз
+                direction = -1 if event.button == 4 else 1
+                self._set_inventory_scroll_row(self.inventory_scroll_row + direction)
         
         elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1 and self.acs_open and self.dragged_item:
-                # Обрабатываем отпускание только в ACS
-                self._handle_acs_mouse_release(mouse_pos)
+            if event.button == 1 and self.acs_open:
+                # Завершаем перетаскивание предмета
+                if self.dragged_item:
+                    self._handle_acs_mouse_release(mouse_pos)
+                # Завершаем перетаскивание скроллбара
+                self.inventory_dragging_scroll = False
         
         elif event.type == pygame.MOUSEMOTION:
             if self.inventory_open:
                 # Обновляем наведение для подсказок
                 self._handle_inventory_mouse_motion(mouse_pos)
+            elif self.acs_open and self.current_acs_category == 0 and self.inventory_dragging_scroll:
+                # Перетаскивание скроллбара инвентаря
+                self._set_inventory_scroll_from_position(mouse_pos[1])
     
     def _open_menu(self, menu_type):
         """Обновляет состояние игры при открытии меню."""
@@ -933,7 +1056,7 @@ class Inventory:
         # Отображаем подсказку если нужно
         if self.hovered_attribute and self.tooltip_timer >= self.tooltip_delay:
             self._draw_attribute_tooltip(screen, self.hovered_attribute)
-    
+
     def _draw_attribute_slider(self, screen):
         """Отрисовывает ползунок категорий атрибутов."""
         slider_width = 400
@@ -1110,9 +1233,8 @@ class Inventory:
             acs_y = (screen.get_height() - self.acs_image.get_height()) // 2
             screen.blit(self.acs_image, (acs_x, acs_y))
             
-            # Вычисляем позиции слотов, если еще не вычислены
-            if not self.inventory_slots_positions:
-                self._calculate_inventory_slot_positions(acs_x, acs_y)
+            # Вычисляем позиции слотов
+            self._calculate_inventory_slot_positions(acs_x, acs_y)
             if not self.equipment_slots_positions:
                 self._calculate_equipment_slot_positions(acs_x, acs_y)
             
@@ -1150,26 +1272,56 @@ class Inventory:
         """Отрисовывает слоты инвентаря в ACS."""
         # Заголовок инвентаря
         font = pygame.font.Font(None, 28)
-        title = "Инвентарь (50 слотов)"
+        total_slots = len(self.inventory_slots)
+        title = f"Инвентарь ({total_slots} слотов)"
         title_surface = font.render(title, True, (220, 220, 220))
-        title_x = acs_x + 900 + (10 * (InventoryItem.SLOT_SIZE + 10)) // 2 - title_surface.get_width() // 2
+        # Центрируем заголовок над сеткой 4×8
+        slot_w = self.inventory_slot_width
+        slot_h = self.inventory_slot_height  # оставлено для читаемости, хотя ниже не используется
+        spacing_x = self.inventory_slot_spacing_x
+        grid_width = self.inventory_cols * (slot_w + spacing_x) - spacing_x
+        inv_start_x = acs_x + 900
+        title_x = inv_start_x + grid_width // 2 - title_surface.get_width() // 2
         title_y = acs_y + 100
         screen.blit(title_surface, (title_x, title_y))
         
         # Отрисовываем слоты и предметы
-        for i, (x, y) in enumerate(self.inventory_slots_positions):
-            # Рамка слота
-            slot_rect = pygame.Rect(x, y, InventoryItem.SLOT_SIZE, InventoryItem.SLOT_SIZE)
-            pygame.draw.rect(screen, (100, 100, 100), slot_rect, 1)
-            
-            # Подсветка выбранного слота
-            if self.selected_slot and self.selected_slot[0] == "inventory" and self.selected_slot[1] == i:
-                pygame.draw.rect(screen, (150, 150, 50, 100), slot_rect)
-            
-            # Предмет в слоте
-            item = self.inventory_slots[i]
-            if item:
-                item.draw(screen, x, y)
+        for visible_index, (x, y) in enumerate(self.inventory_slots_positions):
+            slot_rect = pygame.Rect(x, y, slot_w, slot_h)
+
+            # Глобальный индекс слота для этого видимого индекса
+            global_index = self._visible_index_to_global(visible_index)
+            if 0 <= global_index < len(self.inventory_slots):
+                # В режиме отладки рисуем сетку (рамки всех слотов)
+                if config.DEBUG_MODE:
+                    pygame.draw.rect(screen, (100, 100, 100), slot_rect, 1)
+
+                # Подсветка выбранного слота
+                if (
+                    self.selected_slot
+                    and self.selected_slot[0] == "inventory"
+                    and self.selected_slot[1] == global_index
+                ):
+                    pygame.draw.rect(screen, (150, 150, 50, 80), slot_rect, border_radius=4)
+
+                # Предмет в слоте
+                item = self.inventory_slots[global_index]
+                if item:
+                    # Рисуем предмет внутри ячейки; если иконка меньше, она просто займет верхний‑левый угол
+                    item.draw(screen, x, y)
+
+        # Отрисовываем скроллбар
+        if self.inventory_scrollbar_rect:
+            # Фон трека
+            pygame.draw.rect(screen, (40, 40, 40), self.inventory_scrollbar_rect, border_radius=6)
+            # Ползунок
+            if self.inventory_scroll_thumb_rect:
+                pygame.draw.rect(
+                    screen,
+                    (110, 110, 150),
+                    self.inventory_scroll_thumb_rect,
+                    border_radius=6,
+                )
     
     def _draw_equipment_slots(self, screen, acs_x: int, acs_y: int):
         """Отрисовывает слоты экипировки в ACS."""
