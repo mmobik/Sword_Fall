@@ -40,7 +40,8 @@ class DialogueHandler:
             self._handle_king_dialogue(npc_id)
         elif npc_type == 'doors':
             self.game.door_handler.interact(obj)
-        # TODO: Добавить обработку других типов NPC
+        elif npc_type == 'chest':
+            self.game.chest_handler.interact(obj)
 
     def _handle_guard_dialogue(self, npc_id: int):
         """

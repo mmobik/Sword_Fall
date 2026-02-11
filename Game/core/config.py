@@ -61,6 +61,12 @@ class GameConfig:
             "SHOW_DURATION": 3.0  # Время показа диалога в секундах
         }
 
+        # Интерфейс сундука (по языку)
+        self.CHEST_PANEL = {
+            "IMAGE_PATH_RUS": "Game/assets/images/game/playerData/chest_rus.png",
+            "IMAGE_PATH_ENG": "Game/assets/images/game/playerData/chest_eng.png",
+        }
+
         # Изображения NPC для диалогов
         self.NPC_IMAGES = {
             "GUARD": "Game/assets/images/game/The guard_4.png",

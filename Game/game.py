@@ -19,6 +19,7 @@ from core.game_loop import GameLoop
 from core.dialogue_handler import DialogueHandler
 from core.dialogue_panel import DialoguePanel
 from core.door_handler import DoorInteractionHandler
+from core.chest_handler import ChestInteractionHandler
 from core.sound_manager import SoundManager
 from core.game_state_manager import GameStateManager
 from core.menu_handler import MenuHandler
@@ -112,10 +113,16 @@ class Game:
 
         # Обработчики
         self.door_handler = DoorInteractionHandler(self)
+        self.chest_handler = ChestInteractionHandler(self)
         self.dialogue_panel = DialoguePanel(self)
         self.dialogue_handler = DialogueHandler(self)
         self.talk_button = TalkButton(self)
         self.game_resources = GameResources(self)
+
+        # Сундук: открыт ли интерфейс и текущее изображение
+        self.show_chest = False
+        self.chest_panel_img = None
+        self.active_chest_obj = None
 
         # Глобальное состояние инвентаря
         self.inventory_open_state = False

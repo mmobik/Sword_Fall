@@ -59,6 +59,8 @@ class MenuHandler:
 
         current_mouse_pos = pygame.mouse.get_pos()
         config.set_language(lang)
+        if hasattr(self.game, 'chest_handler') and self.game.chest_handler:
+            self.game.chest_handler.invalidate_cache()
 
         if config.DEBUG_MODE:
             print(f"Язык изменен на: {lang}")

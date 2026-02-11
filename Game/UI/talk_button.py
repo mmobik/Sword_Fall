@@ -37,7 +37,8 @@ class TalkButton:
 
         self.game.show_talk_button = False
 
-        if not self.game.show_dialogue:
+        # Не сбрасывать активный объект, если открыт диалог или сундук
+        if not self.game.show_dialogue and not getattr(self.game, 'show_chest', False):
             self.game.active_npc_obj = None
 
         in_zone = False
@@ -55,7 +56,7 @@ class TalkButton:
             npc_type = obj.properties.get('interactive_type', '').lower()
 
             if ((npc_type == 'the guard' or npc_type == 'royal_guard') or
-                npc_type == 'doors' or npc_type == 'king') and \
+                npc_type == 'doors' or npc_type == 'king' or npc_type == 'chest') and \
                     player_rect.colliderect(obj_rect.inflate(10, 10)):
                 in_zone = True
 
@@ -76,7 +77,8 @@ class TalkButton:
                 self.game.talk_button_enter_time = now
 
             if ((now - self.game.talk_button_enter_time) >=
-                    self.game.talk_button_show_delay and not self.game.show_dialogue):
+                    self.game.talk_button_show_delay and not self.game.show_dialogue
+                    and not getattr(self.game, 'show_chest', False)):
                 self.game.show_talk_button = True
         else:
             self.game.talk_button_enter_time = None
