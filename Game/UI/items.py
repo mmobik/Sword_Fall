@@ -125,11 +125,12 @@ class InventoryItem:
         rarity_color = self.get_rarity_color()
         pygame.draw.rect(surface, rarity_color, slot_rect, 2)
         
-        # Заливка слота
+        # Фон ячейки больше не заливаем, чтобы не портить прозрачность иконок.
+        # При выделении рисуем только лёгкий полупрозрачный оверлей.
         if selected:
-            pygame.draw.rect(surface, (50, 50, 50, 180), slot_rect)
-        else:
-            pygame.draw.rect(surface, (40, 40, 40, 180), slot_rect)
+            overlay = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
+            overlay.fill((80, 80, 40, 100))
+            surface.blit(overlay, (x, y))
         
         # Изображение предмета
         if self.image:
