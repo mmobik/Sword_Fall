@@ -244,8 +244,9 @@ class ChestInteractionHandler:
                 
                 # Используем координаты объекта напрямую (obj.x, obj.y в пикселях)
                 # В Tiled координата Y указывает на нижний край объекта, поэтому вычитаем высоту
+                # Дополнительное смещение для выравнивания с тайлом (32 - 11 = 21 пикселя вверх)
                 world_x = int(self.animating_obj.x)
-                world_y = int(self.animating_obj.y) - int(self.animating_obj.height)
+                world_y = int(self.animating_obj.y) - int(self.animating_obj.height) - 21
                 
                 if config.DEBUG_MODE and self.current_frame == 0:
                     print(f"[CHEST] Анимация на позиции: ({world_x}, {world_y}), размер кадра: {frame.get_size()}, объект y={self.animating_obj.y}, высота={self.animating_obj.height}")

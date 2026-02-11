@@ -162,6 +162,7 @@ class Game:
         self.all_sprites = None
         self.npc_dialogues = {}
         self.interactive_objects = []
+        self.chest_objects = []  # Объекты сундуков для анимации
         
         # UI игрока (будет инициализирован после создания игрока)
         self.player_ui = None
@@ -217,10 +218,30 @@ class Game:
         if self.level_renderer:
             self.level_renderer.render(self.virtual_screen)
 
-        # Отрисовка спрайтов
+        # Отрисовка спрайтов и анимации сундука с Y-сортировкой
         if self.all_sprites and self.camera:
+            # Проверяем, нужно ли рисовать анимацию сундука
+            chest_needs_draw = (hasattr(self, 'chest_handler') and 
+                               self.chest_handler.chest_state in ('opening', 'closing') and 
+                               self.chest_handler.animating_obj)
+            
+            # Получаем Y-координату сундука для сортировки
+            chest_y = None
+            if chest_needs_draw:
+                chest_y = int(self.chest_handler.animating_obj.y)
+            
             for sprite in self.all_sprites:
+                # Если есть анимация сундука и игрок ниже сундука (больше Y), рисуем сундук первым
+                if chest_needs_draw and sprite == self.player and chest_y is not None:
+                    if self.player.hitbox.centery > chest_y:
+                        self.chest_handler.draw(self.virtual_screen, self.camera)
+                        chest_needs_draw = False  # Уже нарисовали
+                
                 self.virtual_screen.blit(sprite.image, self.camera.apply(sprite.rect))
+            
+            # Если сундук не был нарисован (игрок выше сундука), рисуем его теперь
+            if chest_needs_draw:
+                self.chest_handler.draw(self.virtual_screen, self.camera)
 
         # Отрисовка индикаторов урона и лечения
         if self.player:

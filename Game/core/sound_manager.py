@@ -41,6 +41,8 @@ class SoundManager:
         self.sounds = {
             'button_click': self._load_sound("Button.mp3"),
             'steps': self._load_sound("steps.mp3"),  # Добавлен звук шагов
+            'chest_open': self._load_sound("звук открытия сундука.mp3"),  # Звук открытия сундука
+            'chest_close': self._load_sound("звук закрытия сундука.mp3"),  # Звук закрытия сундука
         }
         self.current_music = None
         

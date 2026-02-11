@@ -2,8 +2,8 @@
   "player": {
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
-      360,
-      505
+      367,
+      415
     ]
   },
   "inventory": {
@@ -49,11 +49,6 @@
         "count": 1
       },
       {
-        "slot_index": 8,
-        "id": "robe_of_the_sun",
-        "count": 1
-      },
-      {
         "slot_index": 9,
         "id": "bronze_helmet",
         "count": 1
@@ -62,6 +57,11 @@
         "slot_index": 10,
         "id": "golden_helmet",
         "count": 1
+      },
+      {
+        "slot_index": 12,
+        "id": "robe_of_the_sun",
+        "count": 1
       }
     ],
     "equipment_slots": {}
@@ -69,15 +69,15 @@
   "dialogues": {
     "446": {
       "type": "king",
-      "interaction_count": 1,
+      "interaction_count": 2,
       "phase_index": 0,
       "current_chain_index": 0,
-      "current_chain_position": 0,
+      "current_chain_position": 1,
       "in_dialogue_chain": true
     },
     "413": {
       "type": "royal_guard",
-      "interaction_count": 1,
+      "interaction_count": 4,
       "phase_index": 1
     },
     "414": {

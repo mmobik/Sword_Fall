@@ -5,6 +5,7 @@
 
 import pygame
 import os
+import time
 from typing import Optional, Tuple
 from level.player_stats import StatObserver, PlayerStats
 from core.config import config
@@ -59,6 +60,10 @@ class PlayerUI(StatObserver):
         # Кэшируем проверки для оптимизации
         self._has_health = hasattr(player_stats, 'health')
         self._has_stamina = hasattr(player_stats, 'stamina')
+        
+        # Таймер для вывода отладочной информации (раз в 5 секунд)
+        self.debug_log_timer = 0.0
+        self.debug_log_interval = 5.0  # секунды
         
         # Шрифты и цвета
         self.font_small = pygame.font.Font(None, 20)
@@ -127,9 +132,12 @@ class PlayerUI(StatObserver):
     
     def draw(self):
         """Отрисовывает интерфейс игрока."""
-        # Отладочная информация только в режиме отладки
+        # Отладочная информация только в режиме отладки (раз в 5 секунд)
         if self._has_health and config.DEBUG_MODE:
-            print(f"[UI DEBUG] Отрисовка UI: HP={self.player_stats.health.current_value}/{self.player_stats.health.max_value}, SP={self.player_stats.stamina.current_value}/{self.player_stats.stamina.max_value}")
+            current_time = time.time()
+            if current_time - self.debug_log_timer >= self.debug_log_interval:
+                print(f"[UI DEBUG] Отрисовка UI: HP={self.player_stats.health.current_value}/{self.player_stats.health.max_value}, SP={self.player_stats.stamina.current_value}/{self.player_stats.stamina.max_value}")
+                self.debug_log_timer = current_time
         
         # Отрисовываем только изображение game_bar
         if self.game_bar_image:

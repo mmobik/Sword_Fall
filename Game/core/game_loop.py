@@ -71,6 +71,8 @@ class GameLoop:
             # --- Блокировка открытия меню и инвентаря при диалоге, сундуке или инвентаре ---
             is_any_npc_dialogue = self.game.show_dialogue and self.game.active_npc_obj is not None
             is_chest_open = getattr(self.game, 'show_chest', False)
+            is_chest_animating = (hasattr(self.game, 'chest_handler') and 
+                                 self.game.chest_handler.chest_state in ('opening', 'closing'))
             is_inventory_open = getattr(self.game, 'inventory_open_state', False)
 
             # --- ESC: закрыть сундук или выйти в главное меню ---
@@ -91,7 +93,7 @@ class GameLoop:
                 continue
 
             # Блокируем обработку остальных меню и UI, кроме событий для диалога/инвентаря
-            if is_any_npc_dialogue or is_chest_open or is_inventory_open:
+            if is_any_npc_dialogue or is_chest_open or is_chest_animating or is_inventory_open:
                 continue
 
             if event.type == pygame.KEYDOWN:
@@ -102,7 +104,11 @@ class GameLoop:
 
                 if (event.key == pygame.K_e and
                         self.game.game_state_manager.game_state == "new_game"):
-                    self.game.dialogue_handler.try_interact_with_npc()
+                    # Не взаимодействовать, если сундук анимируется
+                    chest_animating = (hasattr(self.game, 'chest_handler') and 
+                                     self.game.chest_handler.chest_state in ('opening', 'closing'))
+                    if not chest_animating:
+                        self.game.dialogue_handler.try_interact_with_npc()
                 
                 # Воскрешение игрока
                 if (event.key == pygame.K_r and
@@ -216,8 +222,14 @@ class GameLoop:
                 self.game.waiting_for_first_update = False
                 self.game.wait_for_key_release = True
 
-            # Закрыть сундук при отдалении игрока от объекта сундука
-            if getattr(self.game, 'show_chest', False) and self.game.player and getattr(self.game, 'active_chest_obj', None):
+            # Обновляем анимацию сундука
+            if hasattr(self.game, 'chest_handler'):
+                self.game.chest_handler.update(self.game.dt)
+            
+            # Закрыть сундук при отдалении игрока (только если не анимируется)
+            if (getattr(self.game, 'show_chest', False) and self.game.player and 
+                getattr(self.game, 'active_chest_obj', None) and
+                self.game.chest_handler.chest_state == 'open'):
                 obj = self.game.active_chest_obj
                 obj_rect = pygame.Rect(int(obj.x), int(obj.y), int(obj.width), int(obj.height))
                 if not self.game.player.hitbox.colliderect(obj_rect.inflate(40, 40)):

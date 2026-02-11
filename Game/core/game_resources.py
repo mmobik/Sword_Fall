@@ -55,16 +55,26 @@ class GameResources:
             self.game.collision_handler = CollisionHandler()
             self.game.collision_objects = self.game.collision_handler.load_collision_objects(self.game.level)
             self.game.interactive_objects = []
+            self.game.chest_objects = []  # Список объектов сундуков для анимации
 
             # Загрузка интерактивных объектов
             for layer in self.game.level.layers:
                 if hasattr(layer, 'name') and hasattr(layer, '__iter__'):
+                    if config.DEBUG_MODE:
+                        print(f"[RESOURCES] Проверка слоя: {layer.name}")
                     for obj in layer:
                         if hasattr(obj, 'properties') and obj.properties.get('interactive', False):
                             self.game.interactive_objects.append(obj)
+                        # Отдельно сохраняем сундуки из слоя chest
+                        if hasattr(obj, 'properties') and obj.properties.get('chest', False):
+                            if config.DEBUG_MODE:
+                                print(f"[RESOURCES] Найден объект chest на слое {layer.name}: pos=({obj.x}, {obj.y}), properties={dict(obj.properties)}")
+                            self.game.chest_objects.append(obj)
 
             if config.DEBUG_MODE:
                 print(f"Загружено объектов коллизий: {len(self.game.collision_objects)}")
+                print(f"Загружено интерактивных объектов: {len(self.game.interactive_objects)}")
+                print(f"Загружено объектов chest: {len(self.game.chest_objects)}")
 
             # Создаем менеджер звука
             self.sound_manager = SoundManager()
