@@ -8,6 +8,7 @@
 import time
 import pygame
 from core.config import config
+from core.save_manager import save_game_state
 
 
 class GameLoop:
@@ -54,14 +55,16 @@ class GameLoop:
         if self.game.waiting_for_first_update:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    # Сохраняем настройки звука при выходе
+                    # Сохраняем состояние игры и настройки звука при выходе
+                    save_game_state(self.game)
                     self.game.sound_manager.save_settings()
                     return False
             return True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # Сохраняем настройки звука при выходе
+                # Сохраняем состояние игры и настройки звука при выходе
+                save_game_state(self.game)
                 self.game.sound_manager.save_settings()
                 return False
 
@@ -77,6 +80,9 @@ class GameLoop:
                     setattr(self.game.player, '_steps_channel', None)
                 if self.game.player:
                     self.game.player.is_walking = False
+
+                # При выходе в главное меню тоже сохраняем состояние игры
+                save_game_state(self.game)
                 self.game.show_main_menu()
                 continue
 

@@ -4,7 +4,7 @@
 
 import pygame
 import os
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict, Tuple, Any
 from level.player_stats import PlayerStats
 from core.config import config
 from UI.items import InventoryItem
@@ -216,6 +216,121 @@ class Inventory:
             ]
             for item in test_items:
                 self.add_item_to_free_slot(item)
+
+    # === СЕРИАЛИЗАЦИЯ / ДЕСЕРИАЛИЗАЦИЯ ИНВЕНТАРЯ ===
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Преобразует текущее состояние инвентаря в словарь.
+
+        Сохраняются:
+        - содержимое всех слотов инвентаря (индекс, id предмета, количество);
+        - содержимое слотов экипировки.
+        """
+        inventory_data: List[Dict[str, Any]] = []
+        for idx, item in enumerate(self.inventory_slots):
+            if item:
+                inventory_data.append(
+                    {
+                        "slot_index": idx,
+                        "id": item.id,
+                        "count": item.count,
+                    }
+                )
+
+        equipment_data: Dict[str, Dict[str, Any]] = {}
+        for slot_name, item in self.equipment_slots.items():
+            if item:
+                equipment_data[slot_name] = {
+                    "id": item.id,
+                    "count": item.count,
+                }
+
+        return {
+            "inventory_slots": inventory_data,
+            "equipment_slots": equipment_data,
+        }
+
+    def load_from_dict(self, data: Dict[str, Any]) -> None:
+        """
+        Восстанавливает инвентарь из словаря (формат, возвращаемый to_dict).
+        """
+        # Сбрасываем текущие слоты
+        self.inventory_slots = [None] * (self.inventory_cols * self.inventory_total_rows)
+        self.equipment_slots = {slot_name: None for slot_name in self.equipment_slots}
+
+        # Восстанавливаем слоты инвентаря
+        for slot_info in data.get("inventory_slots", []):
+            try:
+                idx = int(slot_info.get("slot_index"))
+                item_id = slot_info.get("id")
+                count = int(slot_info.get("count", 1))
+            except (TypeError, ValueError):
+                continue
+
+            if item_id is None or not (0 <= idx < len(self.inventory_slots)):
+                continue
+
+            item_data = ITEM_DATABASE.get(item_id)
+            if not item_data:
+                # Неизвестный предмет — пропускаем
+                continue
+
+            try:
+                new_item = InventoryItem(
+                    item_id=item_data["id"],
+                    name=item_data["name"],
+                    description=item_data.get("description", ""),
+                    item_type=item_data.get("type", "consumable"),
+                    image_path=item_data.get("image_path"),
+                    stats=item_data.get("stats"),
+                    max_stack=item_data.get("max_stack", 99),
+                    rarity=item_data.get("rarity", "common"),
+                )
+                new_item.count = max(1, min(count, new_item.max_stack))
+                self.inventory_slots[idx] = new_item
+            except Exception:
+                # Любые проблемы с конкретным предметом — просто пропускаем его
+                continue
+
+        # Восстанавливаем экипировку
+        for slot_name, slot_info in (data.get("equipment_slots") or {}).items():
+            if slot_name not in self.equipment_slots:
+                continue
+            item_id = slot_info.get("id")
+            if not item_id:
+                continue
+
+            item_data = ITEM_DATABASE.get(item_id)
+            if not item_data:
+                continue
+
+            try:
+                count = int(slot_info.get("count", 1))
+            except (TypeError, ValueError):
+                count = 1
+
+            try:
+                new_item = InventoryItem(
+                    item_id=item_data["id"],
+                    name=item_data["name"],
+                    description=item_data.get("description", ""),
+                    item_type=item_data.get("type", "consumable"),
+                    image_path=item_data.get("image_path"),
+                    stats=item_data.get("stats"),
+                    max_stack=item_data.get("max_stack", 99),
+                    rarity=item_data.get("rarity", "common"),
+                )
+                new_item.count = max(1, min(count, new_item.max_stack))
+
+                # Проверяем, можно ли надеть предмет в этот слот
+                if self._can_equip_to_slot(new_item, slot_name):
+                    self.equipment_slots[slot_name] = new_item
+            except Exception:
+                continue
+
+        # После восстановления экипировки пересчитываем бонусы
+        recalculate_equipment_bonuses(self.player_stats, self.equipment_slots.values())
     
     # === МЕТОДЫ ДЛЯ РАБОТЫ С ПРЕДМЕТАМИ (ACS) ===
     
@@ -1235,9 +1350,14 @@ class Inventory:
             # Отрисовываем перетаскиваемый предмет (если есть)
             if self.dragged_item:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                self.dragged_item.draw(screen, 
-                                     mouse_x - self.drag_offset[0],
-                                     mouse_y - self.drag_offset[1])
+                # При перетаскивании убираем рамку редкости,
+                # оставляем только иконку и счётчик.
+                self.dragged_item.draw(
+                    screen,
+                    mouse_x - self.drag_offset[0],
+                    mouse_y - self.drag_offset[1],
+                    draw_rarity_border=False,
+                )
             
             # Отрисовываем контекстное меню (если открыто)
             if self.context_menu:
@@ -1272,9 +1392,10 @@ class Inventory:
                 if config.DEBUG_MODE:
                     pygame.draw.rect(screen, (100, 100, 100), slot_rect, 1)
 
-                # Подсветка выбранного слота
+                # Подсветка выбранного слота (только если не перетаскиваем предмет)
                 if (
-                    self.selected_slot
+                    self.dragged_item is None
+                    and self.selected_slot
                     and self.selected_slot[0] == "inventory"
                     and self.selected_slot[1] == global_index
                 ):
@@ -1282,7 +1403,7 @@ class Inventory:
 
                 # Предмет в слоте
                 item = self.inventory_slots[global_index]
-                if item:
+                if item and item is not self.dragged_item:
                     # Рисуем предмет внутри ячейки; если иконка меньше, она просто займет верхний‑левый угол
                     item.draw(screen, x, y)
 
@@ -1320,13 +1441,18 @@ class Inventory:
             slot_rect = pygame.Rect(x, y, InventoryItem.SLOT_SIZE, InventoryItem.SLOT_SIZE)
             pygame.draw.rect(screen, (150, 150, 150), slot_rect, 2)
             
-            # Подсветка выбранного слота
-            if self.selected_slot and self.selected_slot[0] == "equipment" and self.selected_slot[1] == slot_name:
+            # Подсветка выбранного слота (только если не перетаскиваем предмет)
+            if (
+                self.dragged_item is None
+                and self.selected_slot
+                and self.selected_slot[0] == "equipment"
+                and self.selected_slot[1] == slot_name
+            ):
                 pygame.draw.rect(screen, (150, 150, 50, 100), slot_rect)
             
             # Предмет в слоте
             item = self.equipment_slots[slot_name]
-            if item:
+            if item and item is not self.dragged_item:
                 item.draw(screen, x, y)
             
             # Название слота

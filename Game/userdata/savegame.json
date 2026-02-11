@@ -1,0 +1,94 @@
+{
+  "player": {
+    "map_path": "Game/assets/Tiles/Audience Hall .tmx",
+    "position": [
+      381,
+      772
+    ]
+  },
+  "inventory": {
+    "inventory_slots": [
+      {
+        "slot_index": 0,
+        "id": "mana_potion",
+        "count": 1
+      },
+      {
+        "slot_index": 1,
+        "id": "min_mana_potion",
+        "count": 1
+      },
+      {
+        "slot_index": 2,
+        "id": "steel_dagger",
+        "count": 1
+      },
+      {
+        "slot_index": 3,
+        "id": "health_potion",
+        "count": 1
+      },
+      {
+        "slot_index": 4,
+        "id": "min_health_potion",
+        "count": 1
+      },
+      {
+        "slot_index": 5,
+        "id": "small_round_sun_shield",
+        "count": 1
+      },
+      {
+        "slot_index": 6,
+        "id": "steel_axe",
+        "count": 1
+      },
+      {
+        "slot_index": 7,
+        "id": "steel_breastplate",
+        "count": 1
+      },
+      {
+        "slot_index": 8,
+        "id": "robe_of_the_sun",
+        "count": 1
+      },
+      {
+        "slot_index": 9,
+        "id": "bronze_helmet",
+        "count": 1
+      },
+      {
+        "slot_index": 10,
+        "id": "golden_helmet",
+        "count": 1
+      }
+    ],
+    "equipment_slots": {}
+  },
+  "dialogues": {
+    "446": {
+      "type": "king",
+      "interaction_count": 1,
+      "phase_index": 0,
+      "current_chain_index": 0,
+      "current_chain_position": 0,
+      "in_dialogue_chain": true
+    },
+    "413": {
+      "type": "royal_guard",
+      "interaction_count": 1,
+      "phase_index": 1
+    },
+    "414": {
+      "type": "royal_guard",
+      "interaction_count": 1,
+      "phase_index": 1
+    },
+    "415": {
+      "type": "royal_guard",
+      "interaction_count": 1,
+      "phase_index": 1
+    }
+  }
+}

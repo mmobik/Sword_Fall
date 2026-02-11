@@ -7,6 +7,7 @@
 
 import pygame
 from core.config import config
+from core.save_manager import load_game_state
 
 
 class MenuHandler:
@@ -83,9 +84,20 @@ class MenuHandler:
             state: Состояние для запуска игры.
         """
         if state == "new_game":
-            self.game.waiting_for_first_update = True
-            self.game.wait_for_key_release = False
-            self.game.game_state_manager.change_state(state, None)
+            # Пытаемся загрузить сохранённую игру.
+            loaded = load_game_state(self.game)
+
+            if loaded:
+                # Ресурсы уже загружены в load_game_state
+                self.game.waiting_for_first_update = False
+                self.game.wait_for_key_release = False
+                self.game.game_state_manager.change_state(state, None)
+            else:
+                # Обычный запуск новой игры с начального спавна
+                self.game.waiting_for_first_update = True
+                self.game.wait_for_key_release = False
+                self.game.game_state_manager.change_state(state, None)
+
             self.game.sound_manager.play_music("Central Hall.mp3")
         else:
             self.game.game_state_manager.change_state(state)

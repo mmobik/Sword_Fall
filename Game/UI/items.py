@@ -109,7 +109,8 @@ class InventoryItem:
         return self.rarity_colors.get(self.rarity, (200, 200, 200))
     
     def draw(self, surface: pygame.Surface, x: int, y: int, 
-             show_count: bool = True, selected: bool = False):
+             show_count: bool = True, selected: bool = False,
+             draw_rarity_border: bool = True):
         """Отрисовка предмета в слоте."""
         # Вычисляем реальный размер слота: по размеру иконки, если она есть,
         # иначе используем SLOT_SIZE как квадрат по умолчанию.
@@ -118,12 +119,13 @@ class InventoryItem:
         else:
             slot_w = slot_h = self.SLOT_SIZE
 
-        # Рамка слота
+        # Рамка слота (редкость)
         slot_rect = pygame.Rect(x, y, slot_w, slot_h)
         
-        # Цвет рамки в зависимости от редкости
-        rarity_color = self.get_rarity_color()
-        pygame.draw.rect(surface, rarity_color, slot_rect, 2)
+        if draw_rarity_border:
+            # Цвет рамки в зависимости от редкости
+            rarity_color = self.get_rarity_color()
+            pygame.draw.rect(surface, rarity_color, slot_rect, 2)
         
         # Фон ячейки больше не заливаем, чтобы не портить прозрачность иконок.
         # При выделении рисуем только лёгкий полупрозрачный оверлей.
