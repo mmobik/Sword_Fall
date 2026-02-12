@@ -9,6 +9,11 @@ class InventoryItem:
     # реальные иконки могут быть своего размера)
     SLOT_SIZE = 50
     
+    # Кеш для оптимизации производительности (класс-уровень)
+    _font_cache = {}
+    _overlay_cache = {}
+    _text_bg_cache = None
+    
     def __init__(self, item_id: str, name: str, description: str = "", 
                  item_type: str = "consumable", image_path: Optional[str] = None,
                  stats: Optional[Dict[str, Any]] = None, max_stack: int = 99,
@@ -148,9 +153,13 @@ class InventoryItem:
         # Фон ячейки больше не заливаем, чтобы не портить прозрачность иконок.
         # При выделении рисуем только лёгкий полупрозрачный оверлей.
         if selected:
-            overlay = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
-            overlay.fill((80, 80, 40, 100))
-            surface.blit(overlay, (x, y))
+            # Используем кеш для оптимизации
+            size_key = (slot_w, slot_h)
+            if size_key not in InventoryItem._overlay_cache:
+                overlay = pygame.Surface((slot_w, slot_h), pygame.SRCALPHA)
+                overlay.fill((80, 80, 40, 100))
+                InventoryItem._overlay_cache[size_key] = overlay
+            surface.blit(InventoryItem._overlay_cache[size_key], (x, y))
         
         # Изображение предмета (с учетом смещения)
         if self.image:
@@ -164,14 +173,19 @@ class InventoryItem:
     
     def _draw_count(self, surface: pygame.Surface, x: int, y: int, slot_w: int, slot_h: int):
         """Отрисовка количества предметов."""
-        font = pygame.font.Font(None, 20)
+        # Используем кешированный шрифт
+        if 20 not in InventoryItem._font_cache:
+            InventoryItem._font_cache[20] = pygame.font.Font(None, 20)
+        font = InventoryItem._font_cache[20]
+        
         count_text = font.render(str(self.count), True, (255, 255, 255))
         text_x = x + slot_w - 15
         text_y = y + slot_h - 20
         
-        # Фон для текста
-        text_bg = pygame.Surface((20, 20), pygame.SRCALPHA)
-        text_bg.fill((0, 0, 0, 150))
-        surface.blit(text_bg, (text_x - 5, text_y - 5))
+        # Фон для текста (кешируем один раз)
+        if InventoryItem._text_bg_cache is None:
+            InventoryItem._text_bg_cache = pygame.Surface((20, 20), pygame.SRCALPHA)
+            InventoryItem._text_bg_cache.fill((0, 0, 0, 150))
+        surface.blit(InventoryItem._text_bg_cache, (text_x - 5, text_y - 5))
         
         surface.blit(count_text, (text_x, text_y))

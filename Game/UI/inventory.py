@@ -116,6 +116,18 @@ class Inventory:
         self.drag_offset = (0, 0)
         self.selected_slot = None  # Выбранный слот
         
+        # Кеш затемнения для оптимизации производительности
+        self._slot_bg_cache: Dict[Tuple[int, int], pygame.Surface] = {}
+        self._scroll_thumb_cache: Optional[pygame.Surface] = None
+        self._scroll_thumb_cache_size: Optional[Tuple[int, int]] = None
+        self._acs_overlay_cache: Optional[pygame.Surface] = None
+        self._acs_overlay_cache_size: Optional[Tuple[int, int]] = None
+        self._inventory_overlay_cache: Optional[pygame.Surface] = None
+        self._inventory_overlay_cache_size: Optional[Tuple[int, int]] = None
+        
+        # Кеш шрифтов для оптимизации производительности
+        self._font_cache: Dict[int, pygame.font.Font] = {}
+        
         # Категории для ползунка в ACS (больше не используются)
         self.acs_categories = ["Инвентарь", "Экипировка"]
         self.current_acs_category = 0  # Всегда показываем оба
@@ -1127,10 +1139,13 @@ class Inventory:
             else:
                 bg = self.background
             screen.blit(bg, (0, 0))
-            # Затемнение
-            overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 180))
-            screen.blit(overlay, (0, 0))
+            # Затемнение (с кешированием для оптимизации)
+            current_size = screen.get_size()
+            if self._inventory_overlay_cache is None or self._inventory_overlay_cache_size != current_size:
+                self._inventory_overlay_cache = pygame.Surface(current_size, pygame.SRCALPHA)
+                self._inventory_overlay_cache.fill((0, 0, 0, 180))
+                self._inventory_overlay_cache_size = current_size
+            screen.blit(self._inventory_overlay_cache, (0, 0))
         
         # Рисуем сам инвентарь (только для профиля)
         if self.inventory_image:
@@ -1139,7 +1154,10 @@ class Inventory:
         # Получаем ВСЕ характеристики для отображения
         stats_display = self.player_stats.get_all_stats_display()
         
-        font = pygame.font.Font(None, 28)
+        # Используем кешированный шрифт для оптимизации
+        if 28 not in self._font_cache:
+            self._font_cache[28] = pygame.font.Font(None, 28)
+        font = self._font_cache[28]
         
         # Перевод названий на русский
         russian_names = {
@@ -1177,7 +1195,10 @@ class Inventory:
             profile_y = config.VIRTUAL_WIDTH // 2 - 125
             screen.blit(self.inventory_profile, (profile_x, profile_y))
             
-            font_large = pygame.font.Font(None, 32)
+            # Используем кешированный шрифт для оптимизации
+            if 32 not in self._font_cache:
+                self._font_cache[32] = pygame.font.Font(None, 32)
+            font_large = self._font_cache[32]
             nickname = "Алд"
             text_surface = font_large.render(nickname, True, (255, 255, 255))
             text_x = profile_x + (self.inventory_profile.get_width() - text_surface.get_width()) // 2
@@ -1210,7 +1231,10 @@ class Inventory:
         
         # Кнопки категорий
         button_width = slider_width // len(self.attribute_categories)
-        font = pygame.font.Font(None, 22)
+        # Используем кешированный шрифт
+        if 22 not in self._font_cache:
+            self._font_cache[22] = pygame.font.Font(None, 22)
+        font = self._font_cache[22]
         
         for i, category in enumerate(self.attribute_categories):
             button_x = slider_x + i * button_width
@@ -1234,7 +1258,10 @@ class Inventory:
     
     def _draw_attribute_buttons(self, screen):
         """Отрисовывает кнопки для прокачки атрибутов."""
-        font = pygame.font.Font(None, 24)
+        # Используем кешированный шрифт
+        if 24 not in self._font_cache:
+            self._font_cache[24] = pygame.font.Font(None, 24)
+        font = self._font_cache[24]
         
         # Позиции для атрибутов (под ползунком)
         start_x = config.VIRTUAL_WIDTH // 2 + 135
@@ -1292,7 +1319,10 @@ class Inventory:
             elif attribute.category == "derived":
                 # Для производных атрибутов показываем информацию
                 info_text = "(Автоматически)"
-                info_surface = pygame.font.Font(None, 18).render(info_text, True, (150, 150, 150))
+                # Используем кешированный шрифт
+                if 18 not in self._font_cache:
+                    self._font_cache[18] = pygame.font.Font(None, 18)
+                info_surface = self._font_cache[18].render(info_text, True, (150, 150, 150))
                 screen.blit(info_surface, (start_x + 220, y_pos + 5))
     
     def _draw_attribute_tooltip(self, screen, attribute_name: str):
@@ -1308,7 +1338,10 @@ class Inventory:
         
         # Разбиваем текст на строки
         lines = tooltip_text.split('\n')
-        font = pygame.font.Font(None, 22)
+        # Используем кешированный шрифт
+        if 22 not in self._font_cache:
+            self._font_cache[22] = pygame.font.Font(None, 22)
+        font = self._font_cache[22]
         
         # Вычисляем размеры подсказки
         max_width = 0
@@ -1358,10 +1391,13 @@ class Inventory:
             else:
                 bg = self.acs_background
             screen.blit(bg, (0, 0))
-            # Затемнение
-            overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 180))
-            screen.blit(overlay, (0, 0))
+            # Затемнение (с кешированием для оптимизации)
+            current_size = screen.get_size()
+            if self._acs_overlay_cache is None or self._acs_overlay_cache_size != current_size:
+                self._acs_overlay_cache = pygame.Surface(current_size, pygame.SRCALPHA)
+                self._acs_overlay_cache.fill((0, 0, 0, 180))
+                self._acs_overlay_cache_size = current_size
+            screen.blit(self._acs_overlay_cache, (0, 0))
         
         # Рисуем ACS интерфейс
         if self.acs_image:
@@ -1430,12 +1466,15 @@ class Inventory:
         # Отрисовываем только ползунок (без линии‑трека), всегда видимый
         if self.inventory_scroll_thumb_rect:
             if self.inventory_scroll_thumb_image:
-                # Масштабируем изображение под текущий размер ползунка
-                thumb_surf = pygame.transform.smoothscale(
-                    self.inventory_scroll_thumb_image,
-                    (self.inventory_scroll_thumb_rect.width, self.inventory_scroll_thumb_rect.height),
-                )
-                screen.blit(thumb_surf, self.inventory_scroll_thumb_rect.topleft)
+                # Масштабируем изображение под текущий размер ползунка (с кешированием)
+                current_size = (self.inventory_scroll_thumb_rect.width, self.inventory_scroll_thumb_rect.height)
+                if self._scroll_thumb_cache is None or self._scroll_thumb_cache_size != current_size:
+                    self._scroll_thumb_cache = pygame.transform.smoothscale(
+                        self.inventory_scroll_thumb_image,
+                        current_size,
+                    )
+                    self._scroll_thumb_cache_size = current_size
+                screen.blit(self._scroll_thumb_cache, self.inventory_scroll_thumb_rect.topleft)
             else:
                 # Фолбэк — простой прямоугольник, если картинка не загрузилась
                 pygame.draw.rect(
@@ -1460,9 +1499,13 @@ class Inventory:
             # Затемнение фона только если слот занят
             if item and item is not self.dragged_item:
                 # Полное затемнение для активного слота (100% непрозрачность)
-                slot_bg = pygame.Surface((slot_width, slot_height))
-                slot_bg.fill((0, 0, 0))  # Полностью черный фон
-                screen.blit(slot_bg, (x, y))
+                # Используем кеш для оптимизации
+                size_key = (slot_width, slot_height)
+                if size_key not in self._slot_bg_cache:
+                    slot_bg = pygame.Surface((slot_width, slot_height))
+                    slot_bg.fill((0, 0, 0))
+                    self._slot_bg_cache[size_key] = slot_bg
+                screen.blit(self._slot_bg_cache[size_key], (x, y))
             
             if item and item is not self.dragged_item:
                 # Вычисляем центрированную позицию
@@ -1501,7 +1544,10 @@ class Inventory:
         
         # Кнопки категорий
         button_width = slider_width // len(self.acs_categories)
-        font = pygame.font.Font(None, 22)
+        # Используем кешированный шрифт
+        if 22 not in self._font_cache:
+            self._font_cache[22] = pygame.font.Font(None, 22)
+        font = self._font_cache[22]
         
         for i, category in enumerate(self.acs_categories):
             button_x = slider_x + i * button_width
@@ -1537,7 +1583,10 @@ class Inventory:
         pygame.draw.rect(screen, (100, 100, 100), menu_rect, 1)
         
         # Опции меню
-        font = pygame.font.Font(None, 24)
+        # Используем кешированный шрифт
+        if 24 not in self._font_cache:
+            self._font_cache[24] = pygame.font.Font(None, 24)
+        font = self._font_cache[24]
         mouse_pos = pygame.mouse.get_pos()
         
         for i, option in enumerate(self.context_menu["options"]):

@@ -2,8 +2,8 @@
   "player": {
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
-      413,
-      415
+      496,
+      451
     ]
   },
   "inventory": {
@@ -46,11 +46,11 @@
   "dialogues": {
     "446": {
       "type": "king",
-      "interaction_count": 2,
+      "interaction_count": 3,
       "phase_index": 0,
       "current_chain_index": 0,
-      "current_chain_position": 1,
-      "in_dialogue_chain": true
+      "current_chain_position": 0,
+      "in_dialogue_chain": false
     },
     "413": {
       "type": "royal_guard",
@@ -59,8 +59,8 @@
     },
     "414": {
       "type": "royal_guard",
-      "interaction_count": 1,
-      "phase_index": 1
+      "interaction_count": 2,
+      "phase_index": 2
     },
     "415": {
       "type": "royal_guard",
