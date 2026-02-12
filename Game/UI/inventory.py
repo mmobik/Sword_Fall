@@ -666,19 +666,35 @@ class Inventory:
                 # Начинаем перетаскивание
                 self.dragged_item = item
                 if slot_type == "inventory":
-                    # Для расчета смещения используем координаты ВИДИМОГО слота
-                    if visible_index is not None and 0 <= visible_index < len(self.inventory_slots_positions):
-                        slot_x, slot_y = self.inventory_slots_positions[visible_index]
+                    # Для инвентаря центрируем предмет под курсором
+                    if item.image:
+                        item_width = item.image.get_width()
+                        item_height = item.image.get_height()
                     else:
-                        slot_x, slot_y = mouse_pos
-                    self.drag_offset = (
-                        mouse_pos[0] - slot_x,
-                        mouse_pos[1] - slot_y,
-                    )
+                        item_width = item_height = 50
+                    
+                    # Смещение так чтобы предмет был центрирован под курсором
+                    self.drag_offset = (item_width // 2, item_height // 2)
                     self.selected_slot = ("inventory", slot_index)
                 elif slot_type == "equipment":
-                    self.drag_offset = (mouse_pos[0] - self.equipment_slots_positions[slot_name][0],
-                                      mouse_pos[1] - self.equipment_slots_positions[slot_name][1])
+                    # Для экипировки вычисляем смещение относительно центра слота
+                    slot_pos_x, slot_pos_y = self.equipment_slots_positions[slot_name]
+                    slot_width, slot_height = self.equipment_slots_sizes.get(slot_name, (50, 50))
+                    
+                    # Вычисляем центр слота
+                    slot_center_x = slot_pos_x + slot_width // 2
+                    slot_center_y = slot_pos_y + slot_height // 2
+                    
+                    # Размер предмета
+                    if item.image:
+                        item_width = item.image.get_width()
+                        item_height = item.image.get_height()
+                    else:
+                        item_width = item_height = 50
+                    
+                    # Смещение от курсора до левого верхнего угла предмета
+                    # (так чтобы предмет был центрирован под курсором)
+                    self.drag_offset = (item_width // 2, item_height // 2)
                     self.selected_slot = ("equipment", slot_name)
                 
                 print(f"[ACS] Начато перетаскивание: {item.name}")
@@ -1456,23 +1472,25 @@ class Inventory:
             # Получаем уникальный размер для этого слота
             slot_width, slot_height = self.equipment_slots_sizes.get(slot_name, (50, 50))
             
-            # Рамка слота
-            slot_rect = pygame.Rect(x, y, slot_width, slot_height)
-            pygame.draw.rect(screen, (150, 150, 150), slot_rect, 2)
-            
-            # Подсветка выбранного слота (только если не перетаскиваем предмет)
-            if (
-                self.dragged_item is None
-                and self.selected_slot
-                and self.selected_slot[0] == "equipment"
-                and self.selected_slot[1] == slot_name
-            ):
-                pygame.draw.rect(screen, (150, 150, 50, 100), slot_rect)
-            
-            # Предмет в слоте
+            # Предмет в слоте - центрируем относительно размера слота
             item = self.equipment_slots[slot_name]
             if item and item is not self.dragged_item:
-                item.draw(screen, x, y)
+                # Вычисляем центрированную позицию
+                if item.image:
+                    item_width = item.image.get_width()
+                    item_height = item.image.get_height()
+                else:
+                    item_width = item_height = 50  # fallback размер
+                
+                # Центрируем предмет в слоте
+                centered_x = x + (slot_width - item_width) // 2
+                centered_y = y + (slot_height - item_height) // 2
+                
+                # Рисуем предмет с рамкой редкости, растянутой на весь размер слота
+                item.draw(screen, x, y, 
+                         draw_rarity_border=True,
+                         border_size=(slot_width, slot_height),
+                         content_offset=((slot_width - item_width) // 2, (slot_height - item_height) // 2))
             
             # Название слота
             font_small = pygame.font.Font(None, 16)
