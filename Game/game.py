@@ -20,6 +20,7 @@ from core.dialogue_handler import DialogueHandler
 from core.dialogue_panel import DialoguePanel
 from core.door_handler import DoorInteractionHandler
 from core.chest_handler import ChestInteractionHandler
+from core.chest_storage import ChestManager
 from core.sound_manager import SoundManager
 from core.game_state_manager import GameStateManager
 from core.menu_handler import MenuHandler
@@ -113,6 +114,7 @@ class Game:
 
         # Обработчики
         self.door_handler = DoorInteractionHandler(self)
+        self.chest_manager = ChestManager()  # Менеджер хранилищ сундуков
         self.chest_handler = ChestInteractionHandler(self)
         self.dialogue_panel = DialoguePanel(self)
         self.dialogue_handler = DialogueHandler(self)

@@ -85,18 +85,40 @@ class Inventory:
             "Левая рука": None,
             "Кольцо 1": None,
             "Кольцо 2": None,
+            "Кольцо 3": None,
+            "Кольцо 4": None,
+            "Пояс": None,
+            "Плащ": None,
             "Ноги": None
         }
         self.equipment_slots_positions = {}  # Координаты слотов экипировки
+        
+        # Размеры слотов экипировки (ширина, высота) для каждого слота
+        self.equipment_slots_sizes = {
+            "Голова": (115, 185),
+            "Шея": (106, 107),
+            "Плечи": (104, 104),
+            "Грудь": (138, 240),
+            "Руки": (105, 172),
+            "Правая рука": (138, 218),
+            "Левая рука": (138, 218),
+            "Кольцо 1": (80, 80),
+            "Кольцо 2": (80, 80),
+            "Кольцо 3": (80, 80),
+            "Кольцо 4": (80, 80),
+            "Пояс": (105, 105),
+            "Плащ": (105, 105),
+            "Ноги": (120, 195)
+        }
         
         # Перетаскивание (ТОЛЬКО В ACS)
         self.dragged_item = None
         self.drag_offset = (0, 0)
         self.selected_slot = None  # Выбранный слот
         
-        # Категории для ползунка в ACS
-        self.acs_categories = ["Инвентарь", "Экипировка", "Хранилище"]
-        self.current_acs_category = 0  # 0-инвентарь, 1-экипировка, 2-хранилище
+        # Категории для ползунка в ACS (больше не используются)
+        self.acs_categories = ["Инвентарь", "Экипировка"]
+        self.current_acs_category = 0  # Всегда показываем оба
         
         # Категории для ползунка в инвентаре-профиле (I)
         self.attribute_categories = ["Физические", "Ментальные", "Духовные", "Производные"]
@@ -500,16 +522,20 @@ class Inventory:
             
         # Позиции для слотов экипировки (левая часть ACS)
         self.equipment_slots_positions = {
-            "Голова": (acs_x + 400, acs_y + 100),
-            "Шея": (acs_x + 400, acs_y + 200),
-            "Плечи": (acs_x + 300, acs_y + 250),
-            "Грудь": (acs_x + 400, acs_y + 300),
-            "Руки": (acs_x + 500, acs_y + 250),
-            "Правая рука": (acs_x + 600, acs_y + 350),
-            "Левая рука": (acs_x + 200, acs_y + 350),
-            "Кольцо 1": (acs_x + 300, acs_y + 450),
-            "Кольцо 2": (acs_x + 500, acs_y + 450),  # Исправлено
-            "Ноги": (acs_x + 400, acs_y + 500)
+            "Голова": (acs_x + 485, acs_y + 250),
+            "Шея": (acs_x + 655, acs_y + 272),
+            "Плечи": (acs_x + 324, acs_y + 320),
+            "Грудь": (acs_x + 472, acs_y + 479),
+            "Руки": (acs_x + 323, acs_y + 490),
+            "Правая рука": (acs_x + 655, acs_y + 707),
+            "Левая рука": (acs_x + 293, acs_y + 707),
+            "Кольцо 1": (acs_x + 789, acs_y + 494),
+            "Кольцо 2": (acs_x + 789, acs_y + 584),
+            "Кольцо 3": (acs_x + 214, acs_y + 495),
+            "Кольцо 4": (acs_x + 214, acs_y + 585),
+            "Пояс": (acs_x + 655, acs_y + 555),
+            "Плащ": (acs_x + 655, acs_y + 413),
+            "Ноги": (acs_x + 481, acs_y + 752)
         }
     
     def _get_inventory_slot_at_position(self, pos: Tuple[int, int]) -> Optional[int]:
@@ -532,52 +558,15 @@ class Inventory:
         if not self.equipment_slots_positions:
             return None
         
-        slot_size = InventoryItem.SLOT_SIZE
-        
         for slot_name, (x, y) in self.equipment_slots_positions.items():
-            slot_rect = pygame.Rect(x, y, slot_size, slot_size)
+            # Используем уникальный размер для каждого слота
+            slot_width, slot_height = self.equipment_slots_sizes.get(slot_name, (50, 50))
+            slot_rect = pygame.Rect(x, y, slot_width, slot_height)
             if slot_rect.collidepoint(pos):
                 return slot_name
         
         return None
     
-    def _get_chest_slot_at_position(self, pos: Tuple[int, int]) -> Optional[int]:
-        """Возвращает индекс слота сундука по позиции мыши (только в категории Хранилище)."""
-        if not hasattr(self, 'current_chest_storage') or not self.current_chest_storage:
-            return None
-        
-        # Параметры слотов сундука (должны совпадать с _draw_storage_slots)
-        chest_slot_size = self.inventory_slot_width  # 132
-        chest_slot_spacing = self.inventory_slot_spacing_x  # 10
-        chest_cols = 6
-        
-        # Позиция сетки сундука (должна совпадать с _draw_storage_slots)
-        # Вычисляем acs_x и acs_y так же, как в _draw_acs_interface
-        if self.acs_image:
-            acs_width = self.acs_image.get_width()
-            acs_height = self.acs_image.get_height()
-            acs_x = (config.VIRTUAL_WIDTH - acs_width) // 2
-            acs_y = (config.VIRTUAL_HEIGHT - acs_height) // 2
-        else:
-            acs_x = 0
-            acs_y = 0
-        
-        chest_grid_x = acs_x + 100
-        chest_grid_y = acs_y + 300
-        
-        # Проверяем каждый слот
-        for idx in range(self.current_chest_storage.max_slots):
-            row = idx // chest_cols
-            col = idx % chest_cols
-            
-            slot_x = chest_grid_x + col * (chest_slot_size + chest_slot_spacing)
-            slot_y = chest_grid_y + row * (chest_slot_size + chest_slot_spacing)
-            slot_rect = pygame.Rect(slot_x, slot_y, chest_slot_size, chest_slot_size)
-            
-            if slot_rect.collidepoint(pos):
-                return idx
-        
-        return None
     
     # === ОСНОВНЫЕ МЕТОДЫ ===
     
@@ -641,12 +630,8 @@ class Inventory:
             self._handle_context_menu_click(mouse_pos)
             return
         
-        # Проверяем клик по ползунку категорий
-        if self._handle_slider_click(mouse_pos):
-            return
-
-        # Скроллбар инвентаря (категории "Инвентарь" и "Хранилище")
-        if self.current_acs_category in (0, 2) and self.inventory_scrollbar_rect:
+        # Скроллбар инвентаря
+        if self.inventory_scrollbar_rect:
             if self.inventory_scrollbar_rect.collidepoint(mouse_pos):
                 # Клик по области скроллбара — перемещаем ползунок
                 self.inventory_dragging_scroll = True
@@ -660,32 +645,18 @@ class Inventory:
         slot_name = None
         item = None
         
-        if self.current_acs_category == 0:  # Инвентарь
+        # Проверяем клик по экипировке (приоритет, так как слева)
+        slot_name = self._get_equipment_slot_at_position(mouse_pos)
+        if slot_name is not None:
+            slot_type = "equipment"
+            item = self.equipment_slots[slot_name]
+        else:
+            # Проверяем клик по инвентарю
             visible_index = self._get_inventory_slot_at_position(mouse_pos)
             if visible_index is not None:
                 slot_type = "inventory"
                 slot_index = self._visible_index_to_global(visible_index)
                 item = self.inventory_slots[slot_index]
-        elif self.current_acs_category == 1:  # Экипировка
-            slot_name = self._get_equipment_slot_at_position(mouse_pos)
-            if slot_name is not None:
-                slot_type = "equipment"
-                item = self.equipment_slots[slot_name]
-        elif self.current_acs_category == 2:  # Хранилище
-            # Проверяем клик по слотам сундука
-            chest_slot_index = self._get_chest_slot_at_position(mouse_pos)
-            if chest_slot_index is not None:
-                slot_type = "chest"
-                slot_index = chest_slot_index
-                if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                    item = self.current_chest_storage.get_item(chest_slot_index)
-            else:
-                # Проверяем клик по слотам инвентаря
-                visible_index = self._get_inventory_slot_at_position(mouse_pos)
-                if visible_index is not None:
-                    slot_type = "inventory"
-                    slot_index = self._visible_index_to_global(visible_index)
-                    item = self.inventory_slots[slot_index]
         
         if slot_type and item:
             # Проверяем правый клик для контекстного меню
@@ -709,30 +680,8 @@ class Inventory:
                     self.drag_offset = (mouse_pos[0] - self.equipment_slots_positions[slot_name][0],
                                       mouse_pos[1] - self.equipment_slots_positions[slot_name][1])
                     self.selected_slot = ("equipment", slot_name)
-                elif slot_type == "chest":
-                    # Убираем предмет из сундука
-                    if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                        self.current_chest_storage.remove_item(slot_index)
-                    self.drag_offset = (0, 0)
-                    self.selected_slot = ("chest", slot_index)
                 
                 print(f"[ACS] Начато перетаскивание: {item.name}")
-        elif slot_type and not item:
-            # Клик по пустому слоту - если у нас есть перетаскиваемый предмет, кладем его
-            if self.dragged_item:
-                if slot_type == "chest":
-                    # Кладем предмет в сундук
-                    if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                        self.current_chest_storage.add_item(self.dragged_item, slot_index)
-                        print(f"[ACS] Положен предмет {self.dragged_item.name} в сундук, слот {slot_index}")
-                    self.dragged_item = None
-                    self.selected_slot = None
-                elif slot_type == "inventory":
-                    # Кладем предмет в инвентарь
-                    self.inventory_slots[slot_index] = self.dragged_item
-                    print(f"[ACS] Положен предмет {self.dragged_item.name} в инвентарь, слот {slot_index}")
-                    self.dragged_item = None
-                    self.selected_slot = None
     
     def _handle_acs_mouse_release(self, mouse_pos):
         """Обработка отпускания мыши в ACS интерфейсе."""
@@ -745,32 +694,18 @@ class Inventory:
         target_slot_name = None
         target_item = None
         
-        if self.current_acs_category == 0:  # Инвентарь
+        # Проверяем экипировку (приоритет)
+        target_slot_name = self._get_equipment_slot_at_position(mouse_pos)
+        if target_slot_name is not None:
+            target_slot_type = "equipment"
+            target_item = self.equipment_slots[target_slot_name]
+        else:
+            # Проверяем инвентарь
             visible_index = self._get_inventory_slot_at_position(mouse_pos)
             if visible_index is not None:
                 target_slot_type = "inventory"
                 target_slot_index = self._visible_index_to_global(visible_index)
                 target_item = self.inventory_slots[target_slot_index]
-        elif self.current_acs_category == 1:  # Экипировка
-            target_slot_name = self._get_equipment_slot_at_position(mouse_pos)
-            if target_slot_name is not None:
-                target_slot_type = "equipment"
-                target_item = self.equipment_slots[target_slot_name]
-        elif self.current_acs_category == 2:  # Хранилище
-            # Проверяем сначала слоты сундука
-            chest_slot_index = self._get_chest_slot_at_position(mouse_pos)
-            if chest_slot_index is not None:
-                target_slot_type = "chest"
-                target_slot_index = chest_slot_index
-                if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                    target_item = self.current_chest_storage.get_item(chest_slot_index)
-            else:
-                # Проверяем слоты инвентаря
-                visible_index = self._get_inventory_slot_at_position(mouse_pos)
-                if visible_index is not None:
-                    target_slot_type = "inventory"
-                    target_slot_index = self._visible_index_to_global(visible_index)
-                    target_item = self.inventory_slots[target_slot_index]
         
         # Логика перемещения предметов
         if target_slot_type and self.selected_slot:
@@ -785,92 +720,50 @@ class Inventory:
         target_type, target_index, target_name = target_slot
         
         # Получаем источник
-        source_item = None
         if source_type == "inventory":
             source_item = self.inventory_slots[source_id]
+            source_container = self.inventory_slots
+            source_key = source_id
         elif source_type == "equipment":
             source_item = self.equipment_slots[source_id]
-        elif source_type == "chest":
-            if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                source_item = self.current_chest_storage.get_item(source_id)
+            source_container = self.equipment_slots
+            source_key = source_id
+        else:
+            return
         
-        if not source_item:
+        # Получаем цель
+        if target_type == "inventory":
+            target_container = self.inventory_slots
+            target_key = target_index
+        elif target_type == "equipment":
+            target_container = self.equipment_slots
+            target_key = target_name
+        else:
             return
         
         # Проверяем, можно ли поместить предмет в слот экипировки
         if target_type == "equipment":
             if not self._can_equip_to_slot(source_item, target_name):
                 print(f"[ACS] Нельзя надеть {source_item.name} в слот {target_name}")
-                # Возвращаем предмет обратно
-                if source_type == "chest":
-                    if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                        self.current_chest_storage.add_item(source_item, source_id)
-                elif source_type == "inventory":
-                    self.inventory_slots[source_id] = source_item
-                elif source_type == "equipment":
-                    self.equipment_slots[source_id] = source_item
                 return
         
         # Логика перемещения
         if target_item is None:
             # Пустой слот - перемещаем предмет
-            # Удаляем из источника (уже удалено в _handle_acs_mouse_click для chest)
-            if source_type == "inventory":
-                self.inventory_slots[source_id] = None
-            elif source_type == "equipment":
-                self.equipment_slots[source_id] = None
-            # Для chest уже удален в _handle_acs_mouse_click
-            
-            # Добавляем в цель
-            if target_type == "inventory":
-                self.inventory_slots[target_index] = source_item
-            elif target_type == "equipment":
-                self.equipment_slots[target_name] = source_item
-            elif target_type == "chest":
-                if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                    self.current_chest_storage.add_item(source_item, target_index)
+            source_container[source_key] = None
+            target_container[target_key] = source_item
         elif target_item.can_stack_with(source_item):
             # Можно сложить
             target_item.merge(source_item)
-            # Удаляем из источника
-            if source_type == "inventory":
-                self.inventory_slots[source_id] = None
-            elif source_type == "equipment":
-                self.equipment_slots[source_id] = None
-            # Для chest уже удален
+            source_container[source_key] = None
         else:
-            # Меняем предметы местами
-            # Удаляем предметы из исходных мест
-            if source_type == "inventory":
-                self.inventory_slots[source_id] = None
-            elif source_type == "equipment":
-                self.equipment_slots[source_id] = None
-            # Для chest уже удален
+            # Меняем предметы местами (если это допустимо)
+            if target_type == "equipment" and not self._can_equip_to_slot(target_item, source_id):
+                print(f"[ACS] Нельзя поменять местами предметы")
+                return
             
-            if target_type == "inventory":
-                self.inventory_slots[target_index] = None
-            elif target_type == "equipment":
-                self.equipment_slots[target_name] = None
-            elif target_type == "chest":
-                if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                    self.current_chest_storage.remove_item(target_index)
-            
-            # Размещаем предметы в новых местах
-            if target_type == "inventory":
-                self.inventory_slots[target_index] = source_item
-            elif target_type == "equipment":
-                self.equipment_slots[target_name] = source_item
-            elif target_type == "chest":
-                if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                    self.current_chest_storage.add_item(source_item, target_index)
-            
-            if source_type == "inventory":
-                self.inventory_slots[source_id] = target_item
-            elif source_type == "equipment":
-                self.equipment_slots[source_id] = target_item
-            elif source_type == "chest":
-                if hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                    self.current_chest_storage.add_item(target_item, source_id)
+            source_container[source_key], target_container[target_key] = \
+                target_item, source_item
 
         # После любого изменения слотов пересчитываем бонусы экипировки
         recalculate_equipment_bonuses(self.player_stats, self.equipment_slots.values())
@@ -882,11 +775,17 @@ class Inventory:
             "Голова": ["armor", "helmet"],
             "Грудь": ["armor", "chest"],
             "Ноги": ["armor", "legs"],
+            "Плечи": ["armor", "shoulders"],
+            "Руки": ["armor", "gloves"],
             "Правая рука": ["weapon", "shield"],
             "Левая рука": ["weapon", "shield"],
             "Кольцо 1": ["accessory", "ring"],
             "Кольцо 2": ["accessory", "ring"],
-            "Шея": ["accessory", "amulet"]
+            "Кольцо 3": ["accessory", "ring"],
+            "Кольцо 4": ["accessory", "ring"],
+            "Шея": ["accessory", "amulet"],
+            "Пояс": ["accessory", "belt"],
+            "Плащ": ["accessory", "cloak"]
         }
         
         allowed_types = slot_mapping.get(slot_name, [])
@@ -1115,14 +1014,8 @@ class Inventory:
                     self.toggle_inventory()
                     self._close_menu()
                 elif self.acs_open:
-                    # Если открыт сундук (категория Хранилище), закрываем через chest_handler
-                    if self.current_acs_category == 2 and hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                        game = getattr(self.player_stats, 'game', None)
-                        if game and hasattr(game, 'chest_handler'):
-                            game.chest_handler.close()
-                    else:
-                        self.toggle_acs()
-                        self._close_menu()
+                    self.toggle_acs()
+                    self._close_menu()
             
             # I - инвентарь-профиль
             elif event.key == pygame.K_i:
@@ -1152,8 +1045,8 @@ class Inventory:
                 if self.acs_open:
                     # Обрабатываем правый клик в ACS
                     self._handle_acs_mouse_click(mouse_pos)
-            # Прокрутка колесом мыши для инвентаря ACS (категории 0 и 2)
-            elif event.button in (4, 5) and self.acs_open and self.current_acs_category in (0, 2):
+            # Прокрутка колесом мыши для инвентаря ACS
+            elif event.button in (4, 5) and self.acs_open:
                 # 4 - колесо вверх, 5 - вниз
                 direction = -1 if event.button == 4 else 1
                 self._set_inventory_scroll_row(self.inventory_scroll_row + direction)
@@ -1170,8 +1063,8 @@ class Inventory:
             if self.inventory_open:
                 # Обновляем наведение для подсказок
                 self._handle_inventory_mouse_motion(mouse_pos)
-            elif self.acs_open and self.current_acs_category in (0, 2) and self.inventory_dragging_scroll:
-                # Перетаскивание скроллбара инвентаря (категории 0 и 2)
+            elif self.acs_open and self.inventory_dragging_scroll:
+                # Перетаскивание скроллбара инвентаря
                 self._set_inventory_scroll_from_position(mouse_pos[1])
     
     def _open_menu(self, menu_type):
@@ -1187,12 +1080,6 @@ class Inventory:
         """Обновляет состояние игры при закрытии меню."""
         game = getattr(self.player_stats, 'game', None)
         if game and hasattr(game, 'game_state_manager'):
-            # Если закрываем хранилище, убедимся что сундук тоже закрыт
-            if self.current_acs_category == 2 and hasattr(self, 'current_chest_storage') and self.current_chest_storage:
-                if hasattr(game, 'chest_manager'):
-                    game.chest_manager.save_chests()
-                self.current_chest_storage = None
-            
             game.game_state_manager.change_state("new_game", None)
             game.game_state_manager.current_menu = None
             if hasattr(game, 'player_ui') and game.player_ui:
@@ -1472,24 +1359,9 @@ class Inventory:
             if not self.equipment_slots_positions:
                 self._calculate_equipment_slot_positions(acs_x, acs_y)
             
-            # Отрисовываем в зависимости от выбранной категории
-            if self.current_acs_category == 0:  # Инвентарь
-                self._draw_inventory_slots(screen, acs_x, acs_y)
-            elif self.current_acs_category == 1:  # Экипировка
-                self._draw_equipment_slots(screen, acs_x, acs_y)
-            elif self.current_acs_category == 2:  # Хранилище (заглушка)
-                self._draw_storage_slots(screen, acs_x, acs_y)
-            
-            # Отрисовываем ползунок категорий
-            self._draw_acs_slider(screen, acs_x, acs_y)
-            
-            # Заголовок текущей категории
-            font = pygame.font.Font(None, 32)
-            title = self.acs_categories[self.current_acs_category]
-            title_surface = font.render(title, True, (255, 255, 255))
-            title_x = acs_x + (self.acs_image.get_width() - title_surface.get_width()) // 2
-            title_y = acs_y - 50
-            screen.blit(title_surface, (title_x, title_y))
+            # Отрисовываем экипировку (слева) и инвентарь (справа) одновременно
+            self._draw_equipment_slots(screen, acs_x, acs_y)
+            self._draw_inventory_slots(screen, acs_x, acs_y)
             
             # Отрисовываем перетаскиваемый предмет (если есть)
             if self.dragged_item:
@@ -1581,8 +1453,11 @@ class Inventory:
         
         # Отрисовываем слоты экипировки
         for slot_name, (x, y) in self.equipment_slots_positions.items():
+            # Получаем уникальный размер для этого слота
+            slot_width, slot_height = self.equipment_slots_sizes.get(slot_name, (50, 50))
+            
             # Рамка слота
-            slot_rect = pygame.Rect(x, y, InventoryItem.SLOT_SIZE, InventoryItem.SLOT_SIZE)
+            slot_rect = pygame.Rect(x, y, slot_width, slot_height)
             pygame.draw.rect(screen, (150, 150, 150), slot_rect, 2)
             
             # Подсветка выбранного слота (только если не перетаскиваем предмет)
@@ -1602,132 +1477,10 @@ class Inventory:
             # Название слота
             font_small = pygame.font.Font(None, 16)
             text = font_small.render(slot_name, True, (200, 200, 200))
-            text_x = x + (InventoryItem.SLOT_SIZE - text.get_width()) // 2
+            text_x = x + (slot_width - text.get_width()) // 2
             text_y = y - 20
             screen.blit(text, (text_x, text_y))
     
-    def _draw_storage_slots(self, screen, acs_x: int, acs_y: int):
-        """Отрисовывает слоты хранилища сундука и инвентаря."""
-        # Проверяем, есть ли открытый сундук
-        if not hasattr(self, 'current_chest_storage') or not self.current_chest_storage:
-            font = pygame.font.Font(None, 32)
-            text = "Хранилище (в разработке)"
-            text_surface = font.render(text, True, (200, 200, 200))
-            text_x = acs_x + (self.acs_image.get_width() - text_surface.get_width()) // 2
-            text_y = acs_y + (self.acs_image.get_height() - text_surface.get_height()) // 2
-            screen.blit(text_surface, (text_x, text_y))
-            return
-        
-        # Рисуем изображение сундука вместо ACS панели
-        game = getattr(self.player_stats, 'game', None)
-        if game and hasattr(game, 'chest_panel_img') and game.chest_panel_img:
-            chest_img = game.chest_panel_img
-            chest_x = (config.VIRTUAL_WIDTH - chest_img.get_width()) // 2
-            chest_y = (config.VIRTUAL_HEIGHT - chest_img.get_height()) // 2
-            screen.blit(chest_img, (chest_x, chest_y))
-            # Обновляем координаты для отрисовки слотов
-            acs_x = chest_x
-            acs_y = chest_y
-        
-        # Параметры слотов сундука (левая часть)
-        # Используем те же размеры что и для инвентаря
-        chest_slot_size = self.inventory_slot_width  # 132
-        chest_slot_spacing = self.inventory_slot_spacing_x  # 10
-        chest_cols = 6
-        chest_rows = 4  # 24 слота
-        
-        # Позиция сетки сундука (левая часть ACS панели)
-        chest_grid_x = acs_x + 100
-        chest_grid_y = acs_y + 300
-        
-        # Заголовок сундука
-        font = pygame.font.Font(None, 28)
-        title_text = "Сундук"
-        title_surface = font.render(title_text, True, (220, 220, 220))
-        title_x = chest_grid_x + (chest_cols * (chest_slot_size + chest_slot_spacing) - chest_slot_spacing) // 2 - title_surface.get_width() // 2
-        title_y = chest_grid_y - 50
-        screen.blit(title_surface, (title_x, title_y))
-        
-        # Отрисовываем слоты сундука
-        for idx in range(self.current_chest_storage.max_slots):
-            row = idx // chest_cols
-            col = idx % chest_cols
-            
-            slot_x = chest_grid_x + col * (chest_slot_size + chest_slot_spacing)
-            slot_y = chest_grid_y + row * (chest_slot_size + chest_slot_spacing)
-            slot_rect = pygame.Rect(slot_x, slot_y, chest_slot_size, chest_slot_size)
-            
-            # Рисуем рамку слота
-            if config.DEBUG_MODE:
-                pygame.draw.rect(screen, (100, 100, 100), slot_rect, 1)
-            
-            # Подсветка выбранного слота (только если не перетаскиваем предмет)
-            if (
-                self.dragged_item is None
-                and self.selected_slot
-                and self.selected_slot[0] == "chest"
-                and self.selected_slot[1] == idx
-            ):
-                pygame.draw.rect(screen, (150, 150, 50, 80), slot_rect, border_radius=4)
-            
-            # Рисуем предмет в слоте (если есть)
-            item = self.current_chest_storage.get_item(idx)
-            if item and item is not self.dragged_item:
-                item.draw(screen, slot_x, slot_y)
-        
-        # Отрисовываем инвентарь справа (используем ту же логику что для обычного инвентаря)
-        # Заголовок инвентаря
-        title_text = "Инвентарь"
-        title_surface = font.render(title_text, True, (220, 220, 220))
-        inv_start_x = self.inventory_grid_start_x
-        slot_w = self.inventory_slot_width
-        spacing_x = self.inventory_slot_spacing_x
-        grid_width = self.inventory_cols * (slot_w + spacing_x) - spacing_x
-        title_x = inv_start_x + grid_width // 2 - title_surface.get_width() // 2
-        title_y = acs_y + 250
-        screen.blit(title_surface, (title_x, title_y))
-        
-        # Отрисовываем слоты и предметы инвентаря
-        slot_h = self.inventory_slot_height
-        for visible_index, (x, y) in enumerate(self.inventory_slots_positions):
-            slot_rect = pygame.Rect(x, y, slot_w, slot_h)
-
-            # Глобальный индекс слота для этого видимого индекса
-            global_index = self._visible_index_to_global(visible_index)
-            if 0 <= global_index < len(self.inventory_slots):
-                # В режиме отладки рисуем сетку (рамки всех слотов)
-                if config.DEBUG_MODE:
-                    pygame.draw.rect(screen, (100, 100, 100), slot_rect, 1)
-
-                # Подсветка выбранного слота (только если не перетаскиваем предмет)
-                if (
-                    self.dragged_item is None
-                    and self.selected_slot
-                    and self.selected_slot[0] == "inventory"
-                    and self.selected_slot[1] == global_index
-                ):
-                    pygame.draw.rect(screen, (150, 150, 50, 80), slot_rect, border_radius=4)
-
-                # Предмет в слоте
-                item = self.inventory_slots[global_index]
-                if item and item is not self.dragged_item:
-                    item.draw(screen, x, y)
-
-        # Отрисовываем только ползунок инвентаря
-        if self.inventory_scroll_thumb_rect:
-            if self.inventory_scroll_thumb_image:
-                thumb_surf = pygame.transform.smoothscale(
-                    self.inventory_scroll_thumb_image,
-                    (self.inventory_scroll_thumb_rect.width, self.inventory_scroll_thumb_rect.height),
-                )
-                screen.blit(thumb_surf, self.inventory_scroll_thumb_rect.topleft)
-            else:
-                pygame.draw.rect(
-                    screen,
-                    (110, 110, 150),
-                    self.inventory_scroll_thumb_rect,
-                    border_radius=6,
-                )
     
     def _draw_acs_slider(self, screen, acs_x: int, acs_y: int):
         """Отрисовывает ползунок категорий в ACS."""

@@ -10,6 +10,7 @@ from typing import Optional
 import pygame
 from core.config import config
 from core.pathutils import resource_path
+from core.chest_storage import ChestStorage
 
 
 class ChestInteractionHandler:
@@ -34,6 +35,10 @@ class ChestInteractionHandler:
         self.animation_speed = 0.1  # секунд на кадр
         self.animation_timer = 0.0
         self.animating_obj = None  # объект сундука, который анимируется
+        
+        # Текущий открытый сундук
+        self.current_chest_storage: Optional[ChestStorage] = None
+        self.current_chest_id: Optional[str] = None
         
         self._load_chest_tileset()
 
@@ -82,8 +87,14 @@ class ChestInteractionHandler:
             return None
 
         try:
-            self._chest_image = pygame.image.load(path).convert_alpha()
+            image = pygame.image.load(path).convert_alpha()
+            # Уменьшаем изображение сундука в 2 раза
+            original_size = image.get_size()
+            new_size = (original_size[0] // 2, original_size[1] // 2)
+            self._chest_image = pygame.transform.scale(image, new_size)
             self._current_lang = lang
+            if config.DEBUG_MODE:
+                print(f"[CHEST] Изображение сундука масштабировано: {original_size} -> {new_size}")
             return self._chest_image
         except Exception as e:
             if config.DEBUG_MODE:
@@ -159,15 +170,21 @@ class ChestInteractionHandler:
     def _finish_opening(self):
         """Завершает анимацию открытия и показывает интерфейс."""
         self.chest_state = 'open'
-        
-        img = self._load_chest_image()
-        if img is None:
-            if config.DEBUG_MODE:
-                print("[CHEST] Не удалось загрузить изображение сундука")
-            self.chest_state = 'closed'
-            return
 
-        self.game.chest_panel_img = img
+        # Получаем или создаем хранилище для этого сундука
+        if self.animating_obj:
+            self.current_chest_id = f"chest_{int(self.animating_obj.x)}_{int(self.animating_obj.y)}"
+            if hasattr(self.game, 'chest_manager'):
+                self.current_chest_storage = self.game.chest_manager.get_or_create_chest(
+                    self.current_chest_id, 
+                    max_slots=24  # 24 слота в сундуке
+                )
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Открыт сундук {self.current_chest_id}")
+
+        # Загружаем изображение сундука
+        self.game.chest_panel_img = self._load_chest_image()
+        
         self.game.show_chest = True
         self.game.active_chest_obj = self.animating_obj
         
@@ -179,7 +196,17 @@ class ChestInteractionHandler:
         if self.chest_state != 'open':
             return
         
-        # Сначала закрываем интерфейс
+        # Сохраняем содержимое сундука
+        if hasattr(self.game, 'chest_manager') and self.current_chest_storage:
+            self.game.chest_manager.save_chests()
+            if config.DEBUG_MODE:
+                print(f"[CHEST] Сохранено содержимое сундука {self.current_chest_id}")
+        
+        # Очищаем ссылки на текущий сундук
+        self.current_chest_storage = None
+        self.current_chest_id = None
+        
+        # Закрываем интерфейс и очищаем изображение
         self.game.show_chest = False
         self.game.chest_panel_img = None
         
@@ -255,3 +282,296 @@ class ChestInteractionHandler:
                 obj_rect = pygame.Rect(world_x, world_y, frame.get_width(), frame.get_height())
                 screen_pos = camera.apply(obj_rect)
                 screen.blit(frame, screen_pos.topleft)
+        """
+        Отрисовывает интерфейс сундука с слотами и инвентарем.
+        
+        Args:
+            screen: Поверхность для рисования (actual screen).
+        """
+        if self.chest_state != 'open' or not self.current_chest_storage:
+            return
+        
+        # Фоновое изображение сундука (если есть)
+        if self.game.chest_panel_img:
+            img = self.game.chest_panel_img
+            img_w, img_h = img.get_size()
+            x = (config.WIDTH - img_w) // 2
+            y = (config.HEIGHT - img_h) // 2
+            
+            # Черный фон под изображением
+            screen.fill((0, 0, 0), (x, y, img_w, img_h))
+            screen.blit(img, (x, y))
+        
+        # Параметры слотов
+        slot_size = 70
+        slot_spacing = 10
+        cols = 6  # 6 колонок
+        rows = 4  # 4 ряда (всего 24 слота)
+        
+        # Позиция сетки слотов сундука (слева)
+        chest_grid_x = 100
+        chest_grid_y = 200
+        
+        # Отрисовываем заголовок
+        font = pygame.font.Font(None, 36)
+        title_text = "Сундук" if config.current_language == "russian" else "Chest"
+        title_surface = font.render(title_text, True, (255, 255, 255))
+        screen.blit(title_surface, (chest_grid_x, chest_grid_y - 50))
+        
+        # Отрисовываем слоты сундука
+        for idx in range(self.current_chest_storage.max_slots):
+            row = idx // cols
+            col = idx % cols
+            
+            slot_x = chest_grid_x + col * (slot_size + slot_spacing)
+            slot_y = chest_grid_y + row * (slot_size + slot_spacing)
+            slot_rect = pygame.Rect(slot_x, slot_y, slot_size, slot_size)
+            
+            # Рисуем рамку слота
+            pygame.draw.rect(screen, (80, 80, 80), slot_rect, 2)
+            
+            # Рисуем предмет в слоте (если есть)
+            item = self.current_chest_storage.get_item(idx)
+            if item and item.image:
+                # Масштабируем изображение предмета под размер слота
+                item_img = pygame.transform.smoothscale(item.image, (slot_size - 10, slot_size - 10))
+                screen.blit(item_img, (slot_x + 5, slot_y + 5))
+        
+        # Отрисовываем инвентарь справа (используя существующую систему Inventory)
+        if hasattr(self.game, 'player_ui') and self.game.player_ui and hasattr(self.game.player_ui, 'inventory'):
+            self._draw_inventory_side(screen)
+    
+    def _draw_inventory_side(self, screen: pygame.Surface):
+        """
+        Отрисовывает инвентарь игрока справа от сундука.
+        
+        Args:
+            screen: Поверхность для рисования.
+        """
+        # Параметры слотов инвентаря
+        slot_size = 70
+        slot_spacing = 10
+        cols = 4  # 4 колонки
+        
+        # Позиция сетки инвентаря (справа)
+        inv_grid_x = 800
+        inv_grid_y = 200
+        
+        # Заголовок
+        font = pygame.font.Font(None, 36)
+        title_text = "Инвентарь" if config.current_language == "russian" else "Inventory"
+        title_surface = font.render(title_text, True, (255, 255, 255))
+        screen.blit(title_surface, (inv_grid_x, inv_grid_y - 50))
+        
+        # Получаем инвентарь игрока
+        inventory = self.game.player_ui.inventory
+        
+        # Отрисовываем видимые слоты инвентаря
+        for visible_idx in range(len(inventory.inventory_slots_positions)):
+            global_idx = inventory._visible_index_to_global(visible_idx)
+            if 0 <= global_idx < len(inventory.inventory_slots):
+                item = inventory.inventory_slots[global_idx]
+                
+                row = visible_idx // cols
+                col = visible_idx % cols
+                
+                slot_x = inv_grid_x + col * (slot_size + slot_spacing)
+                slot_y = inv_grid_y + row * (slot_size + slot_spacing)
+                slot_rect = pygame.Rect(slot_x, slot_y, slot_size, slot_size)
+                
+                # Рисуем рамку слота
+                pygame.draw.rect(screen, (80, 80, 80), slot_rect, 2)
+                
+                # Рисуем предмет (если есть)
+                if item and item.image:
+                    item_img = pygame.transform.smoothscale(item.image, (slot_size - 10, slot_size - 10))
+                    screen.blit(item_img, (slot_x + 5, slot_y + 5))
+        
+        # Отрисовываем перетаскиваемый предмет у курсора
+        if self.dragged_item and self.dragged_item.image:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            drag_img = pygame.transform.smoothscale(self.dragged_item.image, (self.chest_slot_size - 10, self.chest_slot_size - 10))
+            screen.blit(drag_img, (mouse_x - drag_img.get_width() // 2, mouse_y - drag_img.get_height() // 2))
+    
+    def handle_event(self, event: pygame.event.Event) -> bool:
+        """
+        Обрабатывает события для интерфейса сундука.
+        
+        Args:
+            event: Событие pygame.
+            
+        Returns:
+            True если событие обработано, False иначе.
+        """
+        if self.chest_state != 'open' or not self.current_chest_storage:
+            return False
+        
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Левая кнопка мыши
+            mouse_x, mouse_y = event.pos
+            
+            # Проверяем клик по слотам сундука
+            chest_slot = self._get_chest_slot_at_pos(mouse_x, mouse_y)
+            if chest_slot is not None:
+                self._handle_chest_slot_click(chest_slot)
+                return True
+            
+            # Проверяем клик по слотам инвентаря
+            inv_slot = self._get_inventory_slot_at_pos(mouse_x, mouse_y)
+            if inv_slot is not None:
+                self._handle_inventory_slot_click(inv_slot)
+                return True
+            
+            # Клик вне слотов - отменяем перетаскивание
+            if self.dragged_item:
+                self._cancel_drag()
+                return True
+        
+        return False
+    
+    def _get_chest_slot_at_pos(self, x: int, y: int) -> Optional[int]:
+        """
+        Определяет индекс слота сундука по координатам мыши.
+        
+        Args:
+            x, y: Координаты мыши.
+            
+        Returns:
+            Индекс слота или None.
+        """
+        for idx in range(self.current_chest_storage.max_slots):
+            row = idx // self.chest_cols
+            col = idx % self.chest_cols
+            
+            slot_x = self.chest_grid_x + col * (self.chest_slot_size + self.chest_slot_spacing)
+            slot_y = self.chest_grid_y + row * (self.chest_slot_size + self.chest_slot_spacing)
+            slot_rect = pygame.Rect(slot_x, slot_y, self.chest_slot_size, self.chest_slot_size)
+            
+            if slot_rect.collidepoint(x, y):
+                return idx
+        
+        return None
+    
+    def _get_inventory_slot_at_pos(self, x: int, y: int) -> Optional[int]:
+        """
+        Определяет индекс слота инвентаря по координатам мыши.
+        
+        Args:
+            x, y: Координаты мыши.
+            
+        Returns:
+            Глобальный индекс слота инвентаря или None.
+        """
+        inventory = self.game.player_ui.inventory
+        
+        for visible_idx in range(len(inventory.inventory_slots_positions)):
+            row = visible_idx // self.inv_cols
+            col = visible_idx % self.inv_cols
+            
+            slot_x = self.inv_grid_x + col * (self.inv_slot_size + self.inv_slot_spacing)
+            slot_y = self.inv_grid_y + row * (self.inv_slot_size + self.inv_slot_spacing)
+            slot_rect = pygame.Rect(slot_x, slot_y, self.inv_slot_size, self.inv_slot_size)
+            
+            if slot_rect.collidepoint(x, y):
+                global_idx = inventory._visible_index_to_global(visible_idx)
+                return global_idx if 0 <= global_idx < len(inventory.inventory_slots) else None
+        
+        return None
+    
+    def _handle_chest_slot_click(self, slot_idx: int):
+        """
+        Обрабатывает клик по слоту сундука.
+        
+        Args:
+            slot_idx: Индекс слота сундука.
+        """
+        if self.dragged_item is None:
+            # Берем предмет из сундука
+            item = self.current_chest_storage.get_item(slot_idx)
+            if item:
+                self.dragged_item = self.current_chest_storage.remove_item(slot_idx)
+                self.drag_source = ('chest', slot_idx)
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Взят предмет {self.dragged_item.name} из сундука, слот {slot_idx}")
+        else:
+            # Кладем предмет в сундук
+            existing_item = self.current_chest_storage.get_item(slot_idx)
+            if existing_item is None:
+                # Слот пустой, просто кладем
+                self.current_chest_storage.add_item(self.dragged_item, slot_idx)
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Положен предмет {self.dragged_item.name} в сундук, слот {slot_idx}")
+                self.dragged_item = None
+                self.drag_source = None
+            else:
+                # Слот занят, меняем местами
+                self.current_chest_storage.remove_item(slot_idx)
+                self.current_chest_storage.add_item(self.dragged_item, slot_idx)
+                self._return_item_to_source(existing_item)
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Обмен: {self.dragged_item.name} -> слот {slot_idx}, {existing_item.name} -> источник")
+                self.dragged_item = None
+                self.drag_source = None
+    
+    def _handle_inventory_slot_click(self, slot_idx: int):
+        """
+        Обрабатывает клик по слоту инвентаря.
+        
+        Args:
+            slot_idx: Глобальный индекс слота инвентаря.
+        """
+        inventory = self.game.player_ui.inventory
+        
+        if self.dragged_item is None:
+            # Берем предмет из инвентаря
+            item = inventory.inventory_slots[slot_idx]
+            if item:
+                inventory.inventory_slots[slot_idx] = None
+                self.dragged_item = item
+                self.drag_source = ('inventory', slot_idx)
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Взят предмет {self.dragged_item.name} из инвентаря, слот {slot_idx}")
+        else:
+            # Кладем предмет в инвентарь
+            existing_item = inventory.inventory_slots[slot_idx]
+            if existing_item is None:
+                # Слот пустой, просто кладем
+                inventory.inventory_slots[slot_idx] = self.dragged_item
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Положен предмет {self.dragged_item.name} в инвентарь, слот {slot_idx}")
+                self.dragged_item = None
+                self.drag_source = None
+            else:
+                # Слот занят, меняем местами
+                inventory.inventory_slots[slot_idx] = self.dragged_item
+                self._return_item_to_source(existing_item)
+                if config.DEBUG_MODE:
+                    print(f"[CHEST] Обмен: {self.dragged_item.name} -> слот {slot_idx}, {existing_item.name} -> источник")
+                self.dragged_item = None
+                self.drag_source = None
+    
+    def _return_item_to_source(self, item):
+        """
+        Возвращает предмет в исходный слот при обмене.
+        
+        Args:
+            item: Предмет для возврата.
+        """
+        if self.drag_source is None:
+            return
+        
+        source_type, source_idx = self.drag_source
+        
+        if source_type == 'chest':
+            self.current_chest_storage.add_item(item, source_idx)
+        elif source_type == 'inventory':
+            inventory = self.game.player_ui.inventory
+            inventory.inventory_slots[source_idx] = item
+    
+    def _cancel_drag(self):
+        """Отменяет перетаскивание и возвращает предмет в исходный слот."""
+        if self.dragged_item and self.drag_source:
+            self._return_item_to_source(self.dragged_item)
+            if config.DEBUG_MODE:
+                print(f"[CHEST] Перетаскивание отменено, предмет {self.dragged_item.name} возвращен")
+            self.dragged_item = None
+            self.drag_source = None

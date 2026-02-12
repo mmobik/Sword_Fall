@@ -2,7 +2,7 @@
   "player": {
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
-      367,
+      363,
       415
     ]
   },
@@ -10,27 +10,12 @@
     "inventory_slots": [
       {
         "slot_index": 0,
-        "id": "mana_potion",
-        "count": 1
-      },
-      {
-        "slot_index": 1,
-        "id": "min_mana_potion",
-        "count": 1
-      },
-      {
-        "slot_index": 2,
         "id": "steel_dagger",
         "count": 1
       },
       {
-        "slot_index": 3,
-        "id": "health_potion",
-        "count": 1
-      },
-      {
-        "slot_index": 4,
-        "id": "min_health_potion",
+        "slot_index": 1,
+        "id": "golden_helmet",
         "count": 1
       },
       {
@@ -49,18 +34,13 @@
         "count": 1
       },
       {
-        "slot_index": 9,
-        "id": "bronze_helmet",
+        "slot_index": 8,
+        "id": "robe_of_the_sun",
         "count": 1
       },
       {
         "slot_index": 10,
-        "id": "golden_helmet",
-        "count": 1
-      },
-      {
-        "slot_index": 12,
-        "id": "robe_of_the_sun",
+        "id": "bronze_helmet",
         "count": 1
       }
     ],

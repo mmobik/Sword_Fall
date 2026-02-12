@@ -1,0 +1,12 @@
+{
+  "chests": {
+    "chest_id": "unknown",
+    "max_slots": 24,
+    "items": []
+  },
+  "chest_352_416": {
+    "chest_id": "chest_352_416",
+    "max_slots": 24,
+    "items": []
+  }
+}
