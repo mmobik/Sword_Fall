@@ -110,16 +110,34 @@ class InventoryItem:
     
     def draw(self, surface: pygame.Surface, x: int, y: int, 
              show_count: bool = True, selected: bool = False,
-             draw_rarity_border: bool = True):
-        """Отрисовка предмета в слоте."""
-        # Вычисляем реальный размер слота: по размеру иконки, если она есть,
-        # иначе используем SLOT_SIZE как квадрат по умолчанию.
+             draw_rarity_border: bool = True,
+             border_size: Optional[Tuple[int, int]] = None,
+             content_offset: Optional[Tuple[int, int]] = None):
+        """Отрисовка предмета в слоте.
+        
+        Args:
+            border_size: Кастомный размер рамки (ширина, высота). Если None, используется размер изображения
+            content_offset: Смещение содержимого относительно рамки (x, y)
+        """
+        # Вычисляем реальный размер слота
         if self.image:
-            slot_w, slot_h = self.image.get_width(), self.image.get_height()
+            content_w, content_h = self.image.get_width(), self.image.get_height()
         else:
-            slot_w = slot_h = self.SLOT_SIZE
+            content_w = content_h = self.SLOT_SIZE
+        
+        # Размер рамки (может быть больше содержимого для слотов экипировки)
+        if border_size:
+            slot_w, slot_h = border_size
+        else:
+            slot_w, slot_h = content_w, content_h
+        
+        # Смещение содержимого (для центрирования в большой рамке)
+        if content_offset:
+            offset_x, offset_y = content_offset
+        else:
+            offset_x = offset_y = 0
 
-        # Рамка слота (редкость)
+        # Рамка слота (редкость) - по размеру border_size
         slot_rect = pygame.Rect(x, y, slot_w, slot_h)
         
         if draw_rarity_border:
@@ -134,15 +152,15 @@ class InventoryItem:
             overlay.fill((80, 80, 40, 100))
             surface.blit(overlay, (x, y))
         
-        # Изображение предмета
+        # Изображение предмета (с учетом смещения)
         if self.image:
-            img_x = x + (slot_w - self.image.get_width()) // 2
-            img_y = y + (slot_h - self.image.get_height()) // 2
+            img_x = x + offset_x + (content_w - self.image.get_width()) // 2
+            img_y = y + offset_y + (content_h - self.image.get_height()) // 2
             surface.blit(self.image, (img_x, img_y))
             
             # Количество (если больше 1)
             if show_count and self.count > 1:
-                self._draw_count(surface, x, y, slot_w, slot_h)
+                self._draw_count(surface, x + offset_x, y + offset_y, content_w, content_h)
     
     def _draw_count(self, surface: pygame.Surface, x: int, y: int, slot_w: int, slot_h: int):
         """Отрисовка количества предметов."""

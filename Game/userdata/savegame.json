@@ -2,25 +2,15 @@
   "player": {
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
-      363,
+      413,
       415
     ]
   },
   "inventory": {
     "inventory_slots": [
       {
-        "slot_index": 0,
-        "id": "steel_dagger",
-        "count": 1
-      },
-      {
         "slot_index": 1,
         "id": "golden_helmet",
-        "count": 1
-      },
-      {
-        "slot_index": 5,
-        "id": "small_round_sun_shield",
         "count": 1
       },
       {
@@ -29,22 +19,29 @@
         "count": 1
       },
       {
-        "slot_index": 7,
-        "id": "steel_breastplate",
-        "count": 1
-      },
-      {
-        "slot_index": 8,
+        "slot_index": 9,
         "id": "robe_of_the_sun",
-        "count": 1
-      },
-      {
-        "slot_index": 10,
-        "id": "bronze_helmet",
         "count": 1
       }
     ],
-    "equipment_slots": {}
+    "equipment_slots": {
+      "Голова": {
+        "id": "bronze_helmet",
+        "count": 1
+      },
+      "Грудь": {
+        "id": "steel_breastplate",
+        "count": 1
+      },
+      "Правая рука": {
+        "id": "small_round_sun_shield",
+        "count": 1
+      },
+      "Левая рука": {
+        "id": "steel_dagger",
+        "count": 1
+      }
+    }
   },
   "dialogues": {
     "446": {
