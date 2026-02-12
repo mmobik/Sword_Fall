@@ -1397,21 +1397,9 @@ class Inventory:
     
     def _draw_inventory_slots(self, screen, acs_x: int, acs_y: int):
         """Отрисовывает слоты инвентаря в ACS."""
-        # Заголовок инвентаря
-        font = pygame.font.Font(None, 28)
-        total_slots = len(self.inventory_slots)
-        title = f"Инвентарь ({total_slots} слотов)"
-        title_surface = font.render(title, True, (220, 220, 220))
-        # Центрируем заголовок над сеткой 4×8
+        # Заголовок инвентаря убран по запросу пользователя
         slot_w = self.inventory_slot_width
-        slot_h = self.inventory_slot_height  # оставлено для читаемости, хотя ниже не используется
-        spacing_x = self.inventory_slot_spacing_x
-        grid_width = self.inventory_cols * (slot_w + spacing_x) - spacing_x
-        # Используем те же базовые координаты, что и для решётки слотов
-        inv_start_x = self.inventory_grid_start_x
-        title_x = inv_start_x + grid_width // 2 - title_surface.get_width() // 2
-        title_y = acs_y + 100
-        screen.blit(title_surface, (title_x, title_y))
+        slot_h = self.inventory_slot_height
         
         # Отрисовываем слоты и предметы
         for visible_index, (x, y) in enumerate(self.inventory_slots_positions):
@@ -1459,13 +1447,7 @@ class Inventory:
     
     def _draw_equipment_slots(self, screen, acs_x: int, acs_y: int):
         """Отрисовывает слоты экипировки в ACS."""
-        # Заголовок экипировки
-        font = pygame.font.Font(None, 28)
-        title = "Экипировка персонажа"
-        title_surface = font.render(title, True, (220, 220, 220))
-        title_x = acs_x + 400 - title_surface.get_width() // 2
-        title_y = acs_y + 50
-        screen.blit(title_surface, (title_x, title_y))
+        # Заголовок экипировки убран по запросу пользователя
         
         # Отрисовываем слоты экипировки
         for slot_name, (x, y) in self.equipment_slots_positions.items():
@@ -1474,6 +1456,14 @@ class Inventory:
             
             # Предмет в слоте - центрируем относительно размера слота
             item = self.equipment_slots[slot_name]
+            
+            # Затемнение фона только если слот занят
+            if item and item is not self.dragged_item:
+                # Полное затемнение для активного слота (100% непрозрачность)
+                slot_bg = pygame.Surface((slot_width, slot_height))
+                slot_bg.fill((0, 0, 0))  # Полностью черный фон
+                screen.blit(slot_bg, (x, y))
+            
             if item and item is not self.dragged_item:
                 # Вычисляем центрированную позицию
                 if item.image:
@@ -1492,12 +1482,7 @@ class Inventory:
                          border_size=(slot_width, slot_height),
                          content_offset=((slot_width - item_width) // 2, (slot_height - item_height) // 2))
             
-            # Название слота
-            font_small = pygame.font.Font(None, 16)
-            text = font_small.render(slot_name, True, (200, 200, 200))
-            text_x = x + (slot_width - text.get_width()) // 2
-            text_y = y - 20
-            screen.blit(text, (text_x, text_y))
+            # Названия слотов убраны по запросу пользователя
     
     
     def _draw_acs_slider(self, screen, acs_x: int, acs_y: int):
