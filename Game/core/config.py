@@ -69,8 +69,8 @@ class GameConfig:
 
         # Изображения NPC для диалогов
         self.NPC_IMAGES = {
-            "GUARD": "Game/assets/images/game/The guard_4.png",
-            "KING": "Game/assets/images/game/King.png"
+            "GUARD": "Game/assets/Images/game/npc/The guard_4.png",
+            "KING": "Game/assets/Images/game/npc/King.png"
         }
 
         # Цветовая палитра

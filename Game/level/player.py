@@ -19,6 +19,8 @@ from core.config import config
 from level.player_stats import PlayerStats
 from level.spritesheet import SpriteSheet
 from level.player_movement import PlayerMovementHandler
+from core.combat_system import CombatSystem
+from core.pathutils import resource_path
 
 
 class Player(pygame.sprite.Sprite):
@@ -108,6 +110,10 @@ class Player(pygame.sprite.Sprite):
         # Обработчик движения
         self._movement_handler = PlayerMovementHandler(self)
 
+        # Боевая система
+        self.combat_system = CombatSystem(player=self)
+        self._last_sprite_state: Optional[str] = None  # Отслеживание изменения состояния спрайта
+
         # Индикаторы урона / лечения
         self._indicators: List[Dict[str, object]] = []
         self._indicator_font = pygame.font.Font(None, 24)
@@ -117,13 +123,30 @@ class Player(pygame.sprite.Sprite):
     # ------------------------------------------------------------------
     def _load_animations(self) -> None:
         """Загружает анимации игрока на основе `config.PLAYER_STATES`."""
+        # Получаем текущее состояние спрайта (armed/unarmed)
+        inventory = self._get_inventory()
+        sprite_state = self.combat_system.get_sprite_state(inventory) if inventory else "unarmed"
+        
         frame_w, frame_h = config.FRAME_SIZE
-        for state, params in config.PLAYER_STATES.items():
-            sheet_path = params["sprite_sheet"]
+        
+        # Получаем базовые состояния из конфига
+        base_states = config.PLAYER_STATES
+        
+        for state, params in base_states.items():
+            # Определяем путь к спрайту в зависимости от состояния
+            if sprite_state == "armed":
+                # Используем путь из боевой системы для armed состояния
+                sheet_path = self.combat_system.get_sprite_path(inventory, state)
+            else:
+                # Используем путь из конфига для unarmed состояния
+                sheet_path = params["sprite_sheet"]
+            
             frames_xy: List[Tuple[int, int]] = params["frames"]  # type: ignore[assignment]
             anim_speed: float = float(params.get("animation_speed", 0.15))
 
-            sheet = SpriteSheet(sheet_path, width=frame_w, height=frame_h)
+            # Используем resource_path для корректной работы с путями
+            full_sheet_path = resource_path(sheet_path)
+            sheet = SpriteSheet(full_sheet_path, width=frame_w, height=frame_h)
             frames: List[pygame.Surface] = []
             for x, y in frames_xy:
                 frames.append(sheet.get_image(x, y, frame_w, frame_h))
@@ -132,6 +155,46 @@ class Player(pygame.sprite.Sprite):
                 "frames": frames,
                 "animation_speed": anim_speed,
             }
+        
+        # Сохраняем текущее состояние для отслеживания изменений
+        self._last_sprite_state = sprite_state
+    
+    def _get_inventory(self):
+        """Получает объект инвентаря из game."""
+        if self.game and hasattr(self.game, 'player_ui'):
+            return getattr(self.game.player_ui, 'inventory', None)
+        return None
+    
+    def reload_animations(self) -> None:
+        """
+        Перезагружает анимации при изменении экипировки.
+        Вызывается автоматически при обнаружении изменения состояния.
+        """
+        inventory = self._get_inventory()
+        if inventory:
+            self.combat_system.update_equipment(inventory)
+        
+        current_state = self.combat_system.get_sprite_state(inventory) if inventory else "unarmed"
+        
+        # Перезагружаем только если состояние изменилось
+        if current_state != self._last_sprite_state:
+            if config.DEBUG_MODE:
+                print(f"[PLAYER] Изменение состояния спрайта: {self._last_sprite_state} -> {current_state}")
+            
+            # Сохраняем текущее состояние анимации
+            old_state = self.state_name
+            old_frame = self.current_frame
+            
+            # Перезагружаем анимации
+            self._load_animations()
+            
+            # Восстанавливаем состояние анимации, если оно существует
+            if old_state in self._animations:
+                self.set_state(old_state)
+                # Пытаемся восстановить кадр (если возможно)
+                if old_frame < len(self._animations[old_state]["frames"]):  # type: ignore[index]
+                    self.current_frame = old_frame
+                    self.image = self._animations[old_state]["frames"][old_frame]  # type: ignore[index]
 
     def set_state(self, new_state: str) -> None:
         """Устанавливает новое анимационное состояние."""
@@ -266,6 +329,13 @@ class Player(pygame.sprite.Sprite):
             self.hitbox.centerx - hb_cfg["X_OFFSET"],
             self.hitbox.bottom - hb_cfg["Y_OFFSET"],
         )
+
+        # Проверяем изменение экипировки и перезагружаем анимации при необходимости
+        inventory = self._get_inventory()
+        if inventory:
+            current_state = self.combat_system.get_sprite_state(inventory)
+            if current_state != self._last_sprite_state:
+                self.reload_animations()
 
         # Анимация
         self._update_animation(dt)

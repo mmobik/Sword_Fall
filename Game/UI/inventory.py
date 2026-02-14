@@ -8,8 +8,8 @@ from typing import Optional, List, Dict, Tuple, Any
 from level.player_stats import PlayerStats
 from core.config import config
 from UI.items import InventoryItem
-from UI.equipment_data import DEFAULT_ACS_ITEMS, ITEM_DATABASE
 from UI.equipment_logic import recalculate_equipment_bonuses
+from items.items_loader import load_all_items, get_item, get_all_items, ITEMS_DATABASE
 
 class Inventory:
     """Класс инвентаря для отображения инвентаря (I) и ACS (O - аксессуары)."""
@@ -148,6 +148,16 @@ class Inventory:
         self.tooltip_timer = 0.0
         self.tooltip_delay = 0.5  # Задержка перед показом подсказки (секунды)
         
+        # Загружаем все предметы из JSON файлов
+        self._load_items_from_json()
+        
+        # Проверяем, что база данных загружена
+        item_db = self._get_item_database()
+        if not item_db:
+            print(f"[INVENTORY WARNING] База данных предметов пуста после загрузки!")
+        elif config.DEBUG_MODE:
+            print(f"[INVENTORY DEBUG] База данных предметов загружена: {len(item_db)} предметов")
+        
         # Предзагруженные предметы для теста (в ACS инвентарь)
         self._load_default_items()
         
@@ -156,6 +166,7 @@ class Inventory:
             print(f"[INVENTORY DEBUG] I (Профиль): {self.inventory_open}")
             print(f"[INVENTORY DEBUG] O (ACS/Слоты): {self.acs_open}")
             print(f"[INVENTORY DEBUG] Предметов в ACS: {self.get_total_items()}")
+            print(f"[INVENTORY DEBUG] Предметов в базе данных: {len(self._get_item_database())}")
     
     def _load_inventory_image(self) -> Optional[pygame.Surface]:
         """Загружает изображение inventory.png для профиля (I)."""
@@ -211,7 +222,7 @@ class Inventory:
     def _load_inventory_profile_image(self) -> Optional[pygame.Surface]:
         """Загружает изображение inventory_profile.png."""
         try:
-            image_path = "Game/assets/Images/game/player_profile.png"
+            image_path = "Game/assets/Images/game/npc/player_profile.png"
             if os.path.exists(image_path):
                 image = pygame.image.load(image_path).convert_alpha()
                 if config.DEBUG_MODE:
@@ -224,32 +235,65 @@ class Inventory:
             print(f"[INVENTORY ERROR] Ошибка загрузки inventory_profile: {e}")
             return None
     
-    def _load_default_items(self):
-        """Добавляет тестовые предметы в ACS инвентарь."""
+    def _load_items_from_json(self):
+        """Загружает все предметы из JSON файлов."""
         try:
-            # Добавляем предметы, описанные в отдельном модуле данных
-            for item_data in DEFAULT_ACS_ITEMS:
+            load_all_items()
+            if config.DEBUG_MODE:
+                print(f"[INVENTORY DEBUG] Предметы из JSON загружены")
+        except Exception as e:
+            print(f"[INVENTORY ERROR] Ошибка загрузки предметов из JSON: {e}")
+    
+    def _get_item_database(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Возвращает базу данных предметов из JSON файлов.
+        Все предметы загружаются только из JSON.
+        """
+        # Используем функцию get_all_items() чтобы гарантировать актуальные данные
+        return get_all_items()
+    
+    def _load_default_items(self):
+        """Добавляет тестовые предметы в ACS инвентарь из JSON базы данных."""
+        try:
+            # Загружаем предметы только из JSON базы данных
+            item_database = self._get_item_database()
+            
+            if not item_database:
+                print("[INVENTORY WARNING] База данных предметов пуста. Убедитесь, что JSON файлы загружены.")
+                return
+            
+            # Добавляем несколько предметов для теста (можно настроить логику)
+            items_added = 0
+            max_test_items = 5  # Максимальное количество тестовых предметов
+            
+            for item_id, item_data in item_database.items():
+                if items_added >= max_test_items:
+                    break
+                
+                # Создаем предмет из данных JSON
                 item = InventoryItem(
-                    item_id=item_data["id"],
-                    name=item_data["name"],
+                    item_id=item_data.get("id", item_id),
+                    name=item_data.get("name", item_id),
                     description=item_data.get("description", ""),
                     item_type=item_data.get("type", "consumable"),
                     image_path=item_data.get("image_path"),
                     stats=item_data.get("stats"),
                     max_stack=item_data.get("max_stack", 99),
                     rarity=item_data.get("rarity", "common"),
+                    requirements=item_data.get("requirements", {}),
+                    value=item_data.get("value", 0),
+                    drop_chance=item_data.get("drop_chance", 0.0),
+                    origin=item_data.get("origin", []),
+                    weapon_type=item_data.get("weapon_type", None)
                 )
-                self.add_item_to_free_slot(item)
+                
+                if self.add_item_to_free_slot(item):
+                    items_added += 1
                 
         except Exception as e:
             print(f"[INVENTORY ERROR] Ошибка загрузки тестовых предметов: {e}")
-            # Создаем предметы без изображений для теста
-            test_items = [
-                InventoryItem("test1", "Тестовый предмет 1", "Просто тест", "consumable"),
-                InventoryItem("test2", "Тестовый предмет 2", "Еще тест", "material", max_stack=20),
-            ]
-            for item in test_items:
-                self.add_item_to_free_slot(item)
+            import traceback
+            traceback.print_exc()
 
     # === СЕРИАЛИЗАЦИЯ / ДЕСЕРИАЛИЗАЦИЯ ИНВЕНТАРЯ ===
 
@@ -305,21 +349,27 @@ class Inventory:
             if item_id is None or not (0 <= idx < len(self.inventory_slots)):
                 continue
 
-            item_data = ITEM_DATABASE.get(item_id)
+            item_database = self._get_item_database()
+            item_data = item_database.get(item_id)
             if not item_data:
                 # Неизвестный предмет — пропускаем
                 continue
 
             try:
                 new_item = InventoryItem(
-                    item_id=item_data["id"],
-                    name=item_data["name"],
+                    item_id=item_data.get("id", item_id),
+                    name=item_data.get("name", item_id),
                     description=item_data.get("description", ""),
                     item_type=item_data.get("type", "consumable"),
                     image_path=item_data.get("image_path"),
                     stats=item_data.get("stats"),
                     max_stack=item_data.get("max_stack", 99),
                     rarity=item_data.get("rarity", "common"),
+                    requirements=item_data.get("requirements", {}),
+                    value=item_data.get("value", 0),
+                    drop_chance=item_data.get("drop_chance", 0.0),
+                    origin=item_data.get("origin", []),
+                    weapon_type=item_data.get("weapon_type", None)
                 )
                 new_item.count = max(1, min(count, new_item.max_stack))
                 self.inventory_slots[idx] = new_item
@@ -335,7 +385,8 @@ class Inventory:
             if not item_id:
                 continue
 
-            item_data = ITEM_DATABASE.get(item_id)
+            item_database = self._get_item_database()
+            item_data = item_database.get(item_id)
             if not item_data:
                 continue
 
@@ -346,14 +397,19 @@ class Inventory:
 
             try:
                 new_item = InventoryItem(
-                    item_id=item_data["id"],
-                    name=item_data["name"],
+                    item_id=item_data.get("id", item_id),
+                    name=item_data.get("name", item_id),
                     description=item_data.get("description", ""),
                     item_type=item_data.get("type", "consumable"),
                     image_path=item_data.get("image_path"),
                     stats=item_data.get("stats"),
                     max_stack=item_data.get("max_stack", 99),
                     rarity=item_data.get("rarity", "common"),
+                    requirements=item_data.get("requirements", {}),
+                    value=item_data.get("value", 0),
+                    drop_chance=item_data.get("drop_chance", 0.0),
+                    origin=item_data.get("origin", []),
+                    weapon_type=item_data.get("weapon_type", None)
                 )
                 new_item.count = max(1, min(count, new_item.max_stack))
 
@@ -371,15 +427,32 @@ class Inventory:
     def add_item(self, item_id: str, count: int = 1, **kwargs) -> bool:
         """Добавляет предмет в ACS инвентарь по ID."""
         # Ищем описание предмета в общей базе данных
-        item_data = ITEM_DATABASE.get(item_id)
+        item_database = self._get_item_database()
+        item_data = item_database.get(item_id)
         
         if not item_data:
             print(f"[INVENTORY WARNING] Предмет {item_id} не найден")
             return False
         
         # Создаем предмет
+        item_data = item_data.copy()
         item_data.update(kwargs)
-        item = InventoryItem(**item_data)
+        
+        item = InventoryItem(
+            item_id=item_data.get("id", item_id),
+            name=item_data.get("name", item_id),
+            description=item_data.get("description", ""),
+            item_type=item_data.get("type", "consumable"),
+            image_path=item_data.get("image_path"),
+            stats=item_data.get("stats"),
+            max_stack=item_data.get("max_stack", 99),
+            rarity=item_data.get("rarity", "common"),
+            requirements=item_data.get("requirements", {}),
+            value=item_data.get("value", 0),
+            drop_chance=item_data.get("drop_chance", 0.0),
+            origin=item_data.get("origin", []),
+            weapon_type=item_data.get("weapon_type", None)
+        )
         item.count = count
         
         return self.add_item_to_free_slot(item)

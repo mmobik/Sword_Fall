@@ -2,43 +2,15 @@
   "player": {
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
-      496,
-      451
+      515,
+      458
     ]
   },
   "inventory": {
-    "inventory_slots": [
-      {
-        "slot_index": 0,
-        "id": "bronze_helmet",
-        "count": 1
-      },
-      {
-        "slot_index": 1,
-        "id": "robe_of_the_sun",
-        "count": 1
-      },
-      {
-        "slot_index": 2,
-        "id": "steel_dagger",
-        "count": 1
-      }
-    ],
+    "inventory_slots": [],
     "equipment_slots": {
-      "Голова": {
-        "id": "golden_helmet",
-        "count": 1
-      },
-      "Грудь": {
-        "id": "steel_breastplate",
-        "count": 1
-      },
-      "Правая рука": {
-        "id": "small_round_sun_shield",
-        "count": 1
-      },
       "Левая рука": {
-        "id": "steel_axe",
+        "id": "iron_sword",
         "count": 1
       }
     }
@@ -46,11 +18,11 @@
   "dialogues": {
     "446": {
       "type": "king",
-      "interaction_count": 3,
+      "interaction_count": 4,
       "phase_index": 0,
       "current_chain_index": 0,
       "current_chain_position": 0,
-      "in_dialogue_chain": false
+      "in_dialogue_chain": true
     },
     "413": {
       "type": "royal_guard",
@@ -63,6 +35,21 @@
       "phase_index": 2
     },
     "415": {
+      "type": "royal_guard",
+      "interaction_count": 1,
+      "phase_index": 1
+    },
+    "381": {
+      "type": "royal_guard",
+      "interaction_count": 1,
+      "phase_index": 1
+    },
+    "365": {
+      "type": "royal_guard",
+      "interaction_count": 1,
+      "phase_index": 1
+    },
+    "426": {
       "type": "royal_guard",
       "interaction_count": 1,
       "phase_index": 1

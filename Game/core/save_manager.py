@@ -82,11 +82,23 @@ def save_game_state(game) -> None:
     Сохраняет текущее состояние игры в JSON.
 
     Должно вызываться при выходе из игры или возврате в главное меню.
+    Загружает существующий файл и обновляет только измененные секции.
     """
     try:
-        data: Dict[str, Any] = {}
+        # Загружаем существующие данные, если файл есть
+        existing_data: Dict[str, Any] = {}
+        if os.path.exists(SAVE_FILE_PATH):
+            try:
+                with open(SAVE_FILE_PATH, "r", encoding="utf-8") as f:
+                    existing_data = json.load(f)
+            except Exception as e:
+                if config.DEBUG_MODE:
+                    print(f"[SAVE] Не удалось загрузить существующий файл: {e}")
+        
+        # Начинаем с существующих данных
+        data = existing_data.copy()
 
-        # Позиция игрока и карта
+        # Обновляем позицию игрока и карту
         player = getattr(game, "player", None)
         if player is not None and hasattr(player, "hitbox"):
             data["player"] = {
@@ -94,10 +106,9 @@ def save_game_state(game) -> None:
                 "position": [player.hitbox.x, player.hitbox.y],
             }
 
-        # Инвентарь
+        # Инвентарь (всегда сохраняем, даже если пуст)
         inv_data = _serialize_inventory(game)
-        if inv_data:
-            data["inventory"] = inv_data
+        data["inventory"] = inv_data  # Сохраняем всегда, даже если пуст
 
         # Диалоги
         dialogues_data = _serialize_dialogues(game)

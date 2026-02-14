@@ -14,10 +14,10 @@ class InventoryItem:
     _overlay_cache = {}
     _text_bg_cache = None
     
-    def __init__(self, item_id: str, name: str, description: str = "", 
+    def __init__(self, item_id: str, name: str = "", description: str = "", 
                  item_type: str = "consumable", image_path: Optional[str] = None,
                  stats: Optional[Dict[str, Any]] = None, max_stack: int = 99,
-                 rarity: str = "common"):  # Добавим редкость: common, uncommon, rare, epic, legendary
+                 rarity: str = "common", **kwargs):  # Добавим редкость: common, uncommon, rare, epic, legendary
         self.id = item_id
         self.name = name
         self.description = description
@@ -27,6 +27,13 @@ class InventoryItem:
         self.stats = stats or {}
         self.rarity = rarity
         self.equipped = False  # Надет ли предмет
+        
+        # Дополнительные поля из JSON
+        self.requirements = kwargs.get("requirements", {})
+        self.value = kwargs.get("value", 0)
+        self.drop_chance = kwargs.get("drop_chance", 0.0)
+        self.origin = kwargs.get("origin", [])
+        self.weapon_type = kwargs.get("weapon_type", None)
         
         # Цвета для редкости
         self.rarity_colors = {
@@ -80,7 +87,12 @@ class InventoryItem:
             item_type=self.type,
             stats=self.stats.copy(),
             max_stack=self.max_stack,
-            rarity=self.rarity
+            rarity=self.rarity,
+            requirements=self.requirements.copy() if hasattr(self, 'requirements') else {},
+            value=getattr(self, 'value', 0),
+            drop_chance=getattr(self, 'drop_chance', 0.0),
+            origin=getattr(self, 'origin', []).copy() if hasattr(self, 'origin') else [],
+            weapon_type=getattr(self, 'weapon_type', None)
         )
         new_item.image = self.image  # Используем то же изображение
         

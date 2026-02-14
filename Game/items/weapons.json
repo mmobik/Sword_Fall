@@ -1,0 +1,114 @@
+{
+    "iron_sword": {
+        "name": "Железный меч",
+        "type": "weapon",
+        "weapon_type": "sword",
+        "rarity": "rare",
+        "description": "Добротный железный меч, выкованный опытным кузнецом.",
+        "sprite": "Game/assets/Items/weapons/Железный меч.png",
+        "icon": "Game/assets/Items/weapons/Железный меч.png",
+        
+        "stats": {
+            "damage": [10, 15],
+            "speed": 1.2,
+            "crit_chance": 0.05,
+            "durability": 100,
+            "weight": 2.5
+        },
+        
+        "requirements": {
+            "strength": 15,
+            "dexterity": 12
+        },
+        
+        "value": 500,
+        "drop_chance": 0.03,
+        "origin": ["mob_drop", "chest"]
+    },
+    
+    "iron_axe": {
+        "name": "Железный топор",
+        "type": "weapon",
+        "weapon_type": "axe",
+        "rarity": "rare",
+        "description": "Тяжёлый железный топор, наносящий мощные рубящие удары.",
+        "sprite": "Game/assets/Items/weapons/Железный топор.png",
+        "icon": "Game/assets/Items/weapons/Железный топор.png",
+        
+        "stats": {
+            "damage": [12, 18],
+            "speed": 0.9,
+            "crit_chance": 0.08,
+            "durability": 120,
+            "weight": 3.5
+        },
+        
+        "requirements": {
+            "strength": 18,
+            "dexterity": 8
+        },
+        
+        "value": 600,
+        "drop_chance": 0.025,
+        "origin": ["mob_drop", "chest"]
+    },
+    
+    "old_wizard_staff": {
+        "name": "Старый посох чародея",
+        "type": "weapon",
+        "weapon_type": "staff",
+        "rarity": "epic",
+        "description": "Древний посох, хранящий магическую силу веков. Усиливает магические способности.",
+        "sprite": "Game/assets/Items/weapons/Старый посох чародея.png",
+        "icon": "Game/assets/Items/weapons/Старый посох чародея.png",
+        
+        "stats": {
+            "damage": [8, 12],
+            "speed": 1.0,
+            "crit_chance": 0.1,
+            "durability": 80,
+            "weight": 1.8,
+            "magic_power": 25,
+            "mana_bonus": 50
+        },
+        
+        "requirements": {
+            "intelligence": 20,
+            "magic": 15
+        },
+        
+        "value": 1200,
+        "drop_chance": 0.01,
+        "origin": ["chest", "boss_drop"]
+    },
+    
+    "sun_shield": {
+        "name": "Щит солнца",
+        "type": "weapon",
+        "weapon_type": "shield",
+        "rarity": "epic",
+        "description": "Священный щит с символом солнца, отражающий атаки и защищающий от тьмы.",
+        "sprite": "Game/assets/Items/weapons/Щит солнца.png",
+        "icon": "Game/assets/Items/weapons/Щит солнца.png",
+        
+        "stats": {
+            "damage": [5, 8],
+            "speed": 1.1,
+            "crit_chance": 0.03,
+            "durability": 150,
+            "weight": 4.0,
+            "defense": 25,
+            "block_chance": 0.3
+        },
+        
+        "requirements": {
+            "strength": 20,
+            "dexterity": 10
+        },
+        
+        "value": 1000,
+        "drop_chance": 0.015,
+        "origin": ["chest", "quest_reward"]
+    }
+    
+}

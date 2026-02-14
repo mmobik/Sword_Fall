@@ -2,7 +2,6 @@ from typing import Iterable
 
 from level.player_stats import PlayerStats, StatModifier, BaseStat  # type: ignore
 from UI.items import InventoryItem
-from UI.equipment_data import ITEM_DATABASE
 
 """
 Логика влияния снаряжения (экипированных предметов) на общие характеристики игрока.

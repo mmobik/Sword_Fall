@@ -31,6 +31,7 @@ from UI.language_menu import LanguageMenu
 from UI.music_settings_menu import MusicSettingsMenu
 from UI.talk_button import TalkButton
 from UI.player_ui import PlayerUI
+from items.items_loader import load_all_items
 
 
 class Game:
@@ -45,6 +46,14 @@ class Game:
         """Инициализация игры."""
         pygame.init()
         pygame.mixer.init()
+        
+        # Загружаем все предметы из JSON файлов перед инициализацией игры
+        try:
+            load_all_items()
+            if config.DEBUG_MODE:
+                print(f"[GAME] Предметы загружены из JSON файлов")
+        except Exception as e:
+            print(f"[GAME ERROR] Ошибка загрузки предметов: {e}")
 
         # Инициализация экрана
         self.virtual_screen = pygame.Surface((config.VIRTUAL_WIDTH, config.VIRTUAL_HEIGHT))

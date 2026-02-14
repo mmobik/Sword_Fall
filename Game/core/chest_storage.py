@@ -9,7 +9,7 @@ import json
 import os
 from typing import Optional, Dict, List, Any
 from UI.items import InventoryItem
-from UI.equipment_data import ITEM_DATABASE
+from items.items_loader import ITEMS_DATABASE
 from core.config import config
 
 
@@ -134,21 +134,26 @@ class ChestStorage:
             if item_id is None or not (0 <= slot_index < max_slots):
                 continue
             
-            # Получаем данные предмета из базы
-            item_info = ITEM_DATABASE.get(item_id)
+            # Получаем данные предмета из JSON базы данных
+            item_info = ITEMS_DATABASE.get(item_id)
             if not item_info:
                 continue
             
             try:
                 item = InventoryItem(
-                    item_id=item_info["id"],
-                    name=item_info["name"],
+                    item_id=item_info.get("id", item_id),
+                    name=item_info.get("name", item_id),
                     description=item_info.get("description", ""),
                     item_type=item_info.get("type", "consumable"),
                     image_path=item_info.get("image_path"),
                     stats=item_info.get("stats"),
                     max_stack=item_info.get("max_stack", 99),
                     rarity=item_info.get("rarity", "common"),
+                    requirements=item_info.get("requirements", {}),
+                    value=item_info.get("value", 0),
+                    drop_chance=item_info.get("drop_chance", 0.0),
+                    origin=item_info.get("origin", []),
+                    weapon_type=item_info.get("weapon_type", None)
                 )
                 item.count = max(1, min(count, item.max_stack))
                 storage.slots[slot_index] = item
