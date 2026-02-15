@@ -92,6 +92,17 @@ class GameLoop:
                 self.game.show_main_menu()
                 continue
 
+            # Обработка правой кнопки мыши для атаки (только если оружие экипировано)
+            if (event.type == pygame.MOUSEBUTTONDOWN and event.button == 3 and
+                self.game.game_state_manager.game_state == "new_game" and
+                self.game.player and self.game.player.is_alive()):
+                # Проверяем, что игрок не в диалоге, сундуке или инвентаре
+                if not (is_any_npc_dialogue or is_chest_open or is_chest_animating or is_inventory_open):
+                    # Определяем направление атаки на основе последнего направления движения
+                    attack_direction = self._get_attack_direction()
+                    self.game.player.start_attack(attack_direction)
+                continue
+
             # Блокируем обработку остальных меню и UI, кроме событий для диалога/инвентаря
             if is_any_npc_dialogue or is_chest_open or is_chest_animating or is_inventory_open:
                 continue
@@ -297,6 +308,38 @@ class GameLoop:
                 self.game.screen.blit(img, (x, y))
             
             pygame.display.flip()
+
+    def _get_attack_direction(self) -> str:
+        """
+        Определяет направление атаки на основе последнего направления движения игрока.
+        
+        Returns:
+            "right" или "left"
+        """
+        if not self.game.player:
+            return "right"
+        
+        # Получаем текущее состояние игрока
+        current_state = self.game.player.state_name
+        
+        # Определяем направление на основе состояния
+        if "right" in current_state or current_state == "idle_right":
+            return "right"
+        elif "left" in current_state or current_state == "idle_left":
+            return "left"
+        elif "back" in current_state or current_state == "idle_back":
+            # Если смотрит назад, используем направление из последнего горизонтального движения
+            # Проверяем последнее состояние из movement handler
+            if hasattr(self.game.player, '_movement_handler'):
+                last_state = getattr(self.game.player._movement_handler, 'last_state', 'idle_front')
+                if "right" in last_state:
+                    return "right"
+                elif "left" in last_state:
+                    return "left"
+            return "right"  # По умолчанию вправо
+        else:
+            # По умолчанию вправо
+            return "right"
 
     def _log_performance(self):
         """Логирует информацию о производительности."""

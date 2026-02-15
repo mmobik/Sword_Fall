@@ -87,6 +87,22 @@ class GameResources:
                 print(f"[RESOURCES DEBUG] Установлен game в sound_manager: {self.sound_manager.game}")
                 print(f"[RESOURCES DEBUG] inventory_open_state: {getattr(self.game, 'inventory_open_state', 'NOT_FOUND')}")
 
+            # Сохраняем данные инвентаря (включая экипировку) ПЕРЕД созданием нового игрока
+            saved_inventory_data = None
+            if hasattr(self.game, 'player_ui') and self.game.player_ui:
+                if hasattr(self.game.player_ui, 'inventory') and hasattr(self.game.player_ui.inventory, 'to_dict'):
+                    saved_inventory_data = self.game.player_ui.inventory.to_dict()
+                    self.game.inventory_open_state = self.game.player_ui.inventory.inventory_open
+                    if config.DEBUG_MODE:
+                        print(f"[RESOURCES DEBUG] Сохранены данные инвентаря (включая экипировку)")
+                        print(f"[RESOURCES DEBUG] Состояние открытия инвентаря: {self.game.inventory_open_state}")
+                else:
+                    self.game.inventory_open_state = False
+            else:
+                self.game.inventory_open_state = False
+                if config.DEBUG_MODE:
+                    print(f"[RESOURCES DEBUG] player_ui не существует, используем False")
+
             # Создание игрока
             if config.DEBUG_MODE:
                 print("Создание игрока...")
@@ -102,22 +118,29 @@ class GameResources:
                 print(f"Размер спрайта: {self.game.player.image.get_size()}")
                 print(f"Размер хитбокса: {self.game.player.hitbox.size}")
 
-            # Сохраняем состояние инвентаря в глобальное поле игры ПЕРЕД созданием нового UI
-            if hasattr(self.game, 'player_ui') and self.game.player_ui:
-                self.game.inventory_open_state = self.game.player_ui.inventory.inventory_open
-                if config.DEBUG_MODE:
-                    print(f"[RESOURCES DEBUG] Сохраняем состояние инвентаря в game: {self.game.inventory_open_state}")
-            else:
-                self.game.inventory_open_state = False
-                if config.DEBUG_MODE:
-                    print(f"[RESOURCES DEBUG] player_ui не существует, используем False")
-
             if config.DEBUG_MODE:
                 print(f"[RESOURCES DEBUG] Перед созданием UI: inventory_open_state={self.game.inventory_open_state}")
 
             # Инициализация UI игрока
             from UI.player_ui import PlayerUI
             self.game.player_ui = PlayerUI(self.game.virtual_screen, self.game.player.stats)
+            
+            # Восстанавливаем данные инвентаря (включая экипировку), если они были сохранены
+            if saved_inventory_data and hasattr(self.game.player_ui, 'inventory'):
+                if hasattr(self.game.player_ui.inventory, 'load_from_dict'):
+                    try:
+                        self.game.player_ui.inventory.load_from_dict(saved_inventory_data)
+                        if config.DEBUG_MODE:
+                            print(f"[RESOURCES DEBUG] Данные инвентаря восстановлены (включая экипировку)")
+                        
+                        # Обновляем анимации игрока после восстановления экипировки
+                        if hasattr(self.game.player, 'reload_animations'):
+                            self.game.player.reload_animations()
+                            if config.DEBUG_MODE:
+                                print(f"[RESOURCES DEBUG] Анимации игрока обновлены после восстановления экипировки")
+                    except Exception as e:
+                        if config.DEBUG_MODE:
+                            print(f"[RESOURCES DEBUG] Ошибка при восстановлении инвентаря: {e}")
             
             # Подписываем UI на изменения характеристик
             self.game.player.stats.add_observer(self.game.player_ui)

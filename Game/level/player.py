@@ -69,6 +69,10 @@ class Player(pygame.sprite.Sprite):
         self._was_walking: bool = False
         self._steps_channel: Optional[pygame.mixer.Channel] = None
 
+        # Боевая система (инициализируем до загрузки анимаций, так как они зависят от неё)
+        self.combat_system = CombatSystem(player=self)
+        self._last_sprite_state: Optional[str] = None  # Отслеживание изменения состояния спрайта
+
         # --- Анимации ---
         self.state_name: str = "idle_front"
         self.current_frame: int = 0
@@ -110,9 +114,11 @@ class Player(pygame.sprite.Sprite):
         # Обработчик движения
         self._movement_handler = PlayerMovementHandler(self)
 
-        # Боевая система
-        self.combat_system = CombatSystem(player=self)
-        self._last_sprite_state: Optional[str] = None  # Отслеживание изменения состояния спрайта
+        # Состояние атаки
+        self.is_attacking: bool = False
+        self.attack_direction: str = "right"  # "right" или "left"
+        self._attack_animations: Dict[str, Dict[str, object]] = {}
+        self._load_attack_animations()
 
         # Индикаторы урона / лечения
         self._indicators: List[Dict[str, object]] = []
@@ -188,6 +194,15 @@ class Player(pygame.sprite.Sprite):
             # Перезагружаем анимации
             self._load_animations()
             
+            # Загружаем анимации атаки, если оружие экипировано
+            if current_state == "armed":
+                self._load_attack_animations()
+            elif current_state == "unarmed":
+                # Очищаем анимации атаки при снятии оружия
+                self._attack_animations.clear()
+                if self.is_attacking:
+                    self.is_attacking = False
+            
             # Восстанавливаем состояние анимации, если оно существует
             if old_state in self._animations:
                 self.set_state(old_state)
@@ -195,11 +210,181 @@ class Player(pygame.sprite.Sprite):
                 if old_frame < len(self._animations[old_state]["frames"]):  # type: ignore[index]
                     self.current_frame = old_frame
                     self.image = self._animations[old_state]["frames"][old_frame]  # type: ignore[index]
+    
+    def _load_attack_animations(self) -> None:
+        """
+        Загружает анимации атаки из Attacks.png.
+        Первые 18 кадров - атака вправо, следующие 18 - атака влево.
+        Размер кадра: 128x64, чтение слева направо и вниз.
+        """
+        inventory = self._get_inventory()
+        if not inventory or not self.combat_system.is_armed(inventory):
+            # Если оружие не экипировано, не загружаем анимации атаки
+            return
+        
+        attack_sprite_path = "Game/assets/Sprites/player/armed/Attacks.png"
+        full_path = resource_path(attack_sprite_path)
+        
+        frame_w, frame_h = config.FRAME_SIZE  # 128x64
+        
+        try:
+            # Загружаем весь спрайт для определения размеров
+            temp_sheet = pygame.image.load(full_path).convert_alpha()
+            sheet_width = temp_sheet.get_width()
+            sheet_height = temp_sheet.get_height()
+            
+            # Количество кадров в строке
+            frames_per_row = sheet_width // frame_w
+            total_rows = sheet_height // frame_h
+            
+            if config.DEBUG_MODE:
+                print(f"[PLAYER] Загрузка анимаций атаки: {frames_per_row} кадров в строке, {total_rows} строк, размер {sheet_width}x{sheet_height}")
+            
+            # Загружаем кадры напрямую из изображения
+            attack_right_frames: List[pygame.Surface] = []
+            attack_left_frames: List[pygame.Surface] = []
+            
+            for frame_idx in range(36):  # Всего 36 кадров (18+18)
+                row = frame_idx // frames_per_row
+                col = frame_idx % frames_per_row
+                x = col * frame_w
+                y = row * frame_h
+                
+                # Извлекаем кадр напрямую
+                frame = pygame.Surface((frame_w, frame_h), pygame.SRCALPHA)
+                frame.blit(temp_sheet, (0, 0), (x, y, frame_w, frame_h))
+                
+                if frame_idx < 18:
+                    # Первые 18 кадров - атака вправо
+                    attack_right_frames.append(frame)
+                else:
+                    # Следующие 18 кадров - атака влево
+                    attack_left_frames.append(frame)
+            
+            # Сохраняем анимации
+            self._attack_animations["attack_right"] = {
+                "frames": attack_right_frames,
+                "animation_speed": 0.08,  # Быстрая анимация атаки
+            }
+            self._attack_animations["attack_left"] = {
+                "frames": attack_left_frames,
+                "animation_speed": 0.08,
+            }
+            
+            if config.DEBUG_MODE:
+                print(f"[PLAYER] Анимации атаки загружены: {len(attack_right_frames)} кадров вправо, {len(attack_left_frames)} кадров влево")
+                
+        except Exception as e:
+            if config.DEBUG_MODE:
+                print(f"[PLAYER] Ошибка загрузки анимаций атаки: {e}")
+            # Создаем пустые анимации в случае ошибки
+            self._attack_animations["attack_right"] = {"frames": [], "animation_speed": 0.08}
+            self._attack_animations["attack_left"] = {"frames": [], "animation_speed": 0.08}
+    
+    def start_attack(self, direction: str = "right") -> bool:
+        """
+        Начинает атаку в указанном направлении.
+        
+        Args:
+            direction: Направление атаки ("right" или "left").
+            
+        Returns:
+            True, если атака начата, False если оружие не экипировано или уже идет атака.
+        """
+        inventory = self._get_inventory()
+        if not inventory or not self.combat_system.is_armed(inventory):
+            return False
+        
+        if self.is_attacking:
+            return False  # Уже идет атака
+        
+        # Перезагружаем анимации атаки, если они еще не загружены
+        if not self._attack_animations.get("attack_right", {}).get("frames"):
+            self._load_attack_animations()
+        
+        # Проверяем, что анимации загружены
+        attack_state = f"attack_{direction}"
+        if attack_state not in self._attack_animations or not self._attack_animations[attack_state].get("frames"):
+            if config.DEBUG_MODE:
+                print(f"[PLAYER] Анимация атаки {attack_state} не загружена")
+            return False
+        
+        self.is_attacking = True
+        self.attack_direction = direction
+        
+        # Устанавливаем состояние атаки
+        self.set_state(attack_state)
+        self.current_frame = 0
+        self._frame_time = 0.0
+        
+        # Устанавливаем первый кадр анимации
+        anim = self._attack_animations[attack_state]
+        frames = anim.get("frames", [])
+        if frames:
+            self.image = frames[0]
+        
+        return True
+    
+    def _update_attack_animation(self, dt: float) -> None:
+        """Обновляет анимацию атаки."""
+        if not self.is_attacking:
+            return
+        
+        attack_state = f"attack_{self.attack_direction}"
+        anim = self._attack_animations.get(attack_state)
+        
+        if not anim or not anim.get("frames"):
+            # Анимация не загружена или закончилась
+            self.is_attacking = False
+            # Возвращаемся к обычному состоянию
+            if self.attack_direction == "right":
+                self.set_state("idle_right")
+            else:
+                self.set_state("idle_left")
+            return
+        
+        frames: List[pygame.Surface] = anim["frames"]  # type: ignore[assignment]
+        speed: float = anim["animation_speed"]  # type: ignore[assignment]
+        
+        if not frames:
+            self.is_attacking = False
+            return
+        
+        self._frame_time += dt
+        if self._frame_time >= speed:
+            self._frame_time -= speed
+            self.current_frame += 1
+            
+            if self.current_frame >= len(frames):
+                # Анимация закончилась
+                self.is_attacking = False
+                self.current_frame = 0
+                # Возвращаемся к обычному состоянию
+                # Определяем idle состояние на основе направления атаки
+                if self.attack_direction == "right":
+                    self.set_state("idle_right")
+                else:
+                    self.set_state("idle_left")
+            else:
+                self.image = frames[self.current_frame]
 
     def set_state(self, new_state: str) -> None:
         """Устанавливает новое анимационное состояние."""
         if new_state == self.state_name:
             return
+        
+        # Проверяем, является ли это состоянием атаки
+        if new_state.startswith("attack_"):
+            # Состояние атаки обрабатывается отдельно
+            if new_state in self._attack_animations:
+                self.state_name = new_state
+                self.current_frame = 0
+                self._frame_time = 0.0
+                anim = self._attack_animations[new_state]
+                if anim.get("frames"):
+                    self.image = anim["frames"][0]  # type: ignore[index]
+            return
+        
         if new_state not in self._animations:
             # Неизвестное состояние – игнорируем, чтобы не падать
             return
@@ -336,9 +521,21 @@ class Player(pygame.sprite.Sprite):
             current_state = self.combat_system.get_sprite_state(inventory)
             if current_state != self._last_sprite_state:
                 self.reload_animations()
+                # Перезагружаем анимации атаки при смене экипировки на armed
+                if current_state == "armed":
+                    self._load_attack_animations()
+                elif current_state == "unarmed":
+                    # Очищаем анимации атаки при снятии оружия
+                    self._attack_animations.clear()
+                    if self.is_attacking:
+                        self.is_attacking = False
 
-        # Анимация
-        self._update_animation(dt)
+        # Обновление анимации атаки (приоритет над обычной анимацией)
+        if self.is_attacking:
+            self._update_attack_animation(dt)
+        else:
+            # Обычная анимация
+            self._update_animation(dt)
 
         # Обновляем индикаторы урона/лечения
         self._update_indicators(dt)

@@ -22,6 +22,17 @@ class PlayerMovementHandler:
             self.player.is_walking = False
             return
         
+        # Блокируем движение во время атаки
+        if hasattr(self.player, 'is_attacking') and self.player.is_attacking:
+            # Останавливаем звук шагов, если он играет
+            if hasattr(self.player, '_was_walking') and self.player._was_walking:
+                self.player._was_walking = False
+                if hasattr(self.player, '_steps_channel') and self.player._steps_channel:
+                    self.player._steps_channel.stop()
+                    self.player._steps_channel = None
+            self.player.is_walking = False
+            return
+        
         # Проверяем, жив ли игрок - если нет, блокируем движение
         if not self.player.is_alive():
             # Устанавливаем состояние idle и останавливаем движение
