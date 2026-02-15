@@ -3,29 +3,29 @@
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
       463,
-      401
+      433
     ]
   },
   "inventory": {
     "inventory_slots": [
       {
-        "slot_index": 1,
-        "id": "old_wizard_staff",
+        "slot_index": 0,
+        "id": "iron_sword",
         "count": 1
       },
       {
         "slot_index": 3,
-        "id": "sun_shield",
+        "id": "iron_axe",
         "count": 1
       }
     ],
     "equipment_slots": {
       "Правая рука": {
-        "id": "iron_sword",
+        "id": "sun_shield",
         "count": 1
       },
       "Левая рука": {
-        "id": "iron_axe",
+        "id": "old_wizard_staff",
         "count": 1
       }
     }

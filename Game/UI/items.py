@@ -173,15 +173,22 @@ class InventoryItem:
                 InventoryItem._overlay_cache[size_key] = overlay
             surface.blit(InventoryItem._overlay_cache[size_key], (x, y))
         
-        # Изображение предмета (с учетом смещения)
+        # Изображение предмета (с учетом смещения для центрирования)
         if self.image:
-            img_x = x + offset_x + (content_w - self.image.get_width()) // 2
-            img_y = y + offset_y + (content_h - self.image.get_height()) // 2
+            # Если передан content_offset, используем его напрямую (он уже содержит центрирование)
+            # Иначе центрируем относительно размера изображения
+            if content_offset:
+                img_x = x + offset_x
+                img_y = y + offset_y
+            else:
+                # Автоматическое центрирование, если offset не передан
+                img_x = x + (slot_w - self.image.get_width()) // 2
+                img_y = y + (slot_h - self.image.get_height()) // 2
             surface.blit(self.image, (img_x, img_y))
             
-            # Количество (если больше 1)
+            # Количество (если больше 1) - позиционируем в правом нижнем углу ячейки
             if show_count and self.count > 1:
-                self._draw_count(surface, x + offset_x, y + offset_y, content_w, content_h)
+                self._draw_count(surface, x, y, slot_w, slot_h)
     
     def _draw_count(self, surface: pygame.Surface, x: int, y: int, slot_w: int, slot_h: int):
         """Отрисовка количества предметов."""

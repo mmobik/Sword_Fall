@@ -1517,10 +1517,6 @@ class Inventory:
             # Глобальный индекс слота для этого видимого индекса
             global_index = self._visible_index_to_global(visible_index)
             if 0 <= global_index < len(self.inventory_slots):
-                # В режиме отладки рисуем сетку (рамки всех слотов)
-                if config.DEBUG_MODE:
-                    pygame.draw.rect(screen, (100, 100, 100), slot_rect, 1)
-
                 # Подсветка выбранного слота (только если не перетаскиваем предмет)
                 if (
                     self.dragged_item is None
@@ -1533,8 +1529,24 @@ class Inventory:
                 # Предмет в слоте
                 item = self.inventory_slots[global_index]
                 if item and item is not self.dragged_item:
-                    # Рисуем предмет внутри ячейки; если иконка меньше, она просто займет верхний‑левый угол
-                    item.draw(screen, x, y)
+                    # Вычисляем размеры предмета для центрирования
+                    if item.image:
+                        item_width = item.image.get_width()
+                        item_height = item.image.get_height()
+                    else:
+                        item_width = item_height = 50  # fallback размер
+                    
+                    # Центрируем предмет в ячейке
+                    # Используем border_size для указания размера ячейки
+                    # и content_offset для центрирования содержимого
+                    item.draw(
+                        screen, 
+                        x, 
+                        y,
+                        draw_rarity_border=True,
+                        border_size=(slot_w, slot_h),
+                        content_offset=((slot_w - item_width) // 2, (slot_h - item_height) // 2)
+                    )
 
         # Отрисовываем только ползунок (без линии‑трека), всегда видимый
         if self.inventory_scroll_thumb_rect:
@@ -1565,8 +1577,8 @@ class Inventory:
         for slot_name, (x, y) in self.equipment_slots_positions.items():
             # Получаем уникальный размер для этого слота
             slot_width, slot_height = self.equipment_slots_sizes.get(slot_name, (50, 50))
+            slot_rect = pygame.Rect(x, y, slot_width, slot_height)
             
-            # Предмет в слоте - центрируем относительно размера слота
             item = self.equipment_slots[slot_name]
             
             # Затемнение фона только если слот занят
@@ -1589,9 +1601,6 @@ class Inventory:
                     item_width = item_height = 50  # fallback размер
                 
                 # Центрируем предмет в слоте
-                centered_x = x + (slot_width - item_width) // 2
-                centered_y = y + (slot_height - item_height) // 2
-                
                 # Рисуем предмет с рамкой редкости, растянутой на весь размер слота
                 item.draw(screen, x, y, 
                          draw_rarity_border=True,
