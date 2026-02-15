@@ -858,13 +858,26 @@ class Inventory:
             target_item.merge(source_item)
             source_container[source_key] = None
         else:
-            # Меняем предметы местами (если это допустимо)
-            if target_type == "equipment" and not self._can_equip_to_slot(target_item, source_id):
-                print(f"[ACS] Нельзя поменять местами предметы")
-                return
-            
-            source_container[source_key], target_container[target_key] = \
-                target_item, source_item
+            # Быстрая смена оружия: из инвентаря в занятый слот экипировки
+            if source_type == "inventory" and target_type == "equipment" and target_item:
+                # Старый предмет из экипировки автоматически перемещается в слот источника
+                # (слот источника освобождается, так как мы перетаскиваем оттуда предмет)
+                source_container[source_key] = target_item
+                # Новый предмет надевается в слот экипировки
+                target_container[target_key] = source_item
+                if config.DEBUG_MODE:
+                    print(f"[ACS] Быстрая смена: {source_item.name} надет, {target_item.name} перемещен в инвентарь (слот {source_key})")
+            elif target_type == "equipment" and source_type == "equipment":
+                # Обмен между слотами экипировки (если это допустимо)
+                if not self._can_equip_to_slot(target_item, source_id):
+                    print(f"[ACS] Нельзя поменять местами предметы")
+                    return
+                source_container[source_key], target_container[target_key] = \
+                    target_item, source_item
+            else:
+                # Обычный обмен предметами местами
+                source_container[source_key], target_container[target_key] = \
+                    target_item, source_item
 
         # После любого изменения слотов пересчитываем бонусы экипировки
         recalculate_equipment_bonuses(self.player_stats, self.equipment_slots.values())
