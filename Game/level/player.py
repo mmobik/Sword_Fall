@@ -214,7 +214,7 @@ class Player(pygame.sprite.Sprite):
     def _load_attack_animations(self) -> None:
         """
         Загружает анимации атаки из Attacks.png.
-        Первые 18 кадров - атака вправо, следующие 18 - атака влево.
+        Первые 20 кадров - атака вправо, следующие 20 - атака влево.
         Размер кадра: 128x64, чтение слева направо и вниз.
         """
         inventory = self._get_inventory()
@@ -244,7 +244,7 @@ class Player(pygame.sprite.Sprite):
             attack_right_frames: List[pygame.Surface] = []
             attack_left_frames: List[pygame.Surface] = []
             
-            for frame_idx in range(36):  # Всего 36 кадров (18+18)
+            for frame_idx in range(40):  # Всего 40 кадров (20+20)
                 row = frame_idx // frames_per_row
                 col = frame_idx % frames_per_row
                 x = col * frame_w
@@ -254,11 +254,11 @@ class Player(pygame.sprite.Sprite):
                 frame = pygame.Surface((frame_w, frame_h), pygame.SRCALPHA)
                 frame.blit(temp_sheet, (0, 0), (x, y, frame_w, frame_h))
                 
-                if frame_idx < 18:
-                    # Первые 18 кадров - атака вправо
+                if frame_idx < 20:
+                    # Первые 20 кадров - атака вправо
                     attack_right_frames.append(frame)
                 else:
-                    # Следующие 18 кадров - атака влево
+                    # Следующие 20 кадров - атака влево
                     attack_left_frames.append(frame)
             
             # Сохраняем анимации

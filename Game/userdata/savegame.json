@@ -2,8 +2,8 @@
   "player": {
     "map_path": "Game/assets/Tiles/Audience Hall .tmx",
     "position": [
-      597,
-      360
+      477,
+      354
     ]
   },
   "inventory": {
@@ -41,8 +41,8 @@
     },
     "413": {
       "type": "royal_guard",
-      "interaction_count": 4,
-      "phase_index": 1
+      "interaction_count": 5,
+      "phase_index": 2
     },
     "414": {
       "type": "royal_guard",
