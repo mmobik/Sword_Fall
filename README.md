@@ -111,7 +111,6 @@ Game/
 │   ├── config_settings.json  # Настройки конфигурации
 │   └── sound_settings.json   # Настройки звука
 ├── game.py             # Главный файл игры
-└── REFACTORING_REPORT.md     # Отчет о рефакторинге
 ```
 
 ## Требования
