@@ -206,12 +206,6 @@ python game.py
 
 **VK Автора:** [Сергей Ощепков](https://vk.com/sergeyoshepkov)
 
-**Почта Автора:** Oshchepkov.Sergey@urfu.me
-
-## Лицензия
-
-[Укажите лицензию проекта]
-
 ## Быстрый старт
 
 1. **Установите Python 3.8+**
